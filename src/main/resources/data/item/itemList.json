@@ -1,0 +1,127 @@
+[
+  {
+    "Equipment":
+      [
+        {
+          "itemId": "sword-001",
+          "itemType": "Equipment",
+          "itemName": "铁剑",
+          "itemDescription": "一把锋利的铁剑，适合近战使用",
+          "itemPrice": -1,
+          "isStorable": true,
+          "isConsumable": false,
+          "parameters": {
+            "stateEffectMap": {
+              "attack": 10
+            }
+          }
+        },
+        {
+          "itemId": "shield-001",
+          "itemType": "Equipment",
+          "itemName": "铁盾",
+          "itemDescription": "一面坚固的铁盾，能有效抵挡攻击",
+          "itemPrice": -1,
+          "isStorable": true,
+          "isConsumable": false,
+          "parameters": {
+            "defense": 10
+          }
+        }
+      ]
+  },
+  {
+    "Portion":
+    [
+      {
+        "itemId": "potion-001",
+        "itemType": "Portion",
+        "itemName": "生命药水",
+        "itemDescription": "恢复50点生命值的药水",
+        "itemPrice": -1,
+        "isStorable": false,
+        "isConsumable": false,
+        "parameters": {
+          "healingAmount": 50
+        }
+      }
+    ]
+  },
+  {
+    "AbilityGem":
+      [
+        {
+          "itemId": "ability-gem-001",
+          "itemType": "AbilityGem",
+          "itemName": "攻击力宝石",
+          "itemDescription": "增加2点攻击力的宝石",
+          "itemPrice": -1,
+          "isStorable": false,
+          "isConsumable": false,
+          "parameters": {
+            "abilityType": "attack",
+            "abilityValue": 2
+          }
+        }
+      ]
+  },
+  {
+    "Key":
+    [
+      {
+        "itemId": "key-001-yellow",
+        "itemType": "Key",
+        "itemName": "黄钥匙",
+        "itemDescription": "可以打开黄门的钥匙",
+        "itemPrice": 10,
+        "isStorable": true,
+        "isConsumable": true,
+        "parameters": {
+          "keyColor": "yellow"
+        }
+      },
+      {
+        "itemId": "key-001-blue",
+        "itemType": "Key",
+        "itemName": "蓝钥匙",
+        "itemDescription": "可以打开蓝门的钥匙",
+        "itemPrice": 50,
+        "isStorable": true,
+        "isConsumable": true,
+        "parameters": {
+          "keyColor": "blue"
+        }
+      },
+      {
+        "itemId": "key-001-red",
+        "itemType": "Key",
+        "itemName": "红钥匙",
+        "itemDescription": "可以打开红门的钥匙",
+        "itemPrice": 100,
+        "isStorable": true,
+        "isConsumable": true,
+        "parameters": {
+          "keyColor": "red"
+        }
+      }
+    ]
+  },
+  {
+    "GenericItem":
+    [
+      {
+        "itemId": "FloorJumper-001",
+        "itemType": "GenericItem",
+        "itemName": "楼层跳跃器",
+        "itemDescription": "使用楼层跳跃器可以跳跃至已经到达过的所选择的楼层",
+        "itemPrice": -1,
+        "isStorable": true,
+        "isConsumable": false,
+        "parameters": {
+          "className": "FloorJumper",
+          "floorNumberSelected": 0
+        }
+      }
+    ]
+  }
+]
