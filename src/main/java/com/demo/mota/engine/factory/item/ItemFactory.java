@@ -1,5 +1,6 @@
-package com.demo.mota.engine.Item;
+package com.demo.mota.engine.factory.item;
 
+import com.demo.mota.engine.Item.*;
 import com.demo.mota.engine.Item.GenericItem.FloorJumper;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.enums.StateType;
@@ -22,11 +23,11 @@ public class ItemFactory {
     private static final Map<String, ItemData> itemDataRegistry = new HashMap<>();
 
     static {
-        loadItemsData();
-        itemCreator = (itemId) -> generateItemCreator(itemDataRegistry.get(itemId));
+        loadData();
+        itemCreator = (itemId) -> generateCreator(itemDataRegistry.get(itemId));
     }
 
-    private static void loadItemsData() {
+    private static void loadData() {
         InputStream inputStream = ItemFactory.class.getClassLoader().getResourceAsStream(ITEM_LIST_FILE);
         if (inputStream == null) {
             throw new RuntimeException("Item list file not found: " + ITEM_LIST_FILE);
@@ -46,7 +47,7 @@ public class ItemFactory {
     }
 
     //private static Item instantiateGenericItem(){}
-    private static ItemCreator generateItemCreator(ItemData itemData){
+    private static ItemCreator generateCreator(ItemData itemData){
         return switch(itemData.itemType){
             case EQUIPMENT ->
                     (itemId, itemName, itemDescription, itemPrice, itemCount,
@@ -119,9 +120,9 @@ public class ItemFactory {
                          long itemPrice, boolean isStorable, boolean isConsumable,
                          Map<String, Object> parameters) implements Serializable {}
 
-    public static Item createByItemID(String itemId){
-        ItemData itemData = itemDataRegistry.get(itemId);
-        return ItemFactory.itemCreator.apply(itemId).createItem(
+    public static Item createByID(String Id){
+        ItemData itemData = itemDataRegistry.get(Id);
+        return ItemFactory.itemCreator.apply(Id).createItem(
                 itemData.itemId,
                 itemData.itemName,
                 itemData.itemDescription,

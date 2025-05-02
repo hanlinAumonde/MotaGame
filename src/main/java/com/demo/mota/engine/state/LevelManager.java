@@ -13,11 +13,11 @@ import java.util.List;
 import static com.demo.mota.engine.configs.LevelConfigConstatnts.LEVEL_CONFIG_PATH;
 
 public class LevelManager {
-    private static final List<LevelData> levelData;
+    private static final List<LevelData> loadedLevelData;
     private record LevelData(String levelName, int levelNumber, BigInteger maxExperience) implements Serializable {}
 
     static {
-        levelData = initializeLevelData();
+        loadedLevelData = initializeLevelData();
     }
 
     private String levelName;
@@ -27,9 +27,9 @@ public class LevelManager {
     private BigInteger currentExperience;
 
     LevelManager() {
-        this.levelName = levelData.get(0).levelName;
-        this.levelNumber = levelData.get(0).levelNumber;
-        this.maxExperienceForCurrentLevel = levelData.get(0).maxExperience;
+        this.levelName = loadedLevelData.get(0).levelName;
+        this.levelNumber = loadedLevelData.get(0).levelNumber;
+        this.maxExperienceForCurrentLevel = loadedLevelData.get(0).maxExperience;
         this.currentExperience = BigInteger.ZERO;
     }
 
@@ -73,8 +73,8 @@ public class LevelManager {
     }
 
     private void loadNextLevel() {
-        if (this.levelNumber < levelData.size() - 1) {
-            LevelData nextLevel = levelData.get(this.levelNumber + 1);
+        if (this.levelNumber < loadedLevelData.size() - 1) {
+            LevelData nextLevel = loadedLevelData.get(this.levelNumber + 1);
             this.levelName = nextLevel.levelName;
             this.levelNumber = nextLevel.levelNumber;
             this.maxExperienceForCurrentLevel = nextLevel.maxExperience;

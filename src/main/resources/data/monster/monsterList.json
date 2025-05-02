@@ -1,0 +1,20 @@
+[
+  {
+    "id": "monster-slime-001",
+    "name": "绿史莱姆",
+    "health": 20,
+    "attack": 5,
+    "defense": 2,
+    "gold": 10,
+    "experience": 5
+  },
+  {
+    "id": "monster-skeleton-001",
+    "name": "骷髅战士",
+    "health": 30,
+    "attack": 7,
+    "defense": 3,
+    "gold": 15,
+    "experience": 10
+  }
+]

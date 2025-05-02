@@ -28,6 +28,10 @@ public abstract class AbstractCharacterState {
         return (BigInteger) stateMap.get(StateType.DEF);
     }
 
+    public BigInteger getCharacterHealth() {
+        return (BigInteger) stateMap.get(StateType.HP);
+    }
+
     public BigInteger calculateDamagePerRound(AbstractCharacterState target) {
         BigInteger damage = this.getEffectiveATK().subtract(target.getEffectiveDEF());
         return damage.compareTo(BigInteger.ZERO) > 0 ? damage : BigInteger.ZERO;

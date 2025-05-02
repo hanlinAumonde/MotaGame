@@ -3,7 +3,7 @@ package com.demo.mota.engine.state;
 import com.demo.mota.engine.Item.Equipment;
 import com.demo.mota.engine.Item.GenericItem.GenericItem;
 import com.demo.mota.engine.Item.Item;
-import com.demo.mota.engine.Item.ItemFactory;
+import com.demo.mota.engine.factory.item.ItemFactory;
 import com.demo.mota.engine.Item.Key;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.EquipSlot;
@@ -32,7 +32,7 @@ public class PlayerStateManager extends AbstractCharacterState {
 
     private List<GenericItem> genericItemsOwned;
 
-    PlayerStateManager(String characterId, String characterName, Map<StateType, Object> stateMap, Direction currentDirection){
+    public PlayerStateManager(String characterId, String characterName, Map<StateType, Object> stateMap, Direction currentDirection){
         super(characterId, characterName, stateMap, currentDirection);
         this.levelManager = new LevelManager();
         this.currentGoldAmount = 0;
@@ -44,9 +44,9 @@ public class PlayerStateManager extends AbstractCharacterState {
 
     public void setCurrentKeySet(String currentKeySet) {
         addAncientKey();
-        this.yellow_Key = (Key) ItemFactory.createByItemID(currentKeySet + KeyColor.YELLOW.getValue());
-        this.red_Key = (Key) ItemFactory.createByItemID(currentKeySet + KeyColor.RED.getValue());
-        this.blue_Key = (Key) ItemFactory.createByItemID(currentKeySet + KeyColor.BLUE.getValue());
+        this.yellow_Key = (Key) ItemFactory.createByID(currentKeySet + KeyColor.YELLOW.getValue());
+        this.red_Key = (Key) ItemFactory.createByID(currentKeySet + KeyColor.RED.getValue());
+        this.blue_Key = (Key) ItemFactory.createByID(currentKeySet + KeyColor.BLUE.getValue());
     }
 
     private void addAncientKey() {
@@ -58,21 +58,16 @@ public class PlayerStateManager extends AbstractCharacterState {
         if(this.blue_Key != null) this.ancientKeys.add(this.blue_Key);
     }
 
-    public BigInteger getEffectiveATK(){
+    private BigInteger getEffectiveAttr(StateType stateType){
         return equipmentsEquipped
                 .values().stream()
-                .filter(equipment -> equipment.getStateEffectMap().containsKey(StateType.ATK))
-                .map(equipment -> (BigInteger) equipment.getStateEffectMap().get(StateType.ATK))
+                .filter(equipment -> equipment.getStateEffectMap().containsKey(stateType))
+                .map(equipment -> (BigInteger) equipment.getStateEffectMap().get(stateType))
                 .reduce(BigInteger.ZERO, BigInteger::add);
     }
 
-    public BigInteger getEffectiveDEF(){
-        return equipmentsEquipped
-                .values().stream()
-                .filter(equipment -> equipment.getStateEffectMap().containsKey(StateType.DEF))
-                .map(equipment -> (BigInteger) equipment.getStateEffectMap().get(StateType.DEF))
-                .reduce(BigInteger.ZERO, BigInteger::add);
-    }
+    public BigInteger getEffectiveATK(){ return getEffectiveAttr(StateType.ATK); }
+    public BigInteger getEffectiveDEF(){ return getEffectiveAttr(StateType.DEF); }
 
     public void updateLevel(BigInteger expGained){
         this.levelManager.cumulateExperience(expGained);

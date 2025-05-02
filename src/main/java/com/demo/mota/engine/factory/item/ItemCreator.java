@@ -1,4 +1,6 @@
-package com.demo.mota.engine.Item;
+package com.demo.mota.engine.factory.item;
+
+import com.demo.mota.engine.Item.Item;
 
 import java.util.Map;
 
