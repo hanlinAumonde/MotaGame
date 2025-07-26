@@ -100,7 +100,7 @@ public class Monster extends AbstractCharacterState {
         updateCurrentDamageRange(playerStateManager.getCharacterHealth(), isOverKill);
     }
 
-    public static boolean willOverflow(long a, long b, long c) {
+    private static boolean willOverflow(long a, long b, long c) {
         if (a == 0 || b == 0) return false;
         return b > c / a;
     }

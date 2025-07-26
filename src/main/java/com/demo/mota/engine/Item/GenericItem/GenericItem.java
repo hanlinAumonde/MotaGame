@@ -1,6 +1,6 @@
 package com.demo.mota.engine.Item.GenericItem;
 
-import com.demo.mota.engine.GameContext;
+import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.Item.Item;
 
 public abstract class GenericItem extends Item {
@@ -8,5 +8,5 @@ public abstract class GenericItem extends Item {
         super(itemId, itemName, itemDescription, itemPrice, itemCount, isStorable, isConsumable);
     }
 
-    abstract void applyEffect(GameContext gameContext);
+    abstract void applyEffect(GameEngine gameContext);
 }

@@ -44,9 +44,9 @@ public class PlayerStateManager extends AbstractCharacterState {
 
     public void setCurrentKeySet(String currentKeySet) {
         addAncientKey();
-        this.yellow_Key = (Key) ItemFactory.createByID(currentKeySet + KeyColor.YELLOW.getValue());
-        this.red_Key = (Key) ItemFactory.createByID(currentKeySet + KeyColor.RED.getValue());
-        this.blue_Key = (Key) ItemFactory.createByID(currentKeySet + KeyColor.BLUE.getValue());
+        this.yellow_Key = (Key) ItemFactory.getInstance().createById(currentKeySet + KeyColor.YELLOW.getValue());
+        this.red_Key = (Key) ItemFactory.getInstance().createById(currentKeySet + KeyColor.RED.getValue());
+        this.blue_Key = (Key) ItemFactory.getInstance().createById(currentKeySet + KeyColor.BLUE.getValue());
     }
 
     private void addAncientKey() {

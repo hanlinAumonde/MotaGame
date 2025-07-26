@@ -1,6 +1,6 @@
 package com.demo.mota.engine.Item.GenericItem;
 
-import com.demo.mota.engine.GameContext;
+import com.demo.mota.engine.GameEngine;
 
 public class FloorJumper extends GenericItem{
     private short floorNumberSelected;
@@ -13,13 +13,13 @@ public class FloorJumper extends GenericItem{
         this.floorNumberSelected = floorNumberSelected;
     }
 
-    public void jumpToFloor(short floorNumber, GameContext context) {
+    public void jumpToFloor(short floorNumber, GameEngine context) {
         this.floorNumberSelected = floorNumber;
         applyEffect(context);
     }
 
     @Override
-    public void applyEffect(GameContext context) {
+    public void applyEffect(GameEngine context) {
         //TODO: Implement the logic to jump to the selected floor
     }
 }
