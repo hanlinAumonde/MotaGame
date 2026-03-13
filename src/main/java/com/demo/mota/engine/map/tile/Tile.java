@@ -3,10 +3,10 @@ package com.demo.mota.engine.map.tile;
 import com.demo.mota.engine.map.Position;
 
 public abstract class Tile {
-    private Position position;
+    private final Position position;
     private boolean isPassable;
-    private boolean isChangeable;
-    private String bgResourceId;
+    private final boolean isChangeable;
+    private final String bgResourceId;
 
     public Tile(Position position, boolean isPassable, boolean isChangeable, String bgResourceId) {
         this.position = position;
@@ -15,5 +15,23 @@ public abstract class Tile {
         this.bgResourceId = bgResourceId;
     }
 
-    public abstract void interact();
+    public Position getPosition() {
+        return position;
+    }
+
+    public boolean isPassable() {
+        return isPassable;
+    }
+
+    public void setPassable(boolean passable) {
+        this.isPassable = passable;
+    }
+
+    public boolean isChangeable() {
+        return isChangeable;
+    }
+
+    public String getBgResourceId() {
+        return bgResourceId;
+    }
 }

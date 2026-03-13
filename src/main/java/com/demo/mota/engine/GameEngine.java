@@ -2,6 +2,7 @@ package com.demo.mota.engine;
 
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.StateType;
+import com.demo.mota.engine.map.MapManager;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,10 +17,12 @@ import static com.demo.mota.engine.configs.GameContextConfigConstants.PLAYER_ID;
 public class GameEngine {
     private static volatile GameEngine instance;
 
-    private PlayerStateManager playerStateManager;
+    private final PlayerStateManager playerStateManager;
+    private final MapManager mapManager;
 
     private GameEngine() {
         this.playerStateManager = loadInitialPlayerState();
+        this.mapManager = new MapManager();
     }
 
     public static GameEngine getGameEngine() {
@@ -35,6 +38,10 @@ public class GameEngine {
 
     public PlayerStateManager getPlayerStateManager() {
         return playerStateManager;
+    }
+
+    public MapManager getMapManager() {
+        return mapManager;
     }
 
     private PlayerStateManager loadInitialPlayerState() {
@@ -59,6 +66,4 @@ public class GameEngine {
             throw new RuntimeException("Failed to parse initial player state", e);
         }
     }
-
-    //private record PlayerInitialData(String playerId, String playerName, long health, long attack, long defense) implements Serializable { }
 }
