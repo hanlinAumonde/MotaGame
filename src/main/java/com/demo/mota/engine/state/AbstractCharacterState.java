@@ -4,19 +4,20 @@ import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.StateType;
 
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AbstractCharacterState {
     private final String characterId;
     private final String characterName;
 
-    private Map<StateType, Object> stateMap;
+    private final Map<StateType, Object> stateMap;
     private Direction currentDirection;
 
     public AbstractCharacterState(String characterId, String characterName, Map<StateType, Object> stateMap, Direction currentDirection) {
         this.characterId = characterId;
         this.characterName = characterName;
-        this.stateMap = stateMap;
+        this.stateMap = new HashMap<>(stateMap);
         this.currentDirection = currentDirection;
     }
 
@@ -47,5 +48,13 @@ public abstract class AbstractCharacterState {
 
     public Direction getCurrentDirection() {
         return currentDirection;
+    }
+
+    public void setCurrentDirection(Direction direction) {
+        this.currentDirection = direction;
+    }
+
+    public void updateHealth(BigInteger newHealth) {
+        this.stateMap.put(StateType.HP, newHealth);
     }
 }

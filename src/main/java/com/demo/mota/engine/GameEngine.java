@@ -2,6 +2,8 @@ package com.demo.mota.engine;
 
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.StateType;
+import com.demo.mota.engine.event.MoveHandler;
+import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.MapManager;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -19,10 +21,12 @@ public class GameEngine {
 
     private final PlayerStateManager playerStateManager;
     private final MapManager mapManager;
+    private final MoveHandler moveHandler;
 
     private GameEngine() {
         this.playerStateManager = loadInitialPlayerState();
         this.mapManager = new MapManager();
+        this.moveHandler = new MoveHandler(mapManager, playerStateManager);
     }
 
     public static GameEngine getGameEngine() {
@@ -42,6 +46,25 @@ public class GameEngine {
 
     public MapManager getMapManager() {
         return mapManager;
+    }
+
+    public MoveHandler getMoveHandler() {
+        return moveHandler;
+    }
+
+    /**
+     * 处理玩家移动输入
+     */
+    public MoveResult handlePlayerMove(Direction direction) {
+        return moveHandler.handleMove(direction);
+    }
+
+    /**
+     * 加载初始楼层并执行战斗预计算
+     */
+    public void startGame(int initialFloor) {
+        mapManager.loadFloor(initialFloor);
+        moveHandler.getBattleHandler().recalculateAllDamage(playerStateManager, mapManager.getCurrentMap());
     }
 
     private PlayerStateManager loadInitialPlayerState() {

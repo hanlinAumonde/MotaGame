@@ -91,4 +91,32 @@ public class PlayerStateManager extends AbstractCharacterState {
             }
         }
     }
+
+    /**
+     * 获取指定颜色钥匙的数量
+     */
+    public int getKeyCount(KeyColor color) {
+        return switch (color) {
+            case YELLOW -> yellow_Key != null ? yellow_Key.getItemCount() : 0;
+            case RED -> red_Key != null ? red_Key.getItemCount() : 0;
+            case BLUE -> blue_Key != null ? blue_Key.getItemCount() : 0;
+            default -> 0;
+        };
+    }
+
+    /**
+     * 消耗一把指定颜色的钥匙，返回是否成功
+     */
+    public boolean consumeKey(KeyColor color) {
+        int count = getKeyCount(color);
+        if (count <= 0) {
+            return false;
+        }
+        switch (color) {
+            case YELLOW -> yellow_Key.updateItemCount(-1);
+            case RED -> red_Key.updateItemCount(-1);
+            case BLUE -> blue_Key.updateItemCount(-1);
+        }
+        return true;
+    }
 }
