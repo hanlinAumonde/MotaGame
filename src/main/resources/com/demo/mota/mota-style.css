@@ -1,0 +1,34 @@
+.title-label {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.section-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #7f8c8d;
+    -fx-padding: 6 0 2 0;
+}
+
+.status-label {
+    -fx-font-size: 14px;
+    -fx-font-family: "Consolas", "monospace";
+    -fx-text-fill: #2c3e50;
+}
+
+.key-label {
+    -fx-font-size: 13px;
+    -fx-font-family: "Consolas", "monospace";
+    -fx-text-fill: #2c3e50;
+}
+
+.message-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #e74c3c;
+    -fx-padding: 10 0 0 0;
+    -fx-wrap-text: true;
+}
+
+#statusPanel {
+    -fx-background-color: #ecf0f1;
+}

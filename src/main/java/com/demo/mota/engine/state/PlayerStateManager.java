@@ -73,6 +73,10 @@ public class PlayerStateManager extends AbstractCharacterState {
         this.levelManager.cumulateExperience(expGained);
     }
 
+    public long getCurrentGoldAmount() {
+        return currentGoldAmount;
+    }
+
     public void updateGoldAmount(long goldAmount){
         this.currentGoldAmount += goldAmount;
     }

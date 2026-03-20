@@ -1,16 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.geometry.Insets?>
 
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.demo.mota.MotaController">
-  <padding>
-    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-  </padding>
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.demo.mota.MotaController"
+            stylesheets="@mota-style.css">
 
-  <Label fx:id="welcomeText"/>
-  <Button text="Hello!" onAction="#onHelloButtonClick"/>
-</VBox>
+    <!-- 左侧：地图画布 -->
+    <center>
+        <Canvas fx:id="mapCanvas" width="500" height="500"/>
+    </center>
+
+    <!-- 右侧：玩家状态面板 -->
+    <right>
+        <VBox fx:id="statusPanel" spacing="8" alignment="TOP_LEFT" prefWidth="180">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <Label text="魔塔" styleClass="title-label"/>
+
+            <Label fx:id="floorLabel" text="楼层: 1F" styleClass="status-label"/>
+
+            <Label text="── 勇者状态 ──" styleClass="section-label"/>
+            <Label fx:id="hpLabel" text="生命: 100" styleClass="status-label"/>
+            <Label fx:id="atkLabel" text="攻击: 10" styleClass="status-label"/>
+            <Label fx:id="defLabel" text="防御: 10" styleClass="status-label"/>
+            <Label fx:id="goldLabel" text="金币: 0" styleClass="status-label"/>
+
+            <Label text="── 钥匙 ──" styleClass="section-label"/>
+            <HBox spacing="12">
+                <Label fx:id="yellowKeyLabel" text="黄:0" styleClass="key-label"/>
+                <Label fx:id="blueKeyLabel" text="蓝:0" styleClass="key-label"/>
+                <Label fx:id="redKeyLabel" text="红:0" styleClass="key-label"/>
+            </HBox>
+
+            <Label fx:id="messageLabel" text="" styleClass="message-label"/>
+        </VBox>
+    </right>
+
+</BorderPane>

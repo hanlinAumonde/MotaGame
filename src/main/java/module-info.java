@@ -13,5 +13,16 @@ module com.demo.mota {
     requires com.fasterxml.jackson.databind;
 
     opens com.demo.mota to javafx.fxml;
+    opens com.demo.mota.engine to com.fasterxml.jackson.databind;
+    opens com.demo.mota.engine.state to com.fasterxml.jackson.databind;
+    opens com.demo.mota.engine.map to com.fasterxml.jackson.databind;
+
     exports com.demo.mota;
+    exports com.demo.mota.engine;
+    exports com.demo.mota.engine.enums;
+    exports com.demo.mota.engine.event;
+    exports com.demo.mota.engine.map;
+    exports com.demo.mota.engine.map.tile;
+    exports com.demo.mota.engine.state;
+    exports com.demo.mota.engine.state.monster;
 }
