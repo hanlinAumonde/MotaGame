@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.demo.mota.engine.configs.ItemConfigConstants.*;
@@ -36,9 +37,10 @@ public class ItemFactory extends AbstractFactory<Item, ItemFactory.ItemData, Ite
     protected void parseData(ObjectMapper mapper, InputStream inputStream) throws IOException {
         JsonNode rootNode = mapper.readTree(inputStream);
         for(JsonNode itemNode: rootNode){
-            mapper.treeToValue(itemNode, new TypeReference<Map<String, ItemData>>(){})
+            mapper.treeToValue(itemNode, new TypeReference<Map<String, List<ItemData>>>(){})
                     .values().forEach(itemData -> {
-                        dataRegistry.put(itemData.itemId(), itemData);
+                        //dataRegistry.put(itemData.itemId(), itemData);
+                        itemData.forEach(data -> dataRegistry.put(data.itemId, data));
                     });
         }
     }
@@ -74,7 +76,7 @@ public class ItemFactory extends AbstractFactory<Item, ItemFactory.ItemData, Ite
                             new Portion(itemId, itemName, itemDescription,
                                     itemPrice, itemCount,
                                     isStorable, isConsumable,
-                                    BigInteger.valueOf((long) parameters.get(HEALING_AMOUNT)));
+                                    BigInteger.valueOf((int) parameters.get(HEALING_AMOUNT)));
             case ABILITY_GEM ->
                     (itemId, itemName, itemDescription, itemPrice, itemCount,
                      isStorable, isConsumable, parameters) ->

@@ -35,7 +35,7 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
     protected void parseData(ObjectMapper mapper, InputStream inputStream) throws IOException {
         mapper.readValue(inputStream, new TypeReference<List<MonsterData>>(){})
                 .forEach(monsterData -> {
-                    dataRegistry.put(monsterData.monsterId, monsterData);
+                    dataRegistry.put(monsterData.id, monsterData);
                 });
     }
 
@@ -58,16 +58,16 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
     @Override
     protected Monster createProduct(MonsterCreator creator, MonsterData data) {
         return creator.createMonster(
-                data.monsterId, data.monsterName,
-                data.monsterHealth, data.monsterAttack,
-                data.monsterDefense,
-                data.monsterGoldReward, data.monsterExperienceReward
+                data.id, data.name,
+                data.health, data.attack,
+                data.defense,
+                data.gold, data.experience
         );
     }
 
-    public record MonsterData(String monsterId, String monsterName,
-                              BigInteger monsterHealth, BigInteger monsterAttack, BigInteger monsterDefense,
-                              long monsterGoldReward,
-                              BigInteger monsterExperienceReward) implements Serializable {
+    public record MonsterData(String id, String name,
+                              BigInteger health, BigInteger attack, BigInteger defense,
+                              long gold,
+                              BigInteger experience) implements Serializable {
     }
 }

@@ -1,7 +1,7 @@
 package com.demo.mota.engine.configs;
 
 public class ItemConfigConstants {
-    public static final String ITEM_LIST_FILE = "data/item/itemList.json";
+    public static final String ITEM_LIST_FILE = "/data/item/itemList.json";
 
     public static final String EQUIPMENT = "Equipment";
 
@@ -9,7 +9,7 @@ public class ItemConfigConstants {
     public static final String KEY_COLOR = "keyColor";
     public static final String INITIAL_KEY_SET = "key-001-";
 
-    public static final String PORTION = "Potion";
+    public static final String PORTION = "Portion";
     public static final String HEALING_AMOUNT = "healingAmount";
 
     public static final String ABILITY_GEM = "AbilityGem";

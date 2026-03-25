@@ -77,27 +77,34 @@ public class Monster extends AbstractCharacterState {
 
     public void updateCurrentDamage(PlayerStateManager playerStateManager) {
         BigInteger playerAttack = playerStateManager.getEffectiveATK();
-        BigInteger damageToMonsterPerRound = playerAttack.subtract(this.getEffectiveDEF());
+        BigInteger damageToMonsterPerRound = playerAttack.subtract((BigInteger) this.getStateValue(StateType.DEF));
         boolean isOverKill = false;
         if(damageToMonsterPerRound.compareTo(BigInteger.ZERO) <= 0) {
+            // 我破不了怪物的防御
             setCurrentDamage(BigInteger.ZERO);
             isOverKill = true;
         } else {
-            BigInteger playerDefense = this.getEffectiveDEF();
-            BigInteger damageToPlayerPerRound = playerDefense.subtract(this.getEffectiveATK());
+            BigInteger playerDefense = (BigInteger) playerStateManager.getStateValue(StateType.DEF);
+            BigInteger damageToPlayerPerRound = ((BigInteger) this.getStateValue(StateType.ATK)).subtract(playerDefense);
             if(damageToPlayerPerRound.compareTo(BigInteger.ZERO) <= 0) {
+                // 怪物破不了我的防御
                 setCurrentDamage(BigInteger.ZERO);
             } else {
-                BigInteger roundsForDefeatMonster = this.getCharacterHealth().divide(damageToMonsterPerRound);
-                if(willOverflow(damageToPlayerPerRound.longValue(), roundsForDefeatMonster.longValue(), 2*playerStateManager.getCharacterHealth().longValue())) {
+                BigInteger roundsForDefeatMonster = ((BigInteger) this.getStateValue(StateType.HP)).divide(damageToMonsterPerRound);
+                if(willOverflow(
+                        damageToPlayerPerRound.longValue(),
+                        roundsForDefeatMonster.longValue(),
+                        ((BigInteger) playerStateManager.getStateValue(StateType.HP)).longValue() * 2)) {
+                    // 我能够破防怪物，但我的血量不够，会发生溢出
                     setCurrentDamage(BigInteger.ZERO);
                     isOverKill = true;
                 } else {
+                    // 正常战斗结果
                     setCurrentDamage(damageToPlayerPerRound.multiply(roundsForDefeatMonster));
                 }
             }
         }
-        updateCurrentDamageRange(playerStateManager.getCharacterHealth(), isOverKill);
+        updateCurrentDamageRange(((BigInteger) playerStateManager.getStateValue(StateType.HP)), isOverKill);
     }
 
     private static boolean willOverflow(long a, long b, long c) {

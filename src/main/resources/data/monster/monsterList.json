@@ -12,7 +12,7 @@
     "id": "monster-skeleton-001",
     "name": "骷髅战士",
     "health": 30,
-    "attack": 7,
+    "attack": 12,
     "defense": 3,
     "gold": 15,
     "experience": 10

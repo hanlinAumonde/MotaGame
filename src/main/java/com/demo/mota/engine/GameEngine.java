@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.util.Map;
 
 import static com.demo.mota.engine.configs.GameContextConfigConstants.INITIAL_PLAYER_STATE_PATH;
@@ -68,7 +69,7 @@ public class GameEngine {
     }
 
     private PlayerStateManager loadInitialPlayerState() {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(INITIAL_PLAYER_STATE_PATH);
+        InputStream inputStream = this.getClass().getResourceAsStream(INITIAL_PLAYER_STATE_PATH);
         if(inputStream == null) {
             throw new RuntimeException("Initial player state file not found: " + INITIAL_PLAYER_STATE_PATH);
         }
@@ -79,9 +80,9 @@ public class GameEngine {
                     (String) playerData.get(PLAYER_ID),
                     (String) playerData.get("playerName"),
                     Map.of(
-                            StateType.HP, playerData.get("health"),
-                            StateType.ATK, playerData.get("attack"),
-                            StateType.DEF, playerData.get("defense")
+                            StateType.HP, BigInteger.valueOf((int) playerData.get("health")),
+                            StateType.ATK, BigInteger.valueOf((int) playerData.get("attack")),
+                            StateType.DEF, BigInteger.valueOf((int) playerData.get("defense"))
                     ),
                     Direction.DOWN
             );

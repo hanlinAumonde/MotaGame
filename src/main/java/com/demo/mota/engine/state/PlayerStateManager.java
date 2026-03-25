@@ -1,10 +1,8 @@
 package com.demo.mota.engine.state;
 
-import com.demo.mota.engine.Item.Equipment;
+import com.demo.mota.engine.Item.*;
 import com.demo.mota.engine.Item.GenericItem.GenericItem;
-import com.demo.mota.engine.Item.Item;
 import com.demo.mota.engine.factory.item.ItemFactory;
-import com.demo.mota.engine.Item.Key;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.EquipSlot;
 import com.demo.mota.engine.enums.KeyColor;
@@ -59,11 +57,18 @@ public class PlayerStateManager extends AbstractCharacterState {
     }
 
     private BigInteger getEffectiveAttr(StateType stateType){
-        return equipmentsEquipped
+        BigInteger playerBaseState = (BigInteger) switch (stateType) {
+            case ATK -> this.getStateValue(StateType.ATK);
+            case DEF -> this.getStateValue(StateType.DEF);
+            default -> throw new IllegalArgumentException("Invalid state type: " + stateType);
+        };
+        return playerBaseState.add(
+            equipmentsEquipped
                 .values().stream()
                 .filter(equipment -> equipment.getStateEffectMap().containsKey(stateType))
-                .map(equipment -> (BigInteger) equipment.getStateEffectMap().get(stateType))
-                .reduce(BigInteger.ZERO, BigInteger::add);
+                .map(equipment -> BigInteger.valueOf((int) equipment.getStateEffectMap().get(stateType)))
+                .reduce(BigInteger.ZERO, BigInteger::add)
+        );
     }
 
     public BigInteger getEffectiveATK(){ return getEffectiveAttr(StateType.ATK); }
@@ -93,6 +98,14 @@ public class PlayerStateManager extends AbstractCharacterState {
                 case BLUE -> this.blue_Key.updateItemCount(1);
                 default -> throw new IllegalArgumentException("Invalid key color: " + key.getKeyColor());
             }
+        } else if(item instanceof Portion portion){
+            BigInteger currentHealth = (BigInteger) this.getStateValue(StateType.HP);
+            this.updateState(StateType.HP, currentHealth.add(portion.getReplyAmount()));
+        } else if(item instanceof AbilityGem abilityGem){
+            StateType effectedAbilityType = abilityGem.getEffectedAbilityType();
+            BigInteger correspondingAbility = (BigInteger) this.getStateValue(effectedAbilityType);
+            BigInteger newAbilityValue = (BigInteger.valueOf((int) abilityGem.getEffectValue())).add(correspondingAbility);
+            this.updateState(effectedAbilityType, newAbilityValue);
         }
     }
 

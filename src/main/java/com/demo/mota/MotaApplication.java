@@ -11,7 +11,7 @@ public class MotaApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MotaApplication.class.getResource("mota-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 700, 520);
+        Scene scene = new Scene(fxmlLoader.load(), 1080, 960);
 
         // 获取 controller 并绑定键盘事件
         MotaController controller = fxmlLoader.getController();

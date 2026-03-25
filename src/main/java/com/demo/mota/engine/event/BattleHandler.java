@@ -1,5 +1,6 @@
 package com.demo.mota.engine.event;
 
+import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.map.Position;
 import com.demo.mota.engine.state.PlayerStateManager;
@@ -33,8 +34,8 @@ public class BattleHandler {
 
         // 扣除玩家生命值
         BigInteger damage = monster.getCurrentDamage();
-        BigInteger newHealth = player.getCharacterHealth().subtract(damage);
-        player.updateHealth(newHealth);
+        BigInteger newHealth = ((BigInteger) player.getStateValue(StateType.HP)).subtract(damage);
+        player.updateState(StateType.HP, newHealth);
 
         // 给予金币和经验奖励
         player.updateGoldAmount(monster.getGoldReward());

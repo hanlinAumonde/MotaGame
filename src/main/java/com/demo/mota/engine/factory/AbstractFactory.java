@@ -23,7 +23,7 @@ public abstract class AbstractFactory<T, D, C> {
 
     protected void loadData() {
         String fileName = getConfigFileName();
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+        InputStream inputStream = this.getClass().getResourceAsStream(fileName);
         if (inputStream == null) {
             throw new RuntimeException("Config file not found: " + fileName);
         }

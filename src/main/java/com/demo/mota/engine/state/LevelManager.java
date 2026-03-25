@@ -34,7 +34,7 @@ public class LevelManager {
     }
 
     private static List<LevelData> initializeLevelData() {
-        try (InputStream inputStream = LevelManager.class.getClassLoader().getResourceAsStream(LEVEL_CONFIG_PATH))
+        try (InputStream inputStream = LevelManager.class.getResourceAsStream(LEVEL_CONFIG_PATH))
         {
             if (inputStream == null) {
                 throw new RuntimeException("Level data file not found: " + LEVEL_CONFIG_PATH);

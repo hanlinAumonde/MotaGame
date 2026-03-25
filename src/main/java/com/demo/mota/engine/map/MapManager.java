@@ -75,7 +75,7 @@ public class MapManager {
      */
     private GameMap loadMapFromFile(int floorNumber) {
         String filePath = MAP_FLOOR_PATH_PREFIX + floorNumber + ".json";
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
+        InputStream inputStream = this.getClass().getResourceAsStream(filePath);
         if (inputStream == null) {
             throw new RuntimeException("Map file not found: " + filePath);
         }

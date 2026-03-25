@@ -21,20 +21,18 @@ public abstract class AbstractCharacterState {
         this.currentDirection = currentDirection;
     }
 
-    public BigInteger getEffectiveATK() {
-        return (BigInteger) stateMap.get(StateType.ATK);
-    }
-
-    public BigInteger getEffectiveDEF() {
-        return (BigInteger) stateMap.get(StateType.DEF);
-    }
-
-    public BigInteger getCharacterHealth() {
-        return (BigInteger) stateMap.get(StateType.HP);
+    public Object getStateValue(StateType stateType){
+        try{
+            return switch(stateType){
+                case HP, ATK, DEF -> (BigInteger) this.stateMap.get(stateType);
+            };
+        }catch(ClassCastException e){
+            throw new IllegalStateException("Invalid state value for state type " + stateType);
+        }
     }
 
     public BigInteger calculateDamagePerRound(AbstractCharacterState target) {
-        BigInteger damage = this.getEffectiveATK().subtract(target.getEffectiveDEF());
+        BigInteger damage = ((BigInteger) this.getStateValue(StateType.ATK)).subtract((BigInteger) target.getStateValue(StateType.DEF));
         return damage.compareTo(BigInteger.ZERO) > 0 ? damage : BigInteger.ZERO;
     }
 
@@ -54,7 +52,7 @@ public abstract class AbstractCharacterState {
         this.currentDirection = direction;
     }
 
-    public void updateHealth(BigInteger newHealth) {
-        this.stateMap.put(StateType.HP, newHealth);
+    public void updateState(StateType stateType, Object value) {
+        this.stateMap.put(stateType, value);
     }
 }

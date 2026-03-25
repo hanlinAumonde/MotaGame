@@ -13,7 +13,7 @@
 
     <!-- 左侧：地图画布 -->
     <center>
-        <Canvas fx:id="mapCanvas" width="500" height="500"/>
+        <Canvas fx:id="mapCanvas" width="850" height="850"/>
     </center>
 
     <!-- 右侧：玩家状态面板 -->

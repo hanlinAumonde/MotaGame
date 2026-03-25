@@ -3,6 +3,7 @@ package com.demo.mota;
 import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.KeyColor;
+import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.map.Position;
@@ -223,7 +224,7 @@ public class MotaController {
         GameMap map = engine.getMapManager().getCurrentMap();
 
         floorLabel.setText("楼层: " + map.getFloorNumber() + "F");
-        hpLabel.setText("生命: " + player.getCharacterHealth());
+        hpLabel.setText("生命: " + player.getStateValue(StateType.HP));
         atkLabel.setText("攻击: " + player.getEffectiveATK());
         defLabel.setText("防御: " + player.getEffectiveDEF());
         goldLabel.setText("金币: " + player.getCurrentGoldAmount());
