@@ -1,24 +1,24 @@
 {
-  "floorNumber": 1,
+  "floorNumber": 2,
   "tiles": [
     [
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"}
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"}
     ],
     [
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
@@ -30,11 +30,11 @@
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"FLOOR_SWITCHER","bgResourceId":"bg_default","aimedFloorId":"2","switcherResourceId":"stair_up","targetSpawnX":12,"targetSpawnY":1},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"}
+      {"type":"FLOOR_SWITCHER","bgResourceId":"bg_default","aimedFloorId":"1","switcherResourceId":"stair_down","targetSpawnX":12,"targetSpawnY":1},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"}
     ],
     [
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
@@ -47,10 +47,10 @@
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"}
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"}
     ],
     [
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
@@ -63,10 +63,10 @@
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"}
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"}
     ],
     [
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
@@ -79,26 +79,26 @@
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"}
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"}
     ],
     [
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"DOOR","bgResourceId":"bg_default","keyColor":"yellow","doorResourceId":"door_yellow"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"}
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"}
     ],
     [
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
@@ -111,26 +111,26 @@
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"}
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"}
     ],
     [
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
+      {"type":"BACKGROUND","bgResourceId":"bg_default"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
       {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"}
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"}
     ],
     [
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
@@ -143,10 +143,10 @@
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"}
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"}
     ],
     [
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
@@ -159,10 +159,10 @@
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"}
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"}
     ],
     [
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
@@ -175,10 +175,10 @@
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"}
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"}
     ],
     [
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
@@ -191,10 +191,10 @@
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"}
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"}
     ],
     [
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
@@ -207,37 +207,35 @@
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
       {"type":"BACKGROUND","bgResourceId":"bg_default"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"}
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"}
     ],
     [
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"},
-      {"type":"WALL","bgResourceId":"bg_default","wallType":"NORMAL","wallResourceId":"wall_normal"}
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"},
+      {"type":"WALL","bgResourceId":"bg_default","wallType":"MAGMA","wallResourceId":"wall_magma"}
     ]
   ],
   "items": [
-    {"itemId": "key-001-yellow", "x": 4, "y": 10},
-    {"itemId": "key-001-yellow", "x": 9, "y": 10},
-    {"itemId": "potion-001",     "x": 3, "y": 7},
-    {"itemId": "ability-gem-001","x": 10,"y": 7},
-    {"itemId": "key-001-blue",   "x": 6, "y": 2}
+    {"itemId": "key-001-red",    "x": 2, "y": 5},
+    {"itemId": "potion-001",     "x": 11,"y": 10},
+    {"itemId": "ability-gem-001","x": 6, "y": 9}
   ],
   "monsters": [
-    {"monsterId": "monster-slime-001",    "x": 6, "y": 7},
-    {"monsterId": "monster-slime-001",    "x": 6, "y": 3},
-    {"monsterId": "monster-skeleton-001", "x": 4, "y": 3},
-    {"monsterId": "monster-skeleton-001", "x": 8, "y": 3}
+    {"monsterId": "monster-slime-001",    "x": 4, "y": 4},
+    {"monsterId": "monster-slime-001",    "x": 9, "y": 4},
+    {"monsterId": "monster-skeleton-001", "x": 6, "y": 6},
+    {"monsterId": "monster-skeleton-001", "x": 6, "y": 10}
   ],
-  "playerSpawn": {"x": 7, "y": 11}
+  "playerSpawn": {"x": 12, "y": 2}
 }

@@ -120,11 +120,20 @@ public class MoveHandler {
 
     /**
      * 处理楼梯图格：触发楼层切换
+     *
+     * 设计：玩家"进入"楼梯这一步会直接把玩家落在目标楼层的对应楼梯格上
+     * （switcherTile.targetSpawn 指向目标楼梯自身的坐标）。
+     * 由于 setPlayerPosition 是直接赋值而非触发一次 handleMove，
+     * 站在目标楼梯上不会自动再次切层；玩家下一次按键的 target 是目标楼梯
+     * 的邻居，只要进入方向的反侧不是另一个楼梯，就不会产生连续切层的震荡。
+     *
+     * 同时对新楼层全部怪物执行战斗预计算。
      */
     private MoveResult handleFloorSwitcher(FloorSwitcherTile switcherTile) {
         int targetFloor = Integer.parseInt(switcherTile.getAimedFloorId());
-        // 切换楼层，玩家出生点由地图文件定义
         mapManager.loadFloor(targetFloor);
+        mapManager.setPlayerPosition(switcherTile.getTargetSpawn());
+        battleHandler.recalculateAllDamage(player, mapManager.getCurrentMap());
         return MoveResult.FLOOR_SWITCHED;
     }
 

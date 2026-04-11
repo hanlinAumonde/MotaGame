@@ -184,7 +184,9 @@ public class MapManager {
             case FLOOR_SWITCHER -> {
                 String aimedFloorId = (String) tileData.get("aimedFloorId");
                 String switcherResourceId = (String) tileData.get("switcherResourceId");
-                yield new FloorSwitcherTile(pos, bgResourceId, aimedFloorId, switcherResourceId);
+                short spawnX = ((Number) tileData.get("targetSpawnX")).shortValue();
+                short spawnY = ((Number) tileData.get("targetSpawnY")).shortValue();
+                yield new FloorSwitcherTile(pos, bgResourceId, aimedFloorId, switcherResourceId, spawnX, spawnY);
             }
 
             case TRICKY -> {
