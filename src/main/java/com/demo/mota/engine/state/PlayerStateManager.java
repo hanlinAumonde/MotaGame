@@ -8,7 +8,6 @@ import com.demo.mota.engine.enums.EquipSlot;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.enums.StateType;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +29,7 @@ public class PlayerStateManager extends AbstractCharacterState {
 
     private List<GenericItem> genericItemsOwned;
 
-    public PlayerStateManager(String characterId, String characterName, Map<StateType, Object> stateMap, Direction currentDirection){
+    public PlayerStateManager(String characterId, String characterName, Map<StateType, GameNumber> stateMap, Direction currentDirection){
         super(characterId, characterName, stateMap, currentDirection);
         this.levelManager = new LevelManager();
         this.currentGoldAmount = 0;
@@ -56,25 +55,24 @@ public class PlayerStateManager extends AbstractCharacterState {
         if(this.blue_Key != null) this.ancientKeys.add(this.blue_Key);
     }
 
-    private BigInteger getEffectiveAttr(StateType stateType){
-        BigInteger playerBaseState = (BigInteger) switch (stateType) {
+    private GameNumber getEffectiveAttr(StateType stateType){
+        GameNumber playerBaseState = switch (stateType) {
             case ATK -> this.getStateValue(StateType.ATK);
             case DEF -> this.getStateValue(StateType.DEF);
             default -> throw new IllegalArgumentException("Invalid state type: " + stateType);
         };
-        return playerBaseState.add(
-            equipmentsEquipped
+        GameNumber equipBonus = equipmentsEquipped
                 .values().stream()
                 .filter(equipment -> equipment.getStateEffectMap().containsKey(stateType))
-                .map(equipment -> BigInteger.valueOf((int) equipment.getStateEffectMap().get(stateType)))
-                .reduce(BigInteger.ZERO, BigInteger::add)
-        );
+                .map(equipment -> equipment.getStateEffectMap().get(stateType))
+                .reduce(GameNumber.ZERO, GameNumber::plus);
+        return playerBaseState.plus(equipBonus);
     }
 
-    public BigInteger getEffectiveATK(){ return getEffectiveAttr(StateType.ATK); }
-    public BigInteger getEffectiveDEF(){ return getEffectiveAttr(StateType.DEF); }
+    public GameNumber getEffectiveATK(){ return getEffectiveAttr(StateType.ATK); }
+    public GameNumber getEffectiveDEF(){ return getEffectiveAttr(StateType.DEF); }
 
-    public void updateLevel(BigInteger expGained){
+    public void updateLevel(GameNumber expGained){
         this.levelManager.cumulateExperience(expGained);
     }
 
@@ -99,12 +97,12 @@ public class PlayerStateManager extends AbstractCharacterState {
                 default -> throw new IllegalArgumentException("Invalid key color: " + key.getKeyColor());
             }
         } else if(item instanceof Portion portion){
-            BigInteger currentHealth = (BigInteger) this.getStateValue(StateType.HP);
-            this.updateState(StateType.HP, currentHealth.add(portion.getReplyAmount()));
+            GameNumber currentHealth = this.getStateValue(StateType.HP);
+            this.updateState(StateType.HP, currentHealth.plus(portion.getReplyAmount()));
         } else if(item instanceof AbilityGem abilityGem){
             StateType effectedAbilityType = abilityGem.getEffectedAbilityType();
-            BigInteger correspondingAbility = (BigInteger) this.getStateValue(effectedAbilityType);
-            BigInteger newAbilityValue = (BigInteger.valueOf((int) abilityGem.getEffectValue())).add(correspondingAbility);
+            GameNumber correspondingAbility = this.getStateValue(effectedAbilityType);
+            GameNumber newAbilityValue = abilityGem.getEffectValue().plus(correspondingAbility);
             this.updateState(effectedAbilityType, newAbilityValue);
         }
     }

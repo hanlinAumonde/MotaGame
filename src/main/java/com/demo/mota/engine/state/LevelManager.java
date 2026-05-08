@@ -1,20 +1,18 @@
 package com.demo.mota.engine.state;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.List;
 
 import static com.demo.mota.engine.configs.LevelConfigConstatnts.LEVEL_CONFIG_PATH;
 
 public class LevelManager {
     private static final List<LevelData> loadedLevelData;
-    private record LevelData(String levelName, int levelNumber, BigInteger maxExperience) implements Serializable {}
+    private record LevelData(String levelName, int levelNumber, GameNumber maxExperience) implements Serializable {}
 
     static {
         loadedLevelData = initializeLevelData();
@@ -22,15 +20,15 @@ public class LevelManager {
 
     private String levelName;
     private int levelNumber;
-    private BigInteger maxExperienceForCurrentLevel;
+    private GameNumber maxExperienceForCurrentLevel;
 
-    private BigInteger currentExperience;
+    private GameNumber currentExperience;
 
     LevelManager() {
         this.levelName = loadedLevelData.get(0).levelName;
         this.levelNumber = loadedLevelData.get(0).levelNumber;
         this.maxExperienceForCurrentLevel = loadedLevelData.get(0).maxExperience;
-        this.currentExperience = BigInteger.ZERO;
+        this.currentExperience = GameNumber.ZERO;
     }
 
     private static List<LevelData> initializeLevelData() {
@@ -54,18 +52,18 @@ public class LevelManager {
         return levelNumber;
     }
 
-    public BigInteger getMaxExperienceForCurrentLevel() {
+    public GameNumber getMaxExperienceForCurrentLevel() {
         return maxExperienceForCurrentLevel;
     }
 
-    public BigInteger getCurrentExperience() {
+    public GameNumber getCurrentExperience() {
         return currentExperience;
     }
 
-    public void cumulateExperience(BigInteger experience) {
-        BigInteger cumulatedExp = this.currentExperience.add(experience);
+    public void cumulateExperience(GameNumber experience) {
+        GameNumber cumulatedExp = this.currentExperience.plus(experience);
         if(cumulatedExp.compareTo(maxExperienceForCurrentLevel) >= 0) {
-            this.currentExperience = cumulatedExp.subtract(maxExperienceForCurrentLevel);
+            this.currentExperience = cumulatedExp.minus(maxExperienceForCurrentLevel);
             loadNextLevel();
         } else {
             this.currentExperience = cumulatedExp;

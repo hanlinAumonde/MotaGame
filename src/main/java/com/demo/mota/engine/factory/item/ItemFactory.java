@@ -5,6 +5,7 @@ import com.demo.mota.engine.Item.GenericItem.FloorJumper;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.factory.AbstractFactory;
+import com.demo.mota.engine.state.GameNumber;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +39,6 @@ public class ItemFactory extends AbstractFactory<Item, ItemFactory.ItemData, Ite
         for(JsonNode itemNode: rootNode){
             mapper.treeToValue(itemNode, new TypeReference<Map<String, List<ItemData>>>(){})
                     .values().forEach(itemData -> {
-                        //dataRegistry.put(itemData.itemId(), itemData);
                         itemData.forEach(data -> dataRegistry.put(data.itemId, data));
                     });
         }
@@ -53,10 +52,10 @@ public class ItemFactory extends AbstractFactory<Item, ItemFactory.ItemData, Ite
                     (itemId, itemName, itemDescription, itemPrice, itemCount,
                      isStorable, isConsumable, parameters) ->
                     {
-                        Map<StateType, Object> stateEffectMap = new HashMap<>();
+                        Map<StateType, GameNumber> stateEffectMap = new HashMap<>();
                         for (Map.Entry<String, Object> entry : parameters.entrySet()) {
                             stateEffectMap.put(StateType.fromString(entry.getKey()),
-                                    entry.getValue());
+                                    GameNumber.of((int) entry.getValue()));
                         }
                         return new Equipment(itemId, itemName, itemDescription,
                                 itemPrice, itemCount,
@@ -76,7 +75,7 @@ public class ItemFactory extends AbstractFactory<Item, ItemFactory.ItemData, Ite
                             new Portion(itemId, itemName, itemDescription,
                                     itemPrice, itemCount,
                                     isStorable, isConsumable,
-                                    BigInteger.valueOf((int) parameters.get(HEALING_AMOUNT)));
+                                    GameNumber.of((int) parameters.get(HEALING_AMOUNT)));
             case ABILITY_GEM ->
                     (itemId, itemName, itemDescription, itemPrice, itemCount,
                      isStorable, isConsumable, parameters) ->
@@ -84,13 +83,13 @@ public class ItemFactory extends AbstractFactory<Item, ItemFactory.ItemData, Ite
                                     itemPrice, itemCount,
                                     isStorable, isConsumable,
                                     StateType.fromString((String) parameters.get(ABILITY_TYPE)),
-                                    parameters.get(ABILITY_VALUE));
+                                    GameNumber.of((int) parameters.get(ABILITY_VALUE)));
             case GENERIC_ITEM ->
                     (itemId, itemName, itemDescription, itemPrice, itemCount,
                      isStorable, isConsumable, parameters) ->
                     {
                         String className = (String) parameters.get(GENERIC_ITEM_CLASS_NAME);
-                        String completClassPath = GENERIC_ITEM_CLASS_PATH + '.' + className;
+                        //String completClassPath = GENERIC_ITEM_CLASS_PATH + '.' + className;
                         try{
                             return switch (className.toUpperCase()){
                                 case FLOOR_JUMPER ->

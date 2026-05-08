@@ -1,19 +1,19 @@
 package com.demo.mota.engine.Item;
 
-import java.math.BigInteger;
+import com.demo.mota.engine.state.GameNumber;
 
 public class Portion extends Item {
-    private final BigInteger replyAmount;
+    private final GameNumber replyAmount;
 
     public Portion(String itemId, String itemName, String itemDescription,
                    long itemPrice, int itemCount,
                    boolean isStorable, boolean isConsumable,
-                   BigInteger replyAmount) {
+                   GameNumber replyAmount) {
         super(itemId, itemName, itemDescription, itemPrice, itemCount, isStorable, isConsumable);
         this.replyAmount = replyAmount;
     }
 
-    public BigInteger getReplyAmount() {
+    public GameNumber getReplyAmount() {
         return replyAmount;
     }
 }

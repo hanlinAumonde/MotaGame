@@ -3,20 +3,20 @@ package com.demo.mota.engine.state.monster;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.state.AbstractCharacterState;
+import com.demo.mota.engine.state.GameNumber;
 import com.demo.mota.engine.state.PlayerStateManager;
 
-import java.math.BigInteger;
 import java.util.Map;
 
 public class Monster extends AbstractCharacterState {
     private long goldReward;
-    private BigInteger experienceReward;
+    private GameNumber experienceReward;
 
-    private BigInteger currentDamage;
+    private GameNumber currentDamage;
     private DamageRange currentDamageRange;
 
-    public Monster(String characterId, String characterName, Map<StateType, Object> stateMap, Direction currentDirection,
-                   PlayerStateManager playerStateManager, long goldReward, BigInteger experienceReward) {
+    public Monster(String characterId, String characterName, Map<StateType, GameNumber> stateMap, Direction currentDirection,
+                   PlayerStateManager playerStateManager, long goldReward, GameNumber experienceReward) {
         super(characterId, characterName, stateMap, currentDirection);
         this.goldReward = goldReward;
         this.experienceReward = experienceReward;
@@ -31,15 +31,15 @@ public class Monster extends AbstractCharacterState {
         this.goldReward = goldReward;
     }
 
-    public BigInteger getExperienceReward() {
+    public GameNumber getExperienceReward() {
         return experienceReward;
     }
 
-    public void setExperienceReward(BigInteger experienceReward) {
+    public void setExperienceReward(GameNumber experienceReward) {
         this.experienceReward = experienceReward;
     }
 
-    public BigInteger getCurrentDamage() {
+    public GameNumber getCurrentDamage() {
         return currentDamage;
     }
 
@@ -47,7 +47,7 @@ public class Monster extends AbstractCharacterState {
         return currentDamageRange;
     }
 
-    public void setCurrentDamage(BigInteger currentDamage) {
+    public void setCurrentDamage(GameNumber currentDamage) {
         this.currentDamage = currentDamage;
     }
 
@@ -55,13 +55,12 @@ public class Monster extends AbstractCharacterState {
         this.currentDamageRange = currentDamageRange;
     }
 
-    private void updateCurrentDamageRange(BigInteger playerHealth, boolean isOverKill) {
-        //update the current damage range based on the calculated current damage
+    private void updateCurrentDamageRange(GameNumber playerHealth, boolean isOverKill) {
         if(isOverKill) {
             setCurrentDamageRange(DamageRange.OVER_KILL);
             return;
         }
-        float rateOfDamage = this.currentDamage.divide(playerHealth).floatValue();
+        float rateOfDamage = this.currentDamage.dividedBy(playerHealth).toFloat();
         if(rateOfDamage <= 0){
             setCurrentDamageRange(DamageRange.NONE);
         } else if(rateOfDamage > 0 && rateOfDamage <= 0.3f) {
@@ -76,35 +75,31 @@ public class Monster extends AbstractCharacterState {
     }
 
     public void updateCurrentDamage(PlayerStateManager playerStateManager) {
-        BigInteger playerAttack = playerStateManager.getEffectiveATK();
-        BigInteger damageToMonsterPerRound = playerAttack.subtract((BigInteger) this.getStateValue(StateType.DEF));
+        GameNumber playerAttack = playerStateManager.getEffectiveATK();
+        GameNumber damageToMonsterPerRound = playerAttack.minus(this.getStateValue(StateType.DEF));
         boolean isOverKill = false;
-        if(damageToMonsterPerRound.compareTo(BigInteger.ZERO) <= 0) {
-            // 我破不了怪物的防御
-            setCurrentDamage(BigInteger.ZERO);
+        if(damageToMonsterPerRound.isNonPositive()) {
+            setCurrentDamage(GameNumber.ZERO);
             isOverKill = true;
         } else {
-            BigInteger playerDefense = (BigInteger) playerStateManager.getStateValue(StateType.DEF);
-            BigInteger damageToPlayerPerRound = ((BigInteger) this.getStateValue(StateType.ATK)).subtract(playerDefense);
-            if(damageToPlayerPerRound.compareTo(BigInteger.ZERO) <= 0) {
-                // 怪物破不了我的防御
-                setCurrentDamage(BigInteger.ZERO);
+            GameNumber playerDefense = playerStateManager.getStateValue(StateType.DEF);
+            GameNumber damageToPlayerPerRound = this.getStateValue(StateType.ATK).minus(playerDefense);
+            if(damageToPlayerPerRound.isNonPositive()) {
+                setCurrentDamage(GameNumber.ZERO);
             } else {
-                BigInteger roundsForDefeatMonster = ((BigInteger) this.getStateValue(StateType.HP)).divide(damageToMonsterPerRound);
+                GameNumber roundsForDefeatMonster = this.getStateValue(StateType.HP).dividedBy(damageToMonsterPerRound);
                 if(willOverflow(
-                        damageToPlayerPerRound.longValue(),
-                        roundsForDefeatMonster.longValue(),
-                        ((BigInteger) playerStateManager.getStateValue(StateType.HP)).longValue() * 2)) {
-                    // 我能够破防怪物，但我的血量不够，会发生溢出
-                    setCurrentDamage(BigInteger.ZERO);
+                        damageToPlayerPerRound.toLong(),
+                        roundsForDefeatMonster.toLong(),
+                        playerStateManager.getStateValue(StateType.HP).toLong() * 2)) {
+                    setCurrentDamage(GameNumber.ZERO);
                     isOverKill = true;
                 } else {
-                    // 正常战斗结果
-                    setCurrentDamage(damageToPlayerPerRound.multiply(roundsForDefeatMonster));
+                    setCurrentDamage(damageToPlayerPerRound.times(roundsForDefeatMonster));
                 }
             }
         }
-        updateCurrentDamageRange(((BigInteger) playerStateManager.getStateValue(StateType.HP)), isOverKill);
+        updateCurrentDamageRange(playerStateManager.getStateValue(StateType.HP), isOverKill);
     }
 
     private static boolean willOverflow(long a, long b, long c) {

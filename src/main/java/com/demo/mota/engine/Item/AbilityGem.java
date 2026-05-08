@@ -1,15 +1,16 @@
 package com.demo.mota.engine.Item;
 
 import com.demo.mota.engine.enums.StateType;
+import com.demo.mota.engine.state.GameNumber;
 
 public class AbilityGem extends Item {
     private final StateType effectedAbilityType;
-    private final Object effectValue;
+    private final GameNumber effectValue;
 
     public AbilityGem(String itemId, String itemName, String itemDescription,
                       long itemPrice, int itemCount,
                       boolean isStorable, boolean isConsumable,
-                      StateType effectedAbilityType, Object effectValue) {
+                      StateType effectedAbilityType, GameNumber effectValue) {
         super(itemId, itemName, itemDescription, itemPrice, itemCount, isStorable, isConsumable);
         this.effectedAbilityType = effectedAbilityType;
         this.effectValue = effectValue;
@@ -19,7 +20,7 @@ public class AbilityGem extends Item {
         return effectedAbilityType;
     }
 
-    public Object getEffectValue() {
+    public GameNumber getEffectValue() {
         return effectValue;
     }
 }

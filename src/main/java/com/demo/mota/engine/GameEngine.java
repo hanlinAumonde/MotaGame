@@ -5,13 +5,13 @@ import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.event.MoveHandler;
 import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.MapManager;
+import com.demo.mota.engine.state.GameNumber;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.util.Map;
 
 import static com.demo.mota.engine.configs.GameContextConfigConstants.INITIAL_PLAYER_STATE_PATH;
@@ -53,16 +53,10 @@ public class GameEngine {
         return moveHandler;
     }
 
-    /**
-     * 处理玩家移动输入
-     */
     public MoveResult handlePlayerMove(Direction direction) {
         return moveHandler.handleMove(direction);
     }
 
-    /**
-     * 加载初始楼层并执行战斗预计算
-     */
     public void startGame(int initialFloor) {
         mapManager.loadFloor(initialFloor);
         moveHandler.getBattleHandler().recalculateAllDamage(playerStateManager, mapManager.getCurrentMap());
@@ -80,9 +74,9 @@ public class GameEngine {
                     (String) playerData.get(PLAYER_ID),
                     (String) playerData.get("playerName"),
                     Map.of(
-                            StateType.HP, BigInteger.valueOf((int) playerData.get("health")),
-                            StateType.ATK, BigInteger.valueOf((int) playerData.get("attack")),
-                            StateType.DEF, BigInteger.valueOf((int) playerData.get("defense"))
+                            StateType.HP, GameNumber.of((int) playerData.get("health")),
+                            StateType.ATK, GameNumber.of((int) playerData.get("attack")),
+                            StateType.DEF, GameNumber.of((int) playerData.get("defense"))
                     ),
                     Direction.DOWN
             );

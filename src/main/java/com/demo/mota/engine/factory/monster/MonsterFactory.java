@@ -4,6 +4,7 @@ import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.factory.AbstractFactory;
+import com.demo.mota.engine.state.GameNumber;
 import com.demo.mota.engine.state.monster.Monster;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +44,7 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
         MonsterData monsterData = dataRegistry.get(id);
         return (monsterId, monsterName, monsterHealth, monsterAttack,
                 monsterDefense, monsterGoldReward, monsterExperienceReward) -> {
-            Map<StateType, Object> stateMap = Map.of(
+            Map<StateType, GameNumber> stateMap = Map.of(
                     StateType.HP, monsterHealth,
                     StateType.ATK, monsterAttack,
                     StateType.DEF, monsterDefense
@@ -66,8 +66,8 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
     }
 
     public record MonsterData(String id, String name,
-                              BigInteger health, BigInteger attack, BigInteger defense,
+                              GameNumber health, GameNumber attack, GameNumber defense,
                               long gold,
-                              BigInteger experience) implements Serializable {
+                              GameNumber experience) implements Serializable {
     }
 }
