@@ -4,6 +4,7 @@ import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.factory.AbstractFactory;
+import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.state.GameNumber;
 import com.demo.mota.engine.state.monster.Monster;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -36,6 +37,7 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
         mapper.readValue(inputStream, new TypeReference<List<MonsterData>>(){})
                 .forEach(monsterData -> {
                     dataRegistry.put(monsterData.id, monsterData);
+                    ResourceManager.getInstance().registerMonsterImage(monsterData.id, monsterData.resourceId);
                 });
     }
 
@@ -68,6 +70,7 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
     public record MonsterData(String id, String name,
                               GameNumber health, GameNumber attack, GameNumber defense,
                               long gold,
-                              GameNumber experience) implements Serializable {
+                              GameNumber experience,
+                              String resourceId) implements Serializable {
     }
 }

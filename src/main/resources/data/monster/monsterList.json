@@ -2,19 +2,51 @@
   {
     "id": "monster-slime-001",
     "name": "绿史莱姆",
-    "health": 20,
-    "attack": 5,
-    "defense": 2,
-    "gold": 10,
-    "experience": 5
+    "health": 50,
+    "attack": 20,
+    "defense": 1,
+    "gold": 1,
+    "experience": 1,
+    "resourceId": "031-03.png"
+  },
+  {
+    "id": "monster-bat-001",
+    "name": "小蝙蝠",
+    "health": 100,
+    "attack": 20,
+    "defense": 5,
+    "gold": 2,
+    "experience": 2,
+    "resourceId": "032-01.png"
   },
   {
     "id": "monster-skeleton-001",
     "name": "骷髅战士",
-    "health": 30,
-    "attack": 12,
-    "defense": 3,
-    "gold": 15,
-    "experience": 10
+    "health": 150,
+    "attack": 40,
+    "defense": 20,
+    "gold": 5,
+    "experience": 4,
+    "resourceId": "033-02.png"
+  },
+  {
+    "id": "monster-golem-001",
+    "name": "石头人",
+    "health": 200,
+    "attack": 50,
+    "defense": 25,
+    "gold": 8,
+    "experience": 6,
+    "resourceId": "034-01.png"
+  },
+  {
+    "id": "monster-ghost-001",
+    "name": "幽灵",
+    "health": 300,
+    "attack": 65,
+    "defense": 30,
+    "gold": 10,
+    "experience": 8,
+    "resourceId": "035-01.png"
   }
 ]

@@ -5,13 +5,11 @@ import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.event.MoveHandler;
 import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.MapManager;
+import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.state.GameNumber;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 
 import static com.demo.mota.engine.configs.GameContextConfigConstants.INITIAL_PLAYER_STATE_PATH;
@@ -25,6 +23,7 @@ public class GameEngine {
     private final MoveHandler moveHandler;
 
     private GameEngine() {
+        ResourceManager.getInstance();
         this.playerStateManager = loadInitialPlayerState();
         this.mapManager = new MapManager();
         this.moveHandler = new MoveHandler(mapManager, playerStateManager);
@@ -63,25 +62,17 @@ public class GameEngine {
     }
 
     private PlayerStateManager loadInitialPlayerState() {
-        InputStream inputStream = this.getClass().getResourceAsStream(INITIAL_PLAYER_STATE_PATH);
-        if(inputStream == null) {
-            throw new RuntimeException("Initial player state file not found: " + INITIAL_PLAYER_STATE_PATH);
-        }
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            Map<String,Object> playerData = mapper.readValue(inputStream, new TypeReference<Map<String,Object>>(){});
-            return new PlayerStateManager(
-                    (String) playerData.get(PLAYER_ID),
-                    (String) playerData.get("playerName"),
-                    Map.of(
-                            StateType.HP, GameNumber.of((int) playerData.get("health")),
-                            StateType.ATK, GameNumber.of((int) playerData.get("attack")),
-                            StateType.DEF, GameNumber.of((int) playerData.get("defense"))
-                    ),
-                    Direction.DOWN
-            );
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to parse initial player state", e);
-        }
+        Map<String, Object> playerData = ResourceManager.getInstance()
+                .loadJsonResource(INITIAL_PLAYER_STATE_PATH, new TypeReference<>() {});
+        return new PlayerStateManager(
+                (String) playerData.get(PLAYER_ID),
+                (String) playerData.get("playerName"),
+                Map.of(
+                        StateType.HP, GameNumber.of((int) playerData.get("health")),
+                        StateType.ATK, GameNumber.of((int) playerData.get("attack")),
+                        StateType.DEF, GameNumber.of((int) playerData.get("defense"))
+                ),
+                Direction.DOWN
+        );
     }
 }

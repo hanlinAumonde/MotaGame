@@ -23,6 +23,10 @@ public abstract class Item {
         this.isConsumable = isConsumable;
     }
 
+    public String getItemId() {
+        return itemId;
+    }
+
     public int getItemCount() {
         return itemCount;
     }

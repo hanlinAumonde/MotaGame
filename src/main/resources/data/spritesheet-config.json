@@ -1,0 +1,18 @@
+{
+  "spriteSheet": "/images/magictower.png",
+  "tileWidth": 32,
+  "tileHeight": 32,
+  "tiles": {
+    "bg_default":    { "col": 0, "row": 0 },
+    "wall_normal":   { "col": 0, "row": 5 },
+    "wall_magma":    { "col": 6, "row": 1 },
+    "wall_dark":     { "col": 0, "row": 5 },
+    "door_yellow":   { "col": 0, "row": 30 },
+    "door_blue":     { "col": 1, "row": 30 },
+    "door_red":      { "col": 2, "row": 30 },
+    "door_green":    { "col": 3, "row": 30 },
+    "stair_up":      { "col": 0, "row": 29 },
+    "stair_down":    { "col": 1, "row": 29 },
+    "tricky_wall":   { "col": 0, "row": 5 }
+  }
+}

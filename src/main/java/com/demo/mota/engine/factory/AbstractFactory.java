@@ -1,5 +1,7 @@
 package com.demo.mota.engine.factory;
 
+import com.demo.mota.engine.resource.ResourceManager;
+
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,11 +25,7 @@ public abstract class AbstractFactory<T, D, C> {
 
     protected void loadData() {
         String fileName = getConfigFileName();
-        InputStream inputStream = this.getClass().getResourceAsStream(fileName);
-        if (inputStream == null) {
-            throw new RuntimeException("Config file not found: " + fileName);
-        }
-
+        InputStream inputStream = ResourceManager.getInstance().getResourceStream(fileName);
         ObjectMapper mapper = new ObjectMapper();
         try {
             parseData(mapper, inputStream);

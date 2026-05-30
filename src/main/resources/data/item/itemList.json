@@ -11,10 +11,9 @@
           "isStorable": true,
           "isConsumable": false,
           "parameters": {
-            "stateEffectMap": {
-              "attack": 10
-            }
-          }
+            "attack": 10
+          },
+          "resourceId": null
         },
         {
           "itemId": "shield-001",
@@ -26,7 +25,8 @@
           "isConsumable": false,
           "parameters": {
             "defense": 10
-          }
+          },
+          "resourceId": null
         }
       ]
   },
@@ -36,14 +36,28 @@
       {
         "itemId": "potion-001",
         "itemType": "Portion",
-        "itemName": "生命药水",
+        "itemName": "红药水",
         "itemDescription": "恢复50点生命值的药水",
         "itemPrice": -1,
         "isStorable": false,
         "isConsumable": false,
         "parameters": {
           "healingAmount": 50
-        }
+        },
+        "resourceId": "103-05.png"
+      },
+      {
+        "itemId": "potion-002",
+        "itemType": "Portion",
+        "itemName": "蓝药水",
+        "itemDescription": "恢复200点生命值的药水",
+        "itemPrice": -1,
+        "isStorable": false,
+        "isConsumable": false,
+        "parameters": {
+          "healingAmount": 200
+        },
+        "resourceId": "103-06.png"
       }
     ]
   },
@@ -61,7 +75,22 @@
           "parameters": {
             "abilityType": "attack",
             "abilityValue": 2
-          }
+          },
+          "resourceId": "103-01.png"
+        },
+        {
+          "itemId": "ability-gem-002",
+          "itemType": "AbilityGem",
+          "itemName": "防御力宝石",
+          "itemDescription": "增加2点防御力的宝石",
+          "itemPrice": -1,
+          "isStorable": false,
+          "isConsumable": false,
+          "parameters": {
+            "abilityType": "defense",
+            "abilityValue": 2
+          },
+          "resourceId": "103-02.png"
         }
       ]
   },
@@ -78,7 +107,8 @@
         "isConsumable": true,
         "parameters": {
           "keyColor": "yellow"
-        }
+        },
+        "resourceId": "101-01.png"
       },
       {
         "itemId": "key-001-blue",
@@ -90,7 +120,8 @@
         "isConsumable": true,
         "parameters": {
           "keyColor": "blue"
-        }
+        },
+        "resourceId": "101-02.png"
       },
       {
         "itemId": "key-001-red",
@@ -102,7 +133,8 @@
         "isConsumable": true,
         "parameters": {
           "keyColor": "red"
-        }
+        },
+        "resourceId": "101-03.png"
       }
     ]
   },
@@ -120,7 +152,8 @@
         "parameters": {
           "className": "FloorJumper",
           "floorNumberSelected": 0
-        }
+        },
+        "resourceId": null
       }
     ]
   }

@@ -11,14 +11,9 @@
             fx:controller="com.demo.mota.MotaController"
             stylesheets="@mota-style.css">
 
-    <!-- 左侧：地图画布 -->
-    <center>
-        <Canvas fx:id="mapCanvas" width="850" height="850"/>
-    </center>
-
-    <!-- 右侧：玩家状态面板 -->
-    <right>
-        <VBox fx:id="statusPanel" spacing="8" alignment="TOP_LEFT" prefWidth="180">
+    <!-- 左侧：玩家状态面板 -->
+    <left>
+        <VBox fx:id="statusPanel" spacing="8" alignment="TOP_LEFT" prefWidth="200">
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
@@ -28,7 +23,7 @@
             <Label fx:id="floorLabel" text="楼层: 1F" styleClass="status-label"/>
 
             <Label text="── 勇者状态 ──" styleClass="section-label"/>
-            <Label fx:id="hpLabel" text="生命: 100" styleClass="status-label"/>
+            <Label fx:id="hpLabel" text="生命: 1000" styleClass="status-label"/>
             <Label fx:id="atkLabel" text="攻击: 10" styleClass="status-label"/>
             <Label fx:id="defLabel" text="防御: 10" styleClass="status-label"/>
             <Label fx:id="goldLabel" text="金币: 0" styleClass="status-label"/>
@@ -42,6 +37,11 @@
 
             <Label fx:id="messageLabel" text="" styleClass="message-label"/>
         </VBox>
-    </right>
+    </left>
+
+    <!-- 右侧：地图画布 -->
+    <center>
+        <Canvas fx:id="mapCanvas" width="832" height="832"/>
+    </center>
 
 </BorderPane>

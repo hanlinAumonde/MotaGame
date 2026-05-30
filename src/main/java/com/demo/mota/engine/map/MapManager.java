@@ -7,12 +7,10 @@ import com.demo.mota.engine.enums.WallType;
 import com.demo.mota.engine.factory.item.ItemFactory;
 import com.demo.mota.engine.factory.monster.MonsterFactory;
 import com.demo.mota.engine.map.tile.*;
+import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.state.monster.Monster;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,18 +73,9 @@ public class MapManager {
      */
     private GameMap loadMapFromFile(int floorNumber) {
         String filePath = MAP_FLOOR_PATH_PREFIX + floorNumber + ".json";
-        InputStream inputStream = this.getClass().getResourceAsStream(filePath);
-        if (inputStream == null) {
-            throw new RuntimeException("Map file not found: " + filePath);
-        }
-
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            Map<String, Object> mapData = mapper.readValue(inputStream, new TypeReference<>() {});
-            return parseMapData(mapData, floorNumber);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load map for floor " + floorNumber, e);
-        }
+        Map<String, Object> mapData = ResourceManager.getInstance()
+                .loadJsonResource(filePath, new TypeReference<>() {});
+        return parseMapData(mapData, floorNumber);
     }
 
     /**

@@ -1,7 +1,7 @@
 {
   "playerId": "brave-001",
   "playerName": "勇者",
-  "health": 100,
+  "health": 1000,
   "attack": 10,
   "defense": 10
 }

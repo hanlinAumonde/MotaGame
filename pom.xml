@@ -130,7 +130,7 @@
             <!-- Default configuration for running with: mvn clean javafx:run -->
             <id>default-cli</id>
             <configuration>
-              <mainClass>com.demo.mota.mota/com.demo.mota.HelloApplication</mainClass>
+              <mainClass>com.demo.mota/com.demo.mota.MotaApplication</mainClass>
               <launcher>app</launcher>
               <jlinkZipName>app</jlinkZipName>
               <jlinkImageName>app</jlinkImageName>
