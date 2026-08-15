@@ -16,7 +16,6 @@ import com.demo.mota.engine.state.monster.Monster;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
@@ -27,19 +26,12 @@ import static com.demo.mota.engine.configs.MapConfigConstants.MAP_SIDE_LENGTH;
 
 public class MotaController {
     @FXML private Canvas mapCanvas;
-    @FXML private Label floorLabel;
-    @FXML private Label hpLabel;
-    @FXML private Label atkLabel;
-    @FXML private Label defLabel;
-    @FXML private Label goldLabel;
-    @FXML private Label yellowKeyLabel;
-    @FXML private Label blueKeyLabel;
-    @FXML private Label redKeyLabel;
-    @FXML private Label messageLabel;
+    @FXML private Canvas statusCanvas;
 
     private GameEngine engine;
     private ResourceManager resourceManager;
     private double cellSize;
+    private String currentMessage = "";
 
     @FXML
     public void initialize() {
@@ -67,22 +59,148 @@ public class MotaController {
     }
 
     private void handleMoveResult(MoveResult result) {
-        switch (result) {
-            case BATTLE_LOST -> messageLabel.setText("战斗失败！游戏结束");
-            case BATTLE_WON -> messageLabel.setText("战斗胜利！");
-            case DOOR_OPENED -> messageLabel.setText("门已打开");
-            case DARK_WALL_REVEALED -> messageLabel.setText("发现了暗墙！");
-            case FLOOR_SWITCHED -> messageLabel.setText("切换楼层");
-            case ITEM_PICKED -> messageLabel.setText("获得道具");
-            case BLOCKED, NO_MOVE -> messageLabel.setText("");
-            case MOVED -> messageLabel.setText("");
-        }
+        String detail = result.getDetail();
+        currentMessage = switch (result.getType()) {
+            case BATTLE_WON -> "击败 " + detail + "！";
+            case BATTLE_LOST -> "败给 " + detail + "！游戏结束";
+            case ITEM_PICKED -> "获得 " + detail;
+            case DOOR_OPENED -> detail + "已打开";
+            case DARK_WALL_REVEALED -> "发现了暗墙！";
+            case FLOOR_SWITCHED -> "前往" + detail;
+            case BLOCKED, NO_MOVE, MOVED -> "";
+        };
     }
 
     private void renderAll() {
         renderMap();
-        updateStatusPanel();
+        renderStatusPanel();
     }
+
+    // ==================== 状态面板渲染 ====================
+
+    private void renderStatusPanel() {
+        GraphicsContext gc = statusCanvas.getGraphicsContext2D();
+        double w = statusCanvas.getWidth();
+        double h = statusCanvas.getHeight();
+        PlayerStateManager player = engine.getPlayerStateManager();
+        GameMap map = engine.getMapManager().getCurrentMap();
+
+        drawStatusBackground(gc, w, h);
+        drawPlayerAvatar(gc, player, w);
+        drawStats(gc, player);
+        drawKeys(gc, player);
+        drawFloorInfo(gc, map, w, h);
+        drawMessage(gc, w);
+    }
+
+    private void drawStatusBackground(GraphicsContext gc, double w, double h) {
+        Image bgTile = resourceManager.getTileImage("wall_normal");
+        if (bgTile != null) {
+            for (double ty = 0; ty < h; ty += 32) {
+                for (double tx = 0; tx < w; tx += 32) {
+                    gc.drawImage(bgTile, tx, ty, 32, 32);
+                }
+            }
+        } else {
+            gc.setFill(Color.web("#3a3a3a"));
+            gc.fillRect(0, 0, w, h);
+        }
+    }
+
+    private void drawPlayerAvatar(GraphicsContext gc, PlayerStateManager player, double panelWidth) {
+        double topY = 18;
+        double iconSize = 52;
+        double iconX = 14;
+
+        Image playerSprite = resourceManager.getPlayerSprite(Direction.DOWN.ordinal());
+        if (playerSprite != null) {
+            gc.drawImage(playerSprite, iconX, topY, iconSize, iconSize);
+        }
+
+        gc.setFont(Font.font("Consolas", FontWeight.BOLD, 34));
+        drawShadowText(gc, String.valueOf(player.getLevelNumber()), iconX + iconSize + 18, topY + 38);
+
+        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 28));
+        drawShadowText(gc, "级", panelWidth - 42, topY + 38);
+    }
+
+    private void drawStats(GraphicsContext gc, PlayerStateManager player) {
+        double statsY = 115;
+        double statsX = 14;
+        double lineHeight = 38;
+
+        String[] labels = {"生命", "攻击", "防御", "金币", "经验"};
+        String[] values = {
+                player.getStateValue(StateType.HP).toString(),
+                player.getEffectiveATK().toString(),
+                player.getEffectiveDEF().toString(),
+                String.valueOf(player.getCurrentGoldAmount()),
+                player.getCurrentExp().toString()
+        };
+
+        for (int i = 0; i < labels.length; i++) {
+            double ly = statsY + i * lineHeight;
+
+            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 22));
+            drawShadowText(gc, labels[i], statsX, ly);
+
+            gc.setFont(Font.font("Consolas", FontWeight.BOLD, 22));
+            drawShadowText(gc, values[i], statsX + 60, ly);
+        }
+    }
+
+    private void drawKeys(GraphicsContext gc, PlayerStateManager player) {
+        double keysY = 340;
+        double keysX = 14;
+        double keyIconSize = 40;
+        double keyLineHeight = 58;
+
+        KeyColor[] keyColors = {KeyColor.YELLOW, KeyColor.BLUE, KeyColor.RED};
+        String[] keyItemIds = {"key-001-yellow", "key-001-blue", "key-001-red"};
+
+        for (int i = 0; i < 3; i++) {
+            double ky = keysY + i * keyLineHeight;
+
+            Image keyImg = resourceManager.getItemImage(keyItemIds[i]);
+            if (keyImg != null) {
+                gc.drawImage(keyImg, keysX, ky, keyIconSize, keyIconSize);
+            }
+
+            gc.setFont(Font.font("Consolas", FontWeight.BOLD, 26));
+            String countStr = String.format("%02d", player.getKeyCount(keyColors[i]));
+            drawShadowText(gc, countStr, keysX + keyIconSize + 14, ky + keyIconSize * 0.7);
+
+            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 22));
+            drawShadowText(gc, "个", keysX + keyIconSize + 64, ky + keyIconSize * 0.7);
+        }
+    }
+
+    private void drawFloorInfo(GraphicsContext gc, GameMap map, double w, double h) {
+        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 26));
+        String floorText = "第 " + map.getFloorNumber() + " 层";
+        drawShadowText(gc, floorText, 14, h - 25);
+    }
+
+    private void drawMessage(GraphicsContext gc, double w) {
+        if (currentMessage == null || currentMessage.isEmpty()) return;
+
+        double msgY = 530;
+        gc.setFill(Color.rgb(0, 0, 0, 0.6));
+        gc.fillRect(6, msgY, w - 12, 28);
+
+        gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 15));
+        gc.setFill(Color.web("#ff6b6b"));
+        gc.fillText(currentMessage, 12, msgY + 20);
+    }
+
+    private void drawShadowText(GraphicsContext gc, String text, double x, double y) {
+        gc.setFill(Color.BLACK);
+        gc.fillText(text, x + 2, y + 2);
+        gc.setFill(Color.WHITE);
+        gc.fillText(text, x, y);
+    }
+
+    // ==================== 地图渲染 ====================
 
     private void renderMap() {
         GraphicsContext gc = mapCanvas.getGraphicsContext2D();
@@ -238,20 +356,5 @@ public class MotaController {
                         new double[]{cy, cy - sz, cy + sz}, 3);
             }
         }
-    }
-
-    private void updateStatusPanel() {
-        PlayerStateManager player = engine.getPlayerStateManager();
-        GameMap map = engine.getMapManager().getCurrentMap();
-
-        floorLabel.setText("楼层: " + map.getFloorNumber() + "F");
-        hpLabel.setText("生命: " + player.getStateValue(StateType.HP));
-        atkLabel.setText("攻击: " + player.getEffectiveATK());
-        defLabel.setText("防御: " + player.getEffectiveDEF());
-        goldLabel.setText("金币: " + player.getCurrentGoldAmount());
-
-        yellowKeyLabel.setText("黄:" + player.getKeyCount(KeyColor.YELLOW));
-        blueKeyLabel.setText("蓝:" + player.getKeyCount(KeyColor.BLUE));
-        redKeyLabel.setText("红:" + player.getKeyCount(KeyColor.RED));
     }
 }

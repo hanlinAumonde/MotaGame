@@ -1,47 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.canvas.Canvas?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.geometry.Insets?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.demo.mota.MotaController"
-            stylesheets="@mota-style.css">
+<HBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.demo.mota.MotaController"
+      stylesheets="@mota-style.css"
+      spacing="0">
 
-    <!-- 左侧：玩家状态面板 -->
-    <left>
-        <VBox fx:id="statusPanel" spacing="8" alignment="TOP_LEFT" prefWidth="200">
-            <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </padding>
-
-            <Label text="魔塔" styleClass="title-label"/>
-
-            <Label fx:id="floorLabel" text="楼层: 1F" styleClass="status-label"/>
-
-            <Label text="── 勇者状态 ──" styleClass="section-label"/>
-            <Label fx:id="hpLabel" text="生命: 1000" styleClass="status-label"/>
-            <Label fx:id="atkLabel" text="攻击: 10" styleClass="status-label"/>
-            <Label fx:id="defLabel" text="防御: 10" styleClass="status-label"/>
-            <Label fx:id="goldLabel" text="金币: 0" styleClass="status-label"/>
-
-            <Label text="── 钥匙 ──" styleClass="section-label"/>
-            <HBox spacing="12">
-                <Label fx:id="yellowKeyLabel" text="黄:0" styleClass="key-label"/>
-                <Label fx:id="blueKeyLabel" text="蓝:0" styleClass="key-label"/>
-                <Label fx:id="redKeyLabel" text="红:0" styleClass="key-label"/>
-            </HBox>
-
-            <Label fx:id="messageLabel" text="" styleClass="message-label"/>
-        </VBox>
-    </left>
+    <!-- 左侧：玩家状态面板（Canvas绘制） -->
+    <Canvas fx:id="statusCanvas" width="208" height="832"/>
 
     <!-- 右侧：地图画布 -->
-    <center>
-        <Canvas fx:id="mapCanvas" width="832" height="832"/>
-    </center>
+    <Canvas fx:id="mapCanvas" width="832" height="832"/>
 
-</BorderPane>
+</HBox>

@@ -27,6 +27,10 @@ public abstract class Item {
         return itemId;
     }
 
+    public String getItemName() {
+        return itemName;
+    }
+
     public int getItemCount() {
         return itemCount;
     }

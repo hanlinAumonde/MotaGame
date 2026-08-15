@@ -72,6 +72,8 @@ public class PlayerStateManager extends AbstractCharacterState {
     public GameNumber getEffectiveATK(){ return getEffectiveAttr(StateType.ATK); }
     public GameNumber getEffectiveDEF(){ return getEffectiveAttr(StateType.DEF); }
 
+    public int getLevelNumber() { return this.levelManager.getLevelNumber(); }
+    public GameNumber getCurrentExp() { return this.levelManager.getCurrentExperience(); }
     public void updateLevel(GameNumber expGained){
         this.levelManager.cumulateExperience(expGained);
     }
