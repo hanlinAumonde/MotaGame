@@ -74,8 +74,16 @@ public class PlayerStateManager extends AbstractCharacterState {
 
     public int getLevelNumber() { return this.levelManager.getLevelNumber(); }
     public GameNumber getCurrentExp() { return this.levelManager.getCurrentExperience(); }
-    public void updateLevel(GameNumber expGained){
-        this.levelManager.cumulateExperience(expGained);
+    public LevelUpResult updateLevel(GameNumber expGained) {
+        LevelUpResult result = this.levelManager.cumulateExperience(expGained);
+        if (result.didLevelUp()) {
+            for (LevelBonus bonus : result.bonuses()) {
+                GameNumber currentBase = this.getStateValue(bonus.stat());
+                GameNumber newValue = bonus.apply(currentBase);
+                this.updateState(bonus.stat(), newValue);
+            }
+        }
+        return result;
     }
 
     public long getCurrentGoldAmount() {
