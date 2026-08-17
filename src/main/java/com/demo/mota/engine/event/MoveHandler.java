@@ -2,6 +2,8 @@ package com.demo.mota.engine.event;
 
 import com.demo.mota.engine.Item.AbilityGem;
 import com.demo.mota.engine.Item.Item;
+import com.demo.mota.engine.Item.Portion;
+import com.demo.mota.engine.battle.BattleSimulator;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.enums.WallType;
@@ -70,7 +72,8 @@ public class MoveHandler {
             String itemName = item.getItemName();
             player.gainItem(item);
             map.removeItemAt(targetPos);
-            if(item instanceof AbilityGem) battleHandler.recalculateAllDamage(player, map);
+            if(item instanceof AbilityGem || item instanceof Portion)
+                battleHandler.recalculateAllDamage(player, map);
             mapManager.setPlayerPosition(targetPos);
             return MoveResult.of(MoveResult.Type.ITEM_PICKED, itemName);
         }

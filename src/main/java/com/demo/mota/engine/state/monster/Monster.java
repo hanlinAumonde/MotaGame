@@ -1,5 +1,8 @@
 package com.demo.mota.engine.state.monster;
 
+import com.demo.mota.engine.battle.BattleResult;
+import com.demo.mota.engine.battle.BattleSimulator;
+import com.demo.mota.engine.battle.BattleSnapshot;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.state.AbstractCharacterState;
@@ -55,56 +58,20 @@ public class Monster extends AbstractCharacterState {
         this.currentDamageRange = currentDamageRange;
     }
 
-    private void updateCurrentDamageRange(GameNumber playerHealth, boolean isOverKill) {
-        if(isOverKill) {
-            setCurrentDamageRange(DamageRange.OVER_KILL);
-            return;
-        }
-        double rateOfDamage = this.currentDamage.dividedBy(playerHealth);
-        if(rateOfDamage <= 0){
-            setCurrentDamageRange(DamageRange.NONE);
-        } else if(rateOfDamage > 0 && rateOfDamage <= 0.3f) {
-            setCurrentDamageRange(DamageRange.LOW);
-        } else if(rateOfDamage > 0.3f && rateOfDamage <= 0.6f) {
-            setCurrentDamageRange(DamageRange.MEDIUM);
-        } else if(rateOfDamage > 0.6f && rateOfDamage < 1.0f) {
-            setCurrentDamageRange(DamageRange.HIGH);
-        } else if(rateOfDamage >= 1.0f && rateOfDamage <= 2.0f) {
-            setCurrentDamageRange(DamageRange.DEATH);
-        }
-    }
-
     public void updateCurrentDamage(PlayerStateManager playerStateManager) {
-        GameNumber playerAttack = playerStateManager.getEffectiveATK();
-        GameNumber damageToMonsterPerRound = playerAttack.minus(this.getStateValue(StateType.DEF));
-        boolean isOverKill = false;
-        if(damageToMonsterPerRound.isNonPositive()) {
-            setCurrentDamage(GameNumber.ZERO);
-            isOverKill = true;
-        } else {
-            GameNumber playerDefense = playerStateManager.getStateValue(StateType.DEF);
-            GameNumber damageToPlayerPerRound = this.getStateValue(StateType.ATK).minus(playerDefense);
-            if(damageToPlayerPerRound.isNonPositive()) {
-                setCurrentDamage(GameNumber.ZERO);
-            } else {
-                GameNumber roundsForDefeatMonster = this.getStateValue(StateType.HP).dividedBy(damageToMonsterPerRound, false);
-                if(willOverflow(
-                        damageToPlayerPerRound.toLong(),
-                        roundsForDefeatMonster.toLong(),
-                        playerStateManager.getStateValue(StateType.HP).toLong() * 2)) {
-                    setCurrentDamage(GameNumber.ZERO);
-                    isOverKill = true;
-                } else {
-                    setCurrentDamage(damageToPlayerPerRound.times(roundsForDefeatMonster));
-                }
-            }
-        }
-        updateCurrentDamageRange(playerStateManager.getStateValue(StateType.HP), isOverKill);
-    }
-
-    private static boolean willOverflow(long a, long b, long c) {
-        if (a == 0 || b == 0) return false;
-        return b > c / a;
+        BattleSnapshot playerSnapshot = new BattleSnapshot(
+                playerStateManager.getStateValue(StateType.HP),
+                playerStateManager.getEffectiveATK(),
+                playerStateManager.getEffectiveDEF()
+        );
+        BattleSnapshot monsterSnapshot = new BattleSnapshot(
+                this.getStateValue(StateType.HP),
+                this.getStateValue(StateType.ATK),
+                this.getStateValue(StateType.DEF)
+        );
+        BattleResult result = BattleSimulator.simulate(playerSnapshot, monsterSnapshot);
+        this.currentDamage = result.totalDamage();
+        this.currentDamageRange = result.damageRange();
     }
 
 }
