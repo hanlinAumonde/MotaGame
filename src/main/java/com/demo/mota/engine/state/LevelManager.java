@@ -1,6 +1,7 @@
 package com.demo.mota.engine.state;
 
 import com.demo.mota.engine.enums.StateType;
+import com.demo.mota.engine.resource.ResourceManager;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -10,7 +11,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static com.demo.mota.engine.configs.LevelConfigConstatnts.LEVEL_CONFIG_PATH;
 
@@ -41,7 +41,7 @@ public class LevelManager {
     }
 
     private static LevelConfig initializeConfig() {
-        try (InputStream inputStream = LevelManager.class.getResourceAsStream(LEVEL_CONFIG_PATH)) {
+        try (InputStream inputStream = ResourceManager.getInstance().getResourceStream(LEVEL_CONFIG_PATH)) {
             if (inputStream == null) {
                 throw new RuntimeException("Level data file not found: " + LEVEL_CONFIG_PATH);
             }

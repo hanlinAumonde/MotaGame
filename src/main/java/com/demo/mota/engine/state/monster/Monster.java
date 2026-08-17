@@ -60,7 +60,7 @@ public class Monster extends AbstractCharacterState {
             setCurrentDamageRange(DamageRange.OVER_KILL);
             return;
         }
-        float rateOfDamage = this.currentDamage.dividedBy(playerHealth).toFloat();
+        double rateOfDamage = this.currentDamage.dividedBy(playerHealth);
         if(rateOfDamage <= 0){
             setCurrentDamageRange(DamageRange.NONE);
         } else if(rateOfDamage > 0 && rateOfDamage <= 0.3f) {
@@ -87,7 +87,7 @@ public class Monster extends AbstractCharacterState {
             if(damageToPlayerPerRound.isNonPositive()) {
                 setCurrentDamage(GameNumber.ZERO);
             } else {
-                GameNumber roundsForDefeatMonster = this.getStateValue(StateType.HP).dividedBy(damageToMonsterPerRound);
+                GameNumber roundsForDefeatMonster = this.getStateValue(StateType.HP).dividedBy(damageToMonsterPerRound, false);
                 if(willOverflow(
                         damageToPlayerPerRound.toLong(),
                         roundsForDefeatMonster.toLong(),

@@ -303,11 +303,12 @@ public class MotaController {
 
         DamageRange range = monster.getCurrentDamageRange();
         Color dmgColor = switch (range) {
-            case NONE -> Color.LIMEGREEN;
-            case LOW -> Color.YELLOW;
-            case MEDIUM -> Color.ORANGE;
-            case HIGH -> Color.RED;
-            case DEATH, OVER_KILL -> Color.DARKRED;
+            case NONE -> Color.LIGHTGREEN;
+            case LOW -> Color.LIMEGREEN;
+            case MEDIUM -> Color.YELLOW;
+            case HIGH -> Color.ORANGE;
+            case DEATH -> Color.RED;
+            case OVER_KILL -> Color.DARKRED;
         };
 
         String dmgText = monster.getCurrentDamage() != null ? monster.getCurrentDamage().toString() : "?";

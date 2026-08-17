@@ -39,10 +39,19 @@ public final class GameNumber implements Comparable<GameNumber> {
         return new GameNumber(value.multiply(other.value));
     }
 
-    public GameNumber dividedBy(GameNumber other) {
-        return new GameNumber(value.divide(other.value));
+    public GameNumber dividedBy(GameNumber other, boolean floor) {
+        if (floor) {
+            BigInteger res = value.divide(other.value);
+            return new GameNumber(res);
+        }else {
+            double res = value.doubleValue() / other.value.doubleValue();
+            return new GameNumber(BigInteger.valueOf((long) Math.ceil(res)));
+        }
     }
 
+    public double dividedBy(GameNumber other) {
+        return value.doubleValue() / other.value.doubleValue();
+    }
     public GameNumber clampMin(GameNumber min) {
         return this.compareTo(min) < 0 ? min : this;
     }
