@@ -18,8 +18,8 @@ public class PlayerStateManager extends AbstractCharacterState {
 
     private long currentGoldAmount;
 
-    private List<Equipment> equipmentsOwned;
-    private Map<EquipSlot, Equipment> equipmentsEquipped;
+    private final List<Equipment> equipmentsOwned;
+    private final Map<EquipSlot, Equipment> equipmentsEquipped;
 
     // Keys
     private Key yellow_Key;
@@ -27,7 +27,7 @@ public class PlayerStateManager extends AbstractCharacterState {
     private Key blue_Key;
     private List<Key> ancientKeys;
 
-    private List<GenericItem> genericItemsOwned;
+    private final List<GenericItem> genericItemsOwned;
 
     public PlayerStateManager(String characterId, String characterName, Map<StateType, GameNumber> stateMap, Direction currentDirection){
         super(characterId, characterName, stateMap, currentDirection);
@@ -74,7 +74,7 @@ public class PlayerStateManager extends AbstractCharacterState {
 
     public int getLevelNumber() { return this.levelManager.getLevelNumber(); }
     public GameNumber getCurrentExp() { return this.levelManager.getCurrentExperience(); }
-    public LevelUpResult updateLevel(GameNumber expGained) {
+    public void updateLevel(GameNumber expGained) {
         LevelUpResult result = this.levelManager.cumulateExperience(expGained);
         if (result.didLevelUp()) {
             for (LevelBonus bonus : result.bonuses()) {
@@ -83,7 +83,6 @@ public class PlayerStateManager extends AbstractCharacterState {
                 this.updateState(bonus.stat(), newValue);
             }
         }
-        return result;
     }
 
     public long getCurrentGoldAmount() {

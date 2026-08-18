@@ -48,10 +48,6 @@ public class GameEngine {
         return mapManager;
     }
 
-    public MoveHandler getMoveHandler() {
-        return moveHandler;
-    }
-
     public MoveResult handlePlayerMove(Direction direction) {
         return moveHandler.handleMove(direction);
     }

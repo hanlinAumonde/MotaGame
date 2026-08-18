@@ -68,10 +68,6 @@ public final class GameNumber implements Comparable<GameNumber> {
         return value.signum() == 0;
     }
 
-    public float toFloat() {
-        return value.floatValue();
-    }
-
     @JsonValue
     public long toLong() {
         return value.longValue();

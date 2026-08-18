@@ -52,16 +52,8 @@ public class LevelManager {
         }
     }
 
-    public String getLevelName() {
-        return levelName;
-    }
-
     public int getLevelNumber() {
         return levelNumber;
-    }
-
-    public GameNumber getMaxExperienceForCurrentLevel() {
-        return maxExperienceForCurrentLevel;
     }
 
     public GameNumber getCurrentExperience() {

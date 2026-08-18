@@ -28,8 +28,6 @@ public class BattleHandler {
         player.updateGoldAmount(monster.getGoldReward());
         player.updateLevel(monster.getExperienceReward());
 
-        map.removeMonsterAt(monsterPos);
-
         return true;
     }
 

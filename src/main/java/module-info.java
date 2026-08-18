@@ -26,6 +26,7 @@ module com.demo.mota {
     exports com.demo.mota.engine.event;
     exports com.demo.mota.engine.map;
     exports com.demo.mota.engine.map.tile;
+    exports com.demo.mota.engine.Item;
     exports com.demo.mota.engine.state;
     exports com.demo.mota.engine.state.monster;
     exports com.demo.mota.engine.resource;

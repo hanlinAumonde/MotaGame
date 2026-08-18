@@ -3,7 +3,6 @@ package com.demo.mota.engine.event;
 import com.demo.mota.engine.Item.AbilityGem;
 import com.demo.mota.engine.Item.Item;
 import com.demo.mota.engine.Item.Portion;
-import com.demo.mota.engine.battle.BattleSimulator;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.enums.WallType;
@@ -60,6 +59,7 @@ public class MoveHandler {
             boolean won = battleHandler.executeBattle(player, map, targetPos);
             if (won) {
                 checkTrickyTiles(map, targetPos);
+                map.removeMonsterAt(targetPos);
                 battleHandler.recalculateAllDamage(player, map);
                 return MoveResult.of(MoveResult.Type.BATTLE_WON, monsterName);
             } else {
@@ -115,8 +115,10 @@ public class MoveHandler {
 
     private void checkTrickyTiles(GameMap map, Position defeatedMonsterPos) {
         for (TrickyTile tricky : map.getAllTrickyTiles()) {
-            if (!tricky.isPassable() && tricky.getBoundMonsterIds().isEmpty()) {
-                mapManager.replaceTileWithBackground(tricky.getPosition());
+            if (!tricky.isPassable()) {
+                boolean shouldOpen = tricky.removeBoundMonster(map.getMonsterAt(defeatedMonsterPos).getCharacterId());
+                if(shouldOpen)
+                    mapManager.replaceTileWithBackground(tricky.getPosition());
             }
         }
     }

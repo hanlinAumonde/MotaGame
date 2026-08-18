@@ -89,7 +89,7 @@ public class MotaController {
         drawPlayerAvatar(gc, player, w);
         drawStats(gc, player);
         drawKeys(gc, player);
-        drawFloorInfo(gc, map, w, h);
+        drawFloorInfo(gc, map, h);
         drawMessage(gc, w);
     }
 
@@ -175,7 +175,7 @@ public class MotaController {
         }
     }
 
-    private void drawFloorInfo(GraphicsContext gc, GameMap map, double w, double h) {
+    private void drawFloorInfo(GraphicsContext gc, GameMap map, double h) {
         gc.setFont(Font.font("SimHei", FontWeight.BOLD, 26));
         String floorText = "第 " + map.getFloorNumber() + " 层";
         drawShadowText(gc, floorText, 14, h - 25);

@@ -24,11 +24,6 @@ public abstract class AbstractCharacterState {
         return this.stateMap.get(stateType);
     }
 
-    public GameNumber calculateDamagePerRound(AbstractCharacterState target) {
-        GameNumber damage = getStateValue(StateType.ATK).minus(target.getStateValue(StateType.DEF));
-        return damage.clampMin(GameNumber.ZERO);
-    }
-
     public String getCharacterId() {
         return characterId;
     }
