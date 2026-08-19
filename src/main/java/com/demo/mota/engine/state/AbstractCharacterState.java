@@ -1,5 +1,6 @@
 package com.demo.mota.engine.state;
 
+import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.StateType;
 

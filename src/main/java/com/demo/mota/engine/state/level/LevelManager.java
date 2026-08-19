@@ -1,12 +1,10 @@
-package com.demo.mota.engine.state;
+package com.demo.mota.engine.state.level;
 
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.resource.ResourceManager;
+import com.demo.mota.engine.GameNumber;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,7 +30,7 @@ public class LevelManager {
     private GameNumber maxExperienceForCurrentLevel;
     private GameNumber currentExperience;
 
-    LevelManager() {
+    public LevelManager() {
         LevelData first = loadedConfig.levels.get(0);
         this.levelName = first.levelName;
         this.levelNumber = first.levelNumber;
@@ -41,15 +39,7 @@ public class LevelManager {
     }
 
     private static LevelConfig initializeConfig() {
-        try (InputStream inputStream = ResourceManager.getInstance().getResourceStream(LEVEL_CONFIG_PATH)) {
-            if (inputStream == null) {
-                throw new RuntimeException("Level data file not found: " + LEVEL_CONFIG_PATH);
-            }
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(inputStream, new TypeReference<>() {});
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to parse level data", e);
-        }
+        return ResourceManager.getInstance().loadJsonResource(LEVEL_CONFIG_PATH, new TypeReference<>() {});
     }
 
     public int getLevelNumber() {

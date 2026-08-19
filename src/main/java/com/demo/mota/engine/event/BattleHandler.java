@@ -3,7 +3,7 @@ package com.demo.mota.engine.event;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.map.Position;
-import com.demo.mota.engine.state.GameNumber;
+import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.engine.state.monster.DamageRange;
 import com.demo.mota.engine.state.monster.Monster;

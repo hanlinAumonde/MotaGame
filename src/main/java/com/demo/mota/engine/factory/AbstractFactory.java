@@ -25,9 +25,8 @@ public abstract class AbstractFactory<T, D, C> {
 
     protected void loadData() {
         String fileName = getConfigFileName();
-        InputStream inputStream = ResourceManager.getInstance().getResourceStream(fileName);
         ObjectMapper mapper = new ObjectMapper();
-        try {
+        try (InputStream inputStream = ResourceManager.getInstance().getResourceStream(fileName)) {
             parseData(mapper, inputStream);
         } catch (IOException | IllegalArgumentException e) {
             throw new RuntimeException("Failed to load data", e);

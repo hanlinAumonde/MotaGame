@@ -6,7 +6,6 @@ import com.demo.mota.engine.event.MoveHandler;
 import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.MapManager;
 import com.demo.mota.engine.resource.ResourceManager;
-import com.demo.mota.engine.state.GameNumber;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.fasterxml.jackson.core.type.TypeReference;
 

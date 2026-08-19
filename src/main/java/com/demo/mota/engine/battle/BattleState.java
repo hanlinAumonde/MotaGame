@@ -1,6 +1,6 @@
 package com.demo.mota.engine.battle;
 
-import com.demo.mota.engine.state.GameNumber;
+import com.demo.mota.engine.GameNumber;
 
 /**
  * 战斗模拟过程中的可变状态，供BattleEffect在各回合钩子中读写。

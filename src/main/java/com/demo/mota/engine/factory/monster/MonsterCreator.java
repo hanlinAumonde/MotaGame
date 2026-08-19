@@ -1,6 +1,6 @@
 package com.demo.mota.engine.factory.monster;
 
-import com.demo.mota.engine.state.GameNumber;
+import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.state.monster.Monster;
 
 @FunctionalInterface

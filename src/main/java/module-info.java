@@ -19,6 +19,7 @@ module com.demo.mota {
     opens com.demo.mota.engine.factory.item to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.factory.monster to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.resource to com.fasterxml.jackson.databind;
+    opens com.demo.mota.engine.state.level to com.fasterxml.jackson.databind;
 
     exports com.demo.mota;
     exports com.demo.mota.engine;
@@ -30,4 +31,6 @@ module com.demo.mota {
     exports com.demo.mota.engine.state;
     exports com.demo.mota.engine.state.monster;
     exports com.demo.mota.engine.resource;
+    exports com.demo.mota.engine.resource.provider;
+    exports com.demo.mota.engine.state.level;
 }

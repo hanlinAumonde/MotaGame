@@ -1,5 +1,6 @@
 package com.demo.mota.engine.state;
 
+import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.Item.*;
 import com.demo.mota.engine.Item.GenericItem.GenericItem;
 import com.demo.mota.engine.factory.item.ItemFactory;
@@ -7,6 +8,9 @@ import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.EquipSlot;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.enums.StateType;
+import com.demo.mota.engine.state.level.LevelBonus;
+import com.demo.mota.engine.state.level.LevelManager;
+import com.demo.mota.engine.state.level.LevelUpResult;
 
 import java.util.List;
 import java.util.Map;

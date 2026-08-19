@@ -1,6 +1,6 @@
 package com.demo.mota.engine.Item;
 
-import com.demo.mota.engine.state.GameNumber;
+import com.demo.mota.engine.GameNumber;
 
 public class Portion extends Item {
     private final GameNumber replyAmount;

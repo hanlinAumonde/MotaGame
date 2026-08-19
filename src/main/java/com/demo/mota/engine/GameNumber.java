@@ -1,4 +1,4 @@
-package com.demo.mota.engine.state;
+package com.demo.mota.engine;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

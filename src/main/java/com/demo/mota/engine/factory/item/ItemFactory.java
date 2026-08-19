@@ -6,7 +6,7 @@ import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.factory.AbstractFactory;
 import com.demo.mota.engine.resource.ResourceManager;
-import com.demo.mota.engine.state.GameNumber;
+import com.demo.mota.engine.GameNumber;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

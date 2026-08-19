@@ -2,7 +2,7 @@ package com.demo.mota.engine.Item;
 
 import com.demo.mota.engine.enums.EquipSlot;
 import com.demo.mota.engine.enums.StateType;
-import com.demo.mota.engine.state.GameNumber;
+import com.demo.mota.engine.GameNumber;
 
 import java.util.Map;
 

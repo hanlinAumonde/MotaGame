@@ -1,6 +1,7 @@
-package com.demo.mota.engine.state;
+package com.demo.mota.engine.state.level;
 
 import com.demo.mota.engine.enums.StateType;
+import com.demo.mota.engine.GameNumber;
 
 public record LevelBonus(StateType stat, BonusType type, int value) {
 

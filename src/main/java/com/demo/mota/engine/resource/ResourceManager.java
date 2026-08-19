@@ -1,5 +1,8 @@
 package com.demo.mota.engine.resource;
 
+import com.demo.mota.engine.resource.provider.ClasspathResourceProvider;
+import com.demo.mota.engine.resource.provider.FileSystemResourceProvider;
+import com.demo.mota.engine.resource.provider.ResourceProvider;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.scene.image.Image;
@@ -8,12 +11,40 @@ import javafx.scene.image.WritableImage;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+/**
+ * 全局资源管理器（单例），全项目所有资源读取的唯一入口。
+ * <p>
+ * 读取策略基于 provider 链：按下标顺序依次尝试各 {@link ResourceProvider}，
+ * 前面的找不到则尝试后面的。默认链为：
+ * <ol>
+ *   <li>启动前通过 {@link #registerProvider} 注册的自定义 provider（可选）</li>
+ *   <li>系统属性 {@link #EXTERNAL_DIR_PROPERTY} 指定的项目外目录（可选，用于资源外置）</li>
+ *   <li>{@link ClasspathResourceProvider}（兜底，保持原有 getResourceAsStream 行为）</li>
+ * </ol>
+ */
 public class ResourceManager {
+    /**
+     * 系统属性：资源外置目录，目录结构镜像资源根目录。
+     * 例如 -Dmota.resource.externalDir=D:/mota-resources
+     */
+    public static final String EXTERNAL_DIR_PROPERTY = "mota.resource.externalDir";
+
     private static volatile ResourceManager instance;
+
+    /** 实例创建前注册的 provider，创建时按注册顺序加入链首 */
+    private static final List<ResourceProvider> pendingProviders = new ArrayList<>();
+
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    /** provider 链，下标越小优先级越高 */
+    private final List<ResourceProvider> providers = new ArrayList<>();
 
     private final Map<String, Image> tileImageCache = new HashMap<>();
     private final Map<String, Image> itemImageCache = new HashMap<>();
@@ -21,6 +52,15 @@ public class ResourceManager {
     private final Map<Integer, Image> playerSpriteCache = new HashMap<>();
 
     private ResourceManager() {
+        providers.addAll(pendingProviders);
+        pendingProviders.clear();
+
+        String externalDir = System.getProperty(EXTERNAL_DIR_PROPERTY);
+        if (externalDir != null && !externalDir.isBlank()) {
+            providers.add(new FileSystemResourceProvider(Path.of(externalDir)));
+        }
+        providers.add(new ClasspathResourceProvider());
+
         loadSpriteSheetConfig();
         loadPlayerSprites();
     }
@@ -36,14 +76,61 @@ public class ResourceManager {
         return instance;
     }
 
-    // --- Centralized I/O ---
+    /**
+     * 注册自定义资源提供者（线程安全）。
+     * 首次 getInstance() 之前调用时参与所有资源读取；
+     * 之后调用则追加到链尾（仅影响后续读取，已缓存的资源不受影响）。
+     */
+    public static void registerProvider(ResourceProvider provider) {
+        synchronized (ResourceManager.class) {
+            if (instance == null) {
+                pendingProviders.add(provider);
+            } else {
+                instance.providers.add(provider);
+            }
+        }
+    }
 
+    // --- 统一 I/O ---
+
+    /**
+     * 依次尝试所有 provider 打开资源流，全部找不到时抛异常。
+     * 适用于缺失即视为错误的资源（JSON 配置等）。
+     */
     public InputStream getResourceStream(String resourcePath) {
-        InputStream is = getClass().getResourceAsStream(resourcePath);
+        InputStream is = getOptionalResourceStream(resourcePath);
         if (is == null) {
             throw new RuntimeException("Resource not found: " + resourcePath);
         }
         return is;
+    }
+
+    /**
+     * 依次尝试所有 provider 打开资源流，找不到时返回 null。
+     * 适用于可选资源（图片缺失时渲染走纯色 fallback）。
+     */
+    public InputStream getOptionalResourceStream(String resourcePath) {
+        for (ResourceProvider provider : providers) {
+            try {
+                InputStream is = provider.openStream(resourcePath);
+                if (is != null) return is;
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read resource: " + resourcePath, e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 依次尝试所有 provider 返回资源 URL（供 FXMLLoader 等需要 URL 的组件使用），
+     * 全部找不到时抛异常。
+     */
+    public URL getResourceUrl(String resourcePath) {
+        for (ResourceProvider provider : providers) {
+            URL url = provider.getResourceUrl(resourcePath);
+            if (url != null) return url;
+        }
+        throw new RuntimeException("Resource not found: " + resourcePath);
     }
 
     public <T> T loadJsonResource(String resourcePath, TypeReference<T> typeRef) {
@@ -66,7 +153,10 @@ public class ResourceManager {
             int tileWidth = (int) config.get("tileWidth");
             int tileHeight = (int) config.get("tileHeight");
 
-            Image spriteSheet = new Image(getResourceStream(sheetPath));
+            Image spriteSheet;
+            try (InputStream sheetStream = getResourceStream(sheetPath)) {
+                spriteSheet = new Image(sheetStream);
+            }
             PixelReader reader = spriteSheet.getPixelReader();
 
             Map<String, Map<String, Integer>> tiles =
@@ -94,7 +184,7 @@ public class ResourceManager {
     // --- Player Sprites ---
 
     private void loadPlayerSprites() {
-        try (InputStream is = getClass().getResourceAsStream("/images/011-Braver01.png")) {
+        try (InputStream is = getOptionalResourceStream("/images/011-Braver01.png")) {
             if (is == null) return;
             Image playerSheet = new Image(is);
             PixelReader reader = playerSheet.getPixelReader();
@@ -128,9 +218,12 @@ public class ResourceManager {
     public void registerItemImage(String itemId, String imageFileName) {
         if (imageFileName == null || imageFileName.isEmpty()) return;
         if (itemImageCache.containsKey(itemId)) return;
-        InputStream is = getClass().getResourceAsStream("/images/" + imageFileName);
-        if (is != null) {
-            itemImageCache.put(itemId, new Image(is));
+        try (InputStream is = getOptionalResourceStream("/images/" + imageFileName)) {
+            if (is != null) {
+                itemImageCache.put(itemId, new Image(is));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load item image: " + imageFileName, e);
         }
     }
 
@@ -143,9 +236,12 @@ public class ResourceManager {
     public void registerMonsterImage(String monsterId, String imageFileName) {
         if (imageFileName == null || imageFileName.isEmpty()) return;
         if (monsterImageCache.containsKey(monsterId)) return;
-        InputStream is = getClass().getResourceAsStream("/images/" + imageFileName);
-        if (is != null) {
-            monsterImageCache.put(monsterId, new Image(is));
+        try (InputStream is = getOptionalResourceStream("/images/" + imageFileName)) {
+            if (is != null) {
+                monsterImageCache.put(monsterId, new Image(is));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load monster image: " + imageFileName, e);
         }
     }
 

@@ -1,6 +1,6 @@
 package com.demo.mota.engine.battle;
 
-import com.demo.mota.engine.state.GameNumber;
+import com.demo.mota.engine.GameNumber;
 
 /**
  * 战斗效果接口。

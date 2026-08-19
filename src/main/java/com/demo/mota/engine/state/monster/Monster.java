@@ -6,7 +6,7 @@ import com.demo.mota.engine.battle.BattleSnapshot;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.state.AbstractCharacterState;
-import com.demo.mota.engine.state.GameNumber;
+import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.state.PlayerStateManager;
 
 import java.util.Map;

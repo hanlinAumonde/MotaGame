@@ -1,6 +1,6 @@
 package com.demo.mota.engine.battle;
 
-import com.demo.mota.engine.state.GameNumber;
+import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.state.monster.DamageRange;
 
 public record BattleResult(GameNumber totalDamage, DamageRange damageRange) {
