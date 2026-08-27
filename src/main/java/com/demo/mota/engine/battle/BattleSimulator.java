@@ -78,12 +78,19 @@ public final class BattleSimulator {
         }
 
         GameNumber totalDamage = player.hp().minus(state.getPlayerHp()).clampMin(GameNumber.ZERO);
-        DamageRange range = classifyDamage(totalDamage, player.hp());
+        DamageRange range = classifyDamage(totalDamage, player.maxHp());
         return new BattleResult(totalDamage, range);
     }
 
-    public static DamageRange classifyDamage(GameNumber damage, GameNumber playerHp) {
-        double ratio = damage.dividedBy(playerHp);
+    /**
+     * 按伤害占玩家<b>生命上限</b>的比例分级。
+     *
+     * <p>以上限而非当前生命值为基准，怪物的伤害等级只在玩家属性（含生命上限）
+     * 真正变化时才改变，不会因为掉血而让同一只怪物忽高忽低。
+     * 本回合是否致命由 {@code BattleHandler} 用当前生命值单独判断。
+     */
+    public static DamageRange classifyDamage(GameNumber damage, GameNumber playerMaxHp) {
+        double ratio = damage.dividedBy(playerMaxHp);
         if (ratio <= 0) return DamageRange.NONE;
         if (ratio <= 0.3) return DamageRange.LOW;
         if (ratio <= 0.6) return DamageRange.MEDIUM;

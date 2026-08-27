@@ -60,7 +60,8 @@ public class Monster extends AbstractCharacterState {
 
     public void updateCurrentDamage(PlayerStateManager playerStateManager) {
         BattleSnapshot playerSnapshot = new BattleSnapshot(
-                playerStateManager.getStateValue(StateType.HP),
+                playerStateManager.getCurrentHP(),
+                playerStateManager.getMaxHP(),
                 playerStateManager.getEffectiveATK(),
                 playerStateManager.getEffectiveDEF()
         );

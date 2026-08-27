@@ -100,7 +100,7 @@ public class ItemFactory extends AbstractFactory<Item, ItemFactory.ItemData, Ite
                                         new FloorJumper(itemId, itemName, itemDescription,
                                                 itemPrice, itemCount,
                                                 isStorable, isConsumable,
-                                                (short) parameters.get(FLOOR_NUMBER_SELECTED));
+                                                (int) parameters.get(FLOOR_NUMBER_SELECTED));
                                 default ->
                                         throw new IllegalStateException("Unexpected value: " + className.toUpperCase());
                             };

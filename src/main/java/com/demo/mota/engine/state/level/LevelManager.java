@@ -16,8 +16,9 @@ public class LevelManager {
     private static final LevelConfig loadedConfig;
 
     private record BonusData(String stat, String type, int value) implements Serializable {}
+    /** {@code fullHeal} 为 true 时，升到该等级会直接回满生命值（缺省视为 false） */
     private record LevelData(int levelNumber, String levelName, GameNumber maxExperience,
-                             List<BonusData> bonus) implements Serializable {}
+                             List<BonusData> bonus, Boolean fullHeal) implements Serializable {}
     private record LevelConfig(List<BonusData> defaultBonus,
                                List<LevelData> levels) implements Serializable {}
 
@@ -53,6 +54,7 @@ public class LevelManager {
     public LevelUpResult cumulateExperience(GameNumber experience) {
         int previousLevel = this.levelNumber;
         List<LevelBonus> allBonuses = new ArrayList<>();
+        boolean fullHeal = false;
 
         GameNumber remainingExp = this.currentExperience.plus(experience);
 
@@ -60,11 +62,22 @@ public class LevelManager {
                 && this.levelNumber < loadedConfig.levels.size()) {
             remainingExp = remainingExp.minus(maxExperienceForCurrentLevel);
             allBonuses.addAll(getBonusesForNextLevel());
+            fullHeal |= isNextLevelFullHeal();
             loadNextLevel();
         }
 
         this.currentExperience = remainingExp;
-        return new LevelUpResult(previousLevel, this.levelNumber, Collections.unmodifiableList(allBonuses));
+        return new LevelUpResult(previousLevel, this.levelNumber,
+                Collections.unmodifiableList(allBonuses), fullHeal);
+    }
+
+    /** 即将升入的等级是否配置了回满生命值 */
+    private boolean isNextLevelFullHeal() {
+        int nextIndex = this.levelNumber; // levelNumber 从 1 开始，索引 = levelNumber 即为下一级
+        if (nextIndex >= loadedConfig.levels.size()) {
+            return false;
+        }
+        return Boolean.TRUE.equals(loadedConfig.levels.get(nextIndex).fullHeal);
     }
 
     private List<LevelBonus> getBonusesForNextLevel() {

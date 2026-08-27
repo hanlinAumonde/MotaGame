@@ -3,12 +3,12 @@ package com.demo.mota.engine.Item.GenericItem;
 import com.demo.mota.engine.GameEngine;
 
 public class FloorJumper extends GenericItem{
-    private short floorNumberSelected;
+    private int floorNumberSelected;
 
     public FloorJumper(String itemId, String itemName, String itemDescription,
                        long itemPrice, int itemCount,
                        boolean isStorable, boolean isConsumable,
-                       short floorNumberSelected) {
+                       int floorNumberSelected) {
         super(itemId, itemName, itemDescription, itemPrice, itemCount, isStorable, isConsumable);
         this.floorNumberSelected = floorNumberSelected;
     }

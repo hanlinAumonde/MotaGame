@@ -16,14 +16,19 @@ public class BattleHandler {
             return true;
         }
 
-        DamageRange damageRange = monster.getCurrentDamageRange();
-        if (damageRange == DamageRange.DEATH || damageRange == DamageRange.OVER_KILL) {
+        // OVER_KILL：无论血量多少都打不动
+        if (monster.getCurrentDamageRange() == DamageRange.OVER_KILL) {
             return false;
         }
 
+        // 是否致命由当前生命值判定（伤害等级只以生命上限分级，不参与死活判断）
         GameNumber damage = monster.getCurrentDamage();
-        GameNumber newHealth = player.getStateValue(StateType.HP).minus(damage);
-        player.updateState(StateType.HP, newHealth);
+        GameNumber currentHealth = player.getCurrentHP();
+        if (damage.compareTo(currentHealth) >= 0) {
+            return false;
+        }
+
+        player.updateState(StateType.HP, currentHealth.minus(damage));
 
         player.updateGoldAmount(monster.getGoldReward());
         player.updateLevel(monster.getExperienceReward());

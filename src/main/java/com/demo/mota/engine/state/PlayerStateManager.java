@@ -12,6 +12,8 @@ import com.demo.mota.engine.state.level.LevelBonus;
 import com.demo.mota.engine.state.level.LevelManager;
 import com.demo.mota.engine.state.level.LevelUpResult;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,10 +39,10 @@ public class PlayerStateManager extends AbstractCharacterState {
         super(characterId, characterName, stateMap, currentDirection);
         this.levelManager = new LevelManager();
         this.currentGoldAmount = 0;
-        this.equipmentsOwned = List.of();
-        this.equipmentsEquipped = Map.of();
+        this.equipmentsOwned = new ArrayList<>();
+        this.equipmentsEquipped = new HashMap<>();
         setCurrentKeySet(INITIAL_KEY_SET);
-        this.genericItemsOwned = List.of();
+        this.genericItemsOwned = new ArrayList<>();
     }
 
     public void setCurrentKeySet(String currentKeySet) {
@@ -61,8 +63,7 @@ public class PlayerStateManager extends AbstractCharacterState {
 
     private GameNumber getEffectiveAttr(StateType stateType){
         GameNumber playerBaseState = switch (stateType) {
-            case ATK -> this.getStateValue(StateType.ATK);
-            case DEF -> this.getStateValue(StateType.DEF);
+            case ATK, DEF, MAX_HP -> this.getStateValue(stateType);
             default -> throw new IllegalArgumentException("Invalid state type: " + stateType);
         };
         GameNumber equipBonus = equipmentsEquipped
@@ -76,6 +77,35 @@ public class PlayerStateManager extends AbstractCharacterState {
     public GameNumber getEffectiveATK(){ return getEffectiveAttr(StateType.ATK); }
     public GameNumber getEffectiveDEF(){ return getEffectiveAttr(StateType.DEF); }
 
+    /** 生命上限：基础上限 + 装备加成 */
+    public GameNumber getMaxHP(){ return getEffectiveAttr(StateType.MAX_HP); }
+
+    public GameNumber getCurrentHP(){ return this.getStateValue(StateType.HP); }
+
+    /**
+     * 恢复生命值，结果不超过生命上限。
+     */
+    public void heal(GameNumber amount) {
+        if (amount == null || amount.isNonPositive()) return;
+        GameNumber maxHP = getMaxHP();
+        GameNumber healed = getCurrentHP().plus(amount);
+        this.updateState(StateType.HP, healed.compareTo(maxHP) > 0 ? maxHP : healed);
+    }
+
+    /**
+     * 提升生命上限，并同时回复等量生命值（拾取生命上限宝石 / 升级时的上限成长）。
+     */
+    public void increaseMaxHP(GameNumber amount) {
+        if (amount == null || amount.isNonPositive()) return;
+        this.updateState(StateType.MAX_HP, this.getStateValue(StateType.MAX_HP).plus(amount));
+        heal(amount);
+    }
+
+    /** 将生命值回满至当前生命上限 */
+    public void restoreFullHP() {
+        this.updateState(StateType.HP, getMaxHP());
+    }
+
     public int getLevelNumber() { return this.levelManager.getLevelNumber(); }
     public GameNumber getCurrentExp() { return this.levelManager.getCurrentExperience(); }
     public void updateLevel(GameNumber expGained) {
@@ -84,7 +114,17 @@ public class PlayerStateManager extends AbstractCharacterState {
             for (LevelBonus bonus : result.bonuses()) {
                 GameNumber currentBase = this.getStateValue(bonus.stat());
                 GameNumber newValue = bonus.apply(currentBase);
-                this.updateState(bonus.stat(), newValue);
+                switch (bonus.stat()) {
+                    // 上限成长：抬高上限并回复等量生命值
+                    case MAX_HP -> increaseMaxHP(newValue.minus(currentBase));
+                    // 纯恢复型加成：受上限约束
+                    case HP -> heal(newValue.minus(currentBase));
+                    default -> this.updateState(bonus.stat(), newValue);
+                }
+            }
+            // 配置了 fullHeal 的等级：在全部加成生效后回满，因此填满的是升级后的新上限
+            if (result.fullHeal()) {
+                restoreFullHP();
             }
         }
     }
@@ -110,13 +150,17 @@ public class PlayerStateManager extends AbstractCharacterState {
                 default -> throw new IllegalArgumentException("Invalid key color: " + key.getKeyColor());
             }
         } else if(item instanceof Portion portion){
-            GameNumber currentHealth = this.getStateValue(StateType.HP);
-            this.updateState(StateType.HP, currentHealth.plus(portion.getReplyAmount()));
+            heal(portion.getReplyAmount());
         } else if(item instanceof AbilityGem abilityGem){
             StateType effectedAbilityType = abilityGem.getEffectedAbilityType();
-            GameNumber correspondingAbility = this.getStateValue(effectedAbilityType);
-            GameNumber newAbilityValue = abilityGem.getEffectValue().plus(correspondingAbility);
-            this.updateState(effectedAbilityType, newAbilityValue);
+            GameNumber effectValue = abilityGem.getEffectValue();
+            switch (effectedAbilityType) {
+                // 生命上限宝石：抬高上限并回复等量生命值
+                case MAX_HP -> increaseMaxHP(effectValue);
+                case HP -> heal(effectValue);
+                default -> this.updateState(effectedAbilityType,
+                        this.getStateValue(effectedAbilityType).plus(effectValue));
+            }
         }
     }
 

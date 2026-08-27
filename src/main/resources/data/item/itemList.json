@@ -58,6 +58,19 @@
           "healingAmount": 200
         },
         "resourceId": "103-06.png"
+      },
+      {
+        "itemId": "potion-003",
+        "itemType": "Portion",
+        "itemName": "大药水",
+        "itemDescription": "恢复500点生命值的大药水",
+        "itemPrice": -1,
+        "isStorable": false,
+        "isConsumable": false,
+        "parameters": {
+          "healingAmount": 500
+        },
+        "resourceId": "103-07.png"
       }
     ]
   },
@@ -91,6 +104,34 @@
             "abilityValue": 2
           },
           "resourceId": "103-02.png"
+        },
+        {
+          "itemId": "ability-gem-003",
+          "itemType": "AbilityGem",
+          "itemName": "生命宝石",
+          "itemDescription": "增加100点生命值上限的宝石，并回复等量生命值",
+          "itemPrice": -1,
+          "isStorable": false,
+          "isConsumable": false,
+          "parameters": {
+            "abilityType": "maxHealth",
+            "abilityValue": 100
+          },
+          "resourceId": null
+        },
+        {
+          "itemId": "ability-gem-004",
+          "itemType": "AbilityGem",
+          "itemName": "巨型生命宝石",
+          "itemDescription": "增加10000点生命值上限的宝石，并回复等量生命值",
+          "itemPrice": -1,
+          "isStorable": false,
+          "isConsumable": false,
+          "parameters": {
+            "abilityType": "maxHealth",
+            "abilityValue": 10000
+          },
+          "resourceId": null
         }
       ]
   },

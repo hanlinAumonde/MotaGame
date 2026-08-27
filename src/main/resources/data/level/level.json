@@ -1,6 +1,6 @@
 {
   "defaultBonus": [
-    { "stat": "health", "type": "flat", "value": 50 },
+    { "stat": "maxHealth", "type": "flat", "value": 50 },
     { "stat": "attack", "type": "flat", "value": 3 },
     { "stat": "defense", "type": "flat", "value": 3 }
   ],
@@ -8,29 +8,34 @@
     {
       "levelNumber": 1,
       "levelName": "等级1",
-      "maxExperience": 100
+      "maxExperience": 5
     },
     {
       "levelNumber": 2,
       "levelName": "等级2",
-      "maxExperience": 200
+      "maxExperience": 10
     },
     {
       "levelNumber": 3,
       "levelName": "等级3",
-      "maxExperience": 350
+      "maxExperience": 20,
+      "bonus": [
+        { "stat": "maxHealth", "type": "flat", "value": 100 },
+        { "stat": "attack", "type": "flat", "value": 5 }
+      ]
     },
     {
       "levelNumber": 4,
       "levelName": "等级4",
-      "maxExperience": 550
+      "maxExperience": 40
     },
     {
       "levelNumber": 5,
       "levelName": "等级5",
-      "maxExperience": 800,
+      "maxExperience": 80,
+      "fullHeal": true,
       "bonus": [
-        { "stat": "health", "type": "percentage", "value": 10 },
+        { "stat": "maxHealth", "type": "percentage", "value": 10 },
         { "stat": "attack", "type": "flat", "value": 5 },
         { "stat": "defense", "type": "flat", "value": 5 }
       ]
@@ -38,29 +43,30 @@
     {
       "levelNumber": 6,
       "levelName": "等级6",
-      "maxExperience": 1100
+      "maxExperience": 150
     },
     {
       "levelNumber": 7,
       "levelName": "等级7",
-      "maxExperience": 1500
+      "maxExperience": 300
     },
     {
       "levelNumber": 8,
       "levelName": "等级8",
-      "maxExperience": 2000
+      "maxExperience": 600
     },
     {
       "levelNumber": 9,
       "levelName": "等级9",
-      "maxExperience": 2600
+      "maxExperience": 1200
     },
     {
       "levelNumber": 10,
       "levelName": "等级10",
-      "maxExperience": 3500,
+      "maxExperience": 2000,
+      "fullHeal": true,
       "bonus": [
-        { "stat": "health", "type": "percentage", "value": 15 },
+        { "stat": "maxHealth", "type": "percentage", "value": 15 },
         { "stat": "attack", "type": "percentage", "value": 10 },
         { "stat": "defense", "type": "percentage", "value": 10 }
       ]
