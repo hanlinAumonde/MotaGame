@@ -6,6 +6,7 @@ import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.factory.AbstractFactory;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.GameNumber;
+import com.demo.mota.engine.factory.skill.SkillFactory;
 import com.demo.mota.engine.state.monster.Monster;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,7 +46,7 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
     protected MonsterCreator generateCreator(String id) {
         MonsterData monsterData = dataRegistry.get(id);
         return (monsterId, monsterName, monsterHealth, monsterAttack,
-                monsterDefense, monsterGoldReward, monsterExperienceReward) -> {
+                monsterDefense, monsterGoldReward, monsterExperienceReward, monsterSkills) -> {
             Map<StateType, GameNumber> stateMap = Map.of(
                     StateType.HP, monsterHealth,
                     StateType.ATK, monsterAttack,
@@ -53,7 +54,7 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
             );
             return new Monster(monsterId, monsterName, stateMap,
                     Direction.DOWN, GameEngine.getGameEngine().getPlayerStateManager(),
-                    monsterGoldReward, monsterExperienceReward);
+                    monsterGoldReward, monsterExperienceReward, monsterSkills);
         };
     }
 
@@ -63,7 +64,9 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
                 data.id, data.name,
                 data.health, data.attack,
                 data.defense,
-                data.gold, data.experience
+                data.gold, data.experience,
+                // 技能表与怪物表解耦：这里只把配置中的技能 id 交给技能工厂解析
+                SkillFactory.getInstance().createByIds(data.skills)
         );
     }
 
@@ -71,6 +74,7 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
                               GameNumber health, GameNumber attack, GameNumber defense,
                               long gold,
                               GameNumber experience,
-                              String resourceId) implements Serializable {
+                              String resourceId,
+                              List<String> skills) implements Serializable {
     }
 }

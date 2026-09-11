@@ -18,19 +18,23 @@ module com.demo.mota {
     opens com.demo.mota.engine.map to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.factory.item to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.factory.monster to com.fasterxml.jackson.databind;
+    opens com.demo.mota.engine.factory.skill to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.resource to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.state.level to com.fasterxml.jackson.databind;
 
     exports com.demo.mota;
     exports com.demo.mota.engine;
     exports com.demo.mota.engine.enums;
+    exports com.demo.mota.engine.menu;
     exports com.demo.mota.engine.event;
     exports com.demo.mota.engine.map;
     exports com.demo.mota.engine.map.tile;
     exports com.demo.mota.engine.Item;
     exports com.demo.mota.engine.state;
     exports com.demo.mota.engine.state.monster;
+    exports com.demo.mota.engine.skill;
     exports com.demo.mota.engine.resource;
     exports com.demo.mota.engine.resource.provider;
     exports com.demo.mota.engine.state.level;
+    exports com.demo.mota.ui;
 }

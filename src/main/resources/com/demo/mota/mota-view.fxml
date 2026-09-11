@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Pos?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 
-<HBox xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.demo.mota.MotaController"
-      stylesheets="@mota-style.css"
-      spacing="0">
+<!-- 游戏画面在下，菜单画布覆盖在上（平时 visible=false） -->
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.demo.mota.MotaController"
+           stylesheets="@mota-style.css"
+           alignment="TOP_LEFT">
 
-    <!-- 左侧：玩家状态面板（Canvas绘制） -->
-    <Canvas fx:id="statusCanvas" width="208" height="832"/>
+    <HBox spacing="0">
+        <!-- 左侧：玩家状态面板（Canvas绘制） -->
+        <Canvas fx:id="statusCanvas" width="208" height="832"/>
 
-    <!-- 右侧：地图画布 -->
-    <Canvas fx:id="mapCanvas" width="832" height="832"/>
+        <!-- 右侧：地图画布 -->
+        <Canvas fx:id="mapCanvas" width="832" height="832"/>
+    </HBox>
 
-</HBox>
+    <!-- 游戏内菜单（按 X 呼出），整屏覆盖 -->
+    <Canvas fx:id="menuCanvas" width="1040" height="840" visible="false"/>
+
+</StackPane>

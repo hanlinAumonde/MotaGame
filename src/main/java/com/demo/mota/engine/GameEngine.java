@@ -5,6 +5,7 @@ import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.event.MoveHandler;
 import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.MapManager;
+import com.demo.mota.engine.menu.GameMenu;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -20,12 +21,14 @@ public class GameEngine {
     private final PlayerStateManager playerStateManager;
     private final MapManager mapManager;
     private final MoveHandler moveHandler;
+    private final GameMenu gameMenu;
 
     private GameEngine() {
         ResourceManager.getInstance();
         this.playerStateManager = loadInitialPlayerState();
         this.mapManager = new MapManager();
         this.moveHandler = new MoveHandler(mapManager, playerStateManager);
+        this.gameMenu = new GameMenu(mapManager);
     }
 
     public static GameEngine getGameEngine() {
@@ -45,6 +48,10 @@ public class GameEngine {
 
     public MapManager getMapManager() {
         return mapManager;
+    }
+
+    public GameMenu getGameMenu() {
+        return gameMenu;
     }
 
     public MoveResult handlePlayerMove(Direction direction) {

@@ -49,6 +49,7 @@ public class ResourceManager {
     private final Map<String, Image> tileImageCache = new HashMap<>();
     private final Map<String, Image> itemImageCache = new HashMap<>();
     private final Map<String, Image> monsterImageCache = new HashMap<>();
+    private final Map<String, Image> skillImageCache = new HashMap<>();
     private final Map<Integer, Image> playerSpriteCache = new HashMap<>();
 
     private ResourceManager() {
@@ -213,39 +214,45 @@ public class ResourceManager {
         return playerSpriteCache.get(directionOrdinal);
     }
 
-    // --- Item Images ---
+    // --- Item / Monster / Skill Images ---
 
-    public void registerItemImage(String itemId, String imageFileName) {
+    /**
+     * 按文件名加载 {@code /images/} 下的图片并缓存；文件名为空或图片缺失时不写入缓存，
+     * 由渲染侧走 fallback。同一 id 已缓存时直接跳过。
+     */
+    private void registerImage(Map<String, Image> cache, String id, String imageFileName) {
         if (imageFileName == null || imageFileName.isEmpty()) return;
-        if (itemImageCache.containsKey(itemId)) return;
+        if (cache.containsKey(id)) return;
         try (InputStream is = getOptionalResourceStream("/images/" + imageFileName)) {
             if (is != null) {
-                itemImageCache.put(itemId, new Image(is));
+                cache.put(id, new Image(is));
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load item image: " + imageFileName, e);
+            throw new RuntimeException("Failed to load image: " + imageFileName, e);
         }
+    }
+
+    public void registerItemImage(String itemId, String imageFileName) {
+        registerImage(itemImageCache, itemId, imageFileName);
     }
 
     public Image getItemImage(String itemId) {
         return itemImageCache.get(itemId);
     }
 
-    // --- Monster Images ---
-
     public void registerMonsterImage(String monsterId, String imageFileName) {
-        if (imageFileName == null || imageFileName.isEmpty()) return;
-        if (monsterImageCache.containsKey(monsterId)) return;
-        try (InputStream is = getOptionalResourceStream("/images/" + imageFileName)) {
-            if (is != null) {
-                monsterImageCache.put(monsterId, new Image(is));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load monster image: " + imageFileName, e);
-        }
+        registerImage(monsterImageCache, monsterId, imageFileName);
     }
 
     public Image getMonsterImage(String monsterId) {
         return monsterImageCache.get(monsterId);
+    }
+
+    public void registerSkillImage(String skillId, String imageFileName) {
+        registerImage(skillImageCache, skillId, imageFileName);
+    }
+
+    public Image getSkillImage(String skillId) {
+        return skillImageCache.get(skillId);
     }
 }

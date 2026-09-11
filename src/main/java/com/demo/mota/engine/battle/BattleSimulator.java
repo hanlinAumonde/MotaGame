@@ -11,10 +11,19 @@ import java.util.List;
  * <p>玩家每回合先手攻击，怪物在其死亡回合不反击。
  * 每回合根据当前战斗状态重新计算双方有效伤害，
  * 使效果能够实现眩晕、先手、血量阈值触发等状态型机制。
+ *
+ * <p>总伤害与回合数<b>都由这一次推演产出</b>（回合数取 {@link BattleState#getRound()}）：
+ * 效果可以让每回合伤害逐轮变化，任何「血量 ÷ 每回合伤害」式的闭式换算都只在
+ * 无效果的特例下成立，故不再对任何分支做此类简化。
  */
 public final class BattleSimulator {
 
-    /** 回合数上限，防止效果组合导致无法结束的战斗 */
+    /**
+     * 回合数上限，防止效果组合导致无法结束的战斗；超限一律判 {@code OVER_KILL}。
+     *
+     * <p>该上限对所有战斗一视同仁——包括「打不痛玩家但血厚到打不完」的怪物。
+     * 若日后确实需要这类耐久怪，调高本常量即可（示例塔当前最长的战斗为 900 回合）。
+     */
     private static final int MAX_ROUNDS = 1000;
 
     private BattleSimulator() {}
@@ -30,9 +39,6 @@ public final class BattleSimulator {
         }
 
         GameNumber baseMonsterDamage = monster.atk().minus(player.def()).clampMin(GameNumber.ZERO);
-        if (baseMonsterDamage.isNonPositive()) {
-            return BattleResult.noDamage();
-        }
 
         BattleState state = new BattleState(player.hp(), monster.hp());
         for (BattleEffect effect : effects) {
@@ -79,7 +85,7 @@ public final class BattleSimulator {
 
         GameNumber totalDamage = player.hp().minus(state.getPlayerHp()).clampMin(GameNumber.ZERO);
         DamageRange range = classifyDamage(totalDamage, player.maxHp());
-        return new BattleResult(totalDamage, range);
+        return new BattleResult(totalDamage, range, state.getRound());
     }
 
     /**

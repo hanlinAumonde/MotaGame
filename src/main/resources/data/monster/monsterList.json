@@ -17,7 +17,8 @@
     "defense": 5,
     "gold": 2,
     "experience": 2,
-    "resourceId": "032-01.png"
+    "resourceId": "032-01.png",
+    "skills": ["skill-swift-wing"]
   },
   {
     "id": "monster-skeleton-001",
@@ -27,7 +28,8 @@
     "defense": 14,
     "gold": 5,
     "experience": 4,
-    "resourceId": "033-02.png"
+    "resourceId": "033-02.png",
+    "skills": ["skill-undead-synergy"]
   },
   {
     "id": "monster-golem-001",
@@ -67,7 +69,8 @@
     "defense": 5,
     "gold": 2,
     "experience": 2,
-    "resourceId": "031-02.png"
+    "resourceId": "031-02.png",
+    "skills": ["skill-fatal-strike"]
   },
   {
     "id": "monster-guard-a-001",
@@ -137,7 +140,8 @@
     "defense": 10,
     "gold": 0,
     "experience": 0,
-    "resourceId": "035-01.png"
+    "resourceId": "035-01.png",
+    "skills": ["skill-undead-synergy", "skill-fatal-strike"]
   },
   {
     "id": "monster-boss-001",
@@ -147,7 +151,8 @@
     "defense": 15,
     "gold": 0,
     "experience": 500,
-    "resourceId": "032-01.png"
+    "resourceId": "032-01.png",
+    "skills": ["skill-kings-pressure", "skill-fatal-strike"]
   },
 
   {
