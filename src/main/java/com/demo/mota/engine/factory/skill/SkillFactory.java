@@ -3,6 +3,7 @@ package com.demo.mota.engine.factory.skill;
 import com.demo.mota.engine.factory.AbstractFactory;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.skill.Skill;
+import com.demo.mota.engine.skill.SkillParams;
 import com.demo.mota.engine.skill.SkillType;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import static com.demo.mota.engine.configs.SkillConfigConstants.SKILL_LIST_FILE;
 
@@ -19,6 +21,10 @@ import static com.demo.mota.engine.configs.SkillConfigConstants.SKILL_LIST_FILE;
  * 解析时顺带把技能图标注册进 {@link ResourceManager}。
  *
  * <p>技能表不区分持有者，怪物与（将来的）玩家技能共用这一份配置。
+ *
+ * <p>配置里的 {@code effectId} / {@code params} 原样带入 {@link Skill}，
+ * 本工厂<b>不校验 effectId 是否已注册</b>：未注册的技能仍能正常展示，
+ * 只是不产生战斗效果（见 {@code SkillEffectRegistry}）。
  */
 public class SkillFactory extends AbstractFactory<Skill, SkillFactory.SkillData, SkillCreator> {
     private static class Holder {
@@ -51,7 +57,8 @@ public class SkillFactory extends AbstractFactory<Skill, SkillFactory.SkillData,
     @Override
     protected Skill createProduct(SkillCreator creator, SkillData data) {
         return creator.createSkill(data.id, data.name, SkillType.fromString(data.skillType),
-                data.description, data.resourceId);
+                data.description, data.resourceId,
+                data.effectId, new SkillParams(data.params));
     }
 
     /**
@@ -66,6 +73,7 @@ public class SkillFactory extends AbstractFactory<Skill, SkillFactory.SkillData,
     }
 
     public record SkillData(String id, String name, String skillType,
-                            String description, String resourceId) implements Serializable {
+                            String description, String resourceId,
+                            String effectId, Map<String, Object> params) implements Serializable {
     }
 }

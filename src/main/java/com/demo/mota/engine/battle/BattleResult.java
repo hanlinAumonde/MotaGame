@@ -9,7 +9,8 @@ import com.demo.mota.engine.state.monster.DamageRange;
  * @param totalDamage 击败该怪物玩家将承受的总伤害
  * @param damageRange 伤害分级（以玩家生命上限为基准）
  * @param rounds      击杀实际用掉的回合数（由 {@code BattleSimulator} 逐回合推演得出）；
- *                    无法击败（{@link DamageRange#OVER_KILL}）时为 0
+ *                    无法击败（{@link DamageRange#OVER_KILL}）时为 0，
+ *                    战前效果（如玩家先手）就把怪物打死时同样为 0
  */
 public record BattleResult(GameNumber totalDamage, DamageRange damageRange, int rounds) {
 

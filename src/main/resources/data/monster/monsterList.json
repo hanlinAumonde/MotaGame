@@ -2,6 +2,7 @@
   {
     "id": "monster-slime-001",
     "name": "黑史莱姆",
+    "tags": ["slime"],
     "health": 50,
     "attack": 20,
     "defense": 1,
@@ -12,6 +13,7 @@
   {
     "id": "monster-bat-001",
     "name": "小蝙蝠",
+    "tags": ["beast"],
     "health": 100,
     "attack": 20,
     "defense": 5,
@@ -23,6 +25,7 @@
   {
     "id": "monster-skeleton-001",
     "name": "骷髅战士",
+    "tags": ["undead"],
     "health": 100,
     "attack": 25,
     "defense": 14,
@@ -32,8 +35,21 @@
     "skills": ["skill-undead-synergy"]
   },
   {
+    "id": "monster-skeleton-captain-001",
+    "name": "骷髅队长",
+    "tags": ["undead"],
+    "health": 150,
+    "attack": 45,
+    "defense": 20,
+    "gold": 20,
+    "experience": 15,
+    "resourceId": "033-02.png",
+    "skills": ["skill-undead-synergy"]
+  },
+  {
     "id": "monster-golem-001",
     "name": "石头人",
+    "tags": ["construct"],
     "health": 160,
     "attack": 30,
     "defense": 18,
@@ -44,6 +60,7 @@
   {
     "id": "monster-ghost-001",
     "name": "幽灵",
+    "tags": ["undead", "spirit"],
     "health": 100,
     "attack": 60,
     "defense": 5,
@@ -54,6 +71,7 @@
   {
     "id": "monster-slime-green-001",
     "name": "绿史莱姆",
+    "tags": ["slime"],
     "health": 30,
     "attack": 10,
     "defense": 0,
@@ -64,6 +82,7 @@
   {
     "id": "monster-slime-red-001",
     "name": "红史莱姆",
+    "tags": ["slime"],
     "health": 60,
     "attack": 25,
     "defense": 5,
@@ -75,6 +94,7 @@
   {
     "id": "monster-guard-a-001",
     "name": "机关守卫·甲",
+    "tags": ["construct"],
     "health": 80,
     "attack": 35,
     "defense": 10,
@@ -85,6 +105,7 @@
   {
     "id": "monster-guard-b-001",
     "name": "机关守卫·乙",
+    "tags": ["construct"],
     "health": 100,
     "attack": 40,
     "defense": 15,
@@ -95,6 +116,7 @@
   {
     "id": "monster-exp-ghost-001",
     "name": "经验幽灵",
+    "tags": ["undead", "spirit"],
     "health": 1,
     "attack": 5,
     "defense": 0,
@@ -105,6 +127,7 @@
   {
     "id": "monster-exp-wisp-001",
     "name": "经验精灵",
+    "tags": ["spirit"],
     "health": 1,
     "attack": 0,
     "defense": 0,
@@ -115,6 +138,7 @@
   {
     "id": "monster-gold-golem-001",
     "name": "黄金石人",
+    "tags": ["construct"],
     "health": 150,
     "attack": 30,
     "defense": 5,
@@ -125,6 +149,7 @@
   {
     "id": "monster-iron-001",
     "name": "铁壁守卫",
+    "tags": ["construct"],
     "health": 50,
     "attack": 999,
     "defense": 60,
@@ -135,6 +160,7 @@
   {
     "id": "monster-reaper-001",
     "name": "死神",
+    "tags": ["undead", "demon"],
     "health": 300,
     "attack": 250,
     "defense": 10,
@@ -146,6 +172,7 @@
   {
     "id": "monster-boss-001",
     "name": "魔王",
+    "tags": ["demon"],
     "health": 350,
     "attack": 85,
     "defense": 15,
@@ -265,5 +292,71 @@
     "gold": 0,
     "experience": 0,
     "resourceId": "038-03.png"
+  },
+  {
+    "id": "monster-skill-plain",
+    "name": "技能样本·对照",
+    "health": 800,
+    "attack": 200,
+    "defense": 26,
+    "gold": 0,
+    "experience": 0,
+    "resourceId": "034-01.png"
+  },
+  {
+    "id": "monster-skill-first-strike",
+    "name": "技能样本·先手",
+    "health": 800,
+    "attack": 200,
+    "defense": 26,
+    "gold": 0,
+    "experience": 0,
+    "resourceId": "032-01.png",
+    "skills": ["skill-swift-wing"]
+  },
+  {
+    "id": "monster-skill-burst",
+    "name": "技能样本·蓄力",
+    "health": 800,
+    "attack": 200,
+    "defense": 26,
+    "gold": 0,
+    "experience": 0,
+    "resourceId": "031-02.png",
+    "skills": ["skill-fatal-strike"]
+  },
+  {
+    "id": "monster-skill-pressure",
+    "name": "技能样本·威压",
+    "health": 800,
+    "attack": 200,
+    "defense": 26,
+    "gold": 0,
+    "experience": 0,
+    "resourceId": "036-04.png",
+    "skills": ["skill-kings-pressure"]
+  },
+  {
+    "id": "monster-skill-synergy",
+    "name": "技能样本·协同",
+    "tags": ["undead"],
+    "health": 800,
+    "attack": 200,
+    "defense": 26,
+    "gold": 0,
+    "experience": 0,
+    "resourceId": "033-02.png",
+    "skills": ["skill-undead-synergy"]
+  },
+  {
+    "id": "monster-undead-remains",
+    "name": "亡灵残骸",
+    "tags": ["undead"],
+    "health": 1,
+    "attack": 0,
+    "defense": 0,
+    "gold": 0,
+    "experience": 0,
+    "resourceId": "037-04.png"
   }
 ]

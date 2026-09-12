@@ -46,7 +46,7 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
     protected MonsterCreator generateCreator(String id) {
         MonsterData monsterData = dataRegistry.get(id);
         return (monsterId, monsterName, monsterHealth, monsterAttack,
-                monsterDefense, monsterGoldReward, monsterExperienceReward, monsterSkills) -> {
+                monsterDefense, monsterGoldReward, monsterExperienceReward, monsterSkills, monsterTags) -> {
             Map<StateType, GameNumber> stateMap = Map.of(
                     StateType.HP, monsterHealth,
                     StateType.ATK, monsterAttack,
@@ -54,7 +54,7 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
             );
             return new Monster(monsterId, monsterName, stateMap,
                     Direction.DOWN, GameEngine.getGameEngine().getPlayerStateManager(),
-                    monsterGoldReward, monsterExperienceReward, monsterSkills);
+                    monsterGoldReward, monsterExperienceReward, monsterSkills, monsterTags);
         };
     }
 
@@ -66,7 +66,9 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
                 data.defense,
                 data.gold, data.experience,
                 // 技能表与怪物表解耦：这里只把配置中的技能 id 交给技能工厂解析
-                SkillFactory.getInstance().createByIds(data.skills)
+                SkillFactory.getInstance().createByIds(data.skills),
+                // 标签供技能效果按类别检索（如「亡灵协同」数地图上的 undead）
+                data.tags == null ? List.of() : data.tags
         );
     }
 
@@ -75,6 +77,7 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
                               long gold,
                               GameNumber experience,
                               String resourceId,
-                              List<String> skills) implements Serializable {
+                              List<String> skills,
+                              List<String> tags) implements Serializable {
     }
 }

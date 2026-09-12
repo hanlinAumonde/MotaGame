@@ -15,6 +15,9 @@ import java.util.List;
  * <p>总伤害与回合数<b>都由这一次推演产出</b>（回合数取 {@link BattleState#getRound()}）：
  * 效果可以让每回合伤害逐轮变化，任何「血量 ÷ 每回合伤害」式的闭式换算都只在
  * 无效果的特例下成立，故不再对任何分支做此类简化。
+ *
+ * <p>{@link BattleEffect} 列表是外部影响战斗的唯一途径；技能通过
+ * {@code engine.skill.effect.SkillEffectResolver} 翻译成效果后传入。
  */
 public final class BattleSimulator {
 
@@ -33,14 +36,22 @@ public final class BattleSimulator {
     }
 
     public static BattleResult simulate(BattleSnapshot player, BattleSnapshot monster, List<BattleEffect> effects) {
-        GameNumber basePlayerDamage = player.atk().minus(monster.def()).clampMin(GameNumber.ZERO);
+        // 1. 战前属性调整：按效果顺序折叠，后续效果看到的是已调整过的快照
+        BattleSnapshot playerStats = player;
+        BattleSnapshot monsterStats = monster;
+        for (BattleEffect effect : effects) {
+            playerStats = effect.adjustPlayerStats(playerStats, monsterStats);
+            monsterStats = effect.adjustMonsterStats(monsterStats, playerStats);
+        }
+
+        // 2. 基于调整后的属性算定基础伤害
+        GameNumber basePlayerDamage = playerStats.atk().minus(monsterStats.def()).clampMin(GameNumber.ZERO);
         if (basePlayerDamage.isNonPositive()) {
             return BattleResult.cannotWin();
         }
+        GameNumber baseMonsterDamage = monsterStats.atk().minus(playerStats.def()).clampMin(GameNumber.ZERO);
 
-        GameNumber baseMonsterDamage = monster.atk().minus(player.def()).clampMin(GameNumber.ZERO);
-
-        BattleState state = new BattleState(player.hp(), monster.hp());
+        BattleState state = new BattleState(playerStats, monsterStats, basePlayerDamage, baseMonsterDamage);
         for (BattleEffect effect : effects) {
             effect.onBattleStart(state);
         }
@@ -83,8 +94,9 @@ public final class BattleSimulator {
             }
         }
 
-        GameNumber totalDamage = player.hp().minus(state.getPlayerHp()).clampMin(GameNumber.ZERO);
-        DamageRange range = classifyDamage(totalDamage, player.maxHp());
+        // 总伤害与分级都以调整后的玩家快照为基准，保证战前增减益一并计入
+        GameNumber totalDamage = state.getInitialPlayerHp().minus(state.getPlayerHp()).clampMin(GameNumber.ZERO);
+        DamageRange range = classifyDamage(totalDamage, playerStats.maxHp());
         return new BattleResult(totalDamage, range, state.getRound());
     }
 

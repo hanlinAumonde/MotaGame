@@ -4,27 +4,52 @@
     "name": "亡灵协同",
     "skillType": "PASSIVE",
     "description": "弱小亡灵们总是聚在一起展现出强大的协同作战能力\n地图上每有一只除自身外的亡灵，便增加20%生命",
-    "resourceId": ""
+    "resourceId": "",
+    "effectId": "tag-count-stat-bonus",
+    "params": {
+      "target": "SELF",
+      "stat": "HP",
+      "tag": "undead",
+      "ratioPerUnit": 0.2,
+      "excludeSelf": true
+    }
   },
   {
     "id": "skill-swift-wing",
     "name": "疾风之翼",
     "skillType": "PASSIVE",
     "description": "振翅带起的疾风让它总能抢在对手之前出手\n战斗开始时先手攻击一次，该回合不会遭到反击",
-    "resourceId": ""
+    "resourceId": "",
+    "effectId": "first-strike",
+    "params": {
+      "target": "SELF",
+      "times": 1
+    }
   },
   {
     "id": "skill-fatal-strike",
     "name": "致命一击",
     "skillType": "ACTIVE",
     "description": "每隔三回合蓄力挥出一记重击\n该回合造成的伤害提升至三倍",
-    "resourceId": ""
+    "resourceId": "",
+    "effectId": "periodic-damage-multiplier",
+    "params": {
+      "target": "SELF",
+      "interval": 3,
+      "multiplier": 3.0
+    }
   },
   {
     "id": "skill-kings-pressure",
     "name": "王者威压",
     "skillType": "PASSIVE",
     "description": "身处其威压之下，武器都会变得沉重\n战斗期间玩家的攻击力降低 10%",
-    "resourceId": ""
+    "resourceId": "",
+    "effectId": "stat-modifier",
+    "params": {
+      "target": "OPPONENT",
+      "stat": "ATK",
+      "multiplier": 0.9
+    }
   }
 ]

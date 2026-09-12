@@ -36,9 +36,16 @@ public class BattleHandler {
         return true;
     }
 
+    /**
+     * 重算当前地图上所有怪物的预计伤害。
+     *
+     * <p>地图作为技能效果的上下文一并传入：像「亡灵协同」这种按同层同类数量加成的技能，
+     * 每死掉一只同类，其余怪物的数值都会变，因此必须在<b>怪物增减 / 玩家属性变化</b>后
+     * 整张地图一起重算，而不是只更新被打的那一只。
+     */
     public void recalculateAllDamage(PlayerStateManager player, GameMap map) {
         for (Monster monster : map.getMonsters().values()) {
-            monster.updateCurrentDamage(player);
+            monster.updateCurrentDamage(player, map);
         }
     }
 }

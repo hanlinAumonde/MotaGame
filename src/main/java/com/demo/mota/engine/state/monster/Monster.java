@@ -1,13 +1,16 @@
 package com.demo.mota.engine.state.monster;
 
+import com.demo.mota.engine.battle.BattleEffect;
 import com.demo.mota.engine.battle.BattleResult;
 import com.demo.mota.engine.battle.BattleSimulator;
 import com.demo.mota.engine.battle.BattleSnapshot;
+import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.state.AbstractCharacterState;
 import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.skill.Skill;
+import com.demo.mota.engine.skill.effect.SkillEffectResolver;
 import com.demo.mota.engine.state.PlayerStateManager;
 
 import java.util.List;
@@ -24,12 +27,14 @@ public class Monster extends AbstractCharacterState {
 
     public Monster(String characterId, String characterName, Map<StateType, GameNumber> stateMap, Direction currentDirection,
                    PlayerStateManager playerStateManager, long goldReward, GameNumber experienceReward,
-                   List<Skill> skills) {
-        // 技能由基类统一持有：怪物在构造时从配置带入，玩家可在技能系统落地后逐步习得
-        super(characterId, characterName, stateMap, currentDirection, skills);
+                   List<Skill> skills, List<String> tags) {
+        // 技能与标签由基类统一持有：怪物在构造时从配置带入，玩家可在技能系统落地后逐步习得
+        super(characterId, characterName, stateMap, currentDirection, skills, tags);
         this.goldReward = goldReward;
         this.experienceReward = experienceReward;
-        this.updateCurrentDamage(playerStateManager);
+        // 此刻怪物还没被放进地图，依赖地图的技能效果暂不生效；
+        // 地图装载完成后 BattleHandler.recalculateAllDamage 会带着地图重算一次
+        this.updateCurrentDamage(playerStateManager, null);
     }
 
     public long getGoldReward() {
@@ -82,7 +87,16 @@ public class Monster extends AbstractCharacterState {
         this.currentDamageRange = currentDamageRange;
     }
 
-    public void updateCurrentDamage(PlayerStateManager playerStateManager) {
+    /**
+     * 重新推演与玩家的战斗，刷新伤害 / 分级 / 回合数。
+     *
+     * <p>双方技能在这里统一折算成 {@link BattleEffect} 交给模拟器，
+     * 因此地图上显示的伤害数字、手册里的回合数与实际战斗结算<b>永远出自同一次推演</b>。
+     *
+     * @param map 怪物所在地图，供「按地图同类数量加成」这类技能取数；
+     *            怪物尚未落图时传 null，相应效果本次不生效
+     */
+    public void updateCurrentDamage(PlayerStateManager playerStateManager, GameMap map) {
         BattleSnapshot playerSnapshot = new BattleSnapshot(
                 playerStateManager.getCurrentHP(),
                 playerStateManager.getMaxHP(),
@@ -94,7 +108,8 @@ public class Monster extends AbstractCharacterState {
                 this.getStateValue(StateType.ATK),
                 this.getStateValue(StateType.DEF)
         );
-        BattleResult result = BattleSimulator.simulate(playerSnapshot, monsterSnapshot);
+        List<BattleEffect> effects = SkillEffectResolver.resolve(playerStateManager, this, map);
+        BattleResult result = BattleSimulator.simulate(playerSnapshot, monsterSnapshot, effects);
         this.currentDamage = result.totalDamage();
         this.currentDamageRange = result.damageRange();
         this.currentRounds = result.rounds();

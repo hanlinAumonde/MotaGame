@@ -33,6 +33,9 @@ module com.demo.mota {
     exports com.demo.mota.engine.state;
     exports com.demo.mota.engine.state.monster;
     exports com.demo.mota.engine.skill;
+    exports com.demo.mota.engine.skill.effect;
+    exports com.demo.mota.engine.skill.effect.builtin;
+    exports com.demo.mota.engine.battle;
     exports com.demo.mota.engine.resource;
     exports com.demo.mota.engine.resource.provider;
     exports com.demo.mota.engine.state.level;

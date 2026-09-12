@@ -4,10 +4,17 @@ import com.demo.mota.engine.GameNumber;
 
 /**
  * 战斗模拟过程中的可变状态，供BattleEffect在各回合钩子中读写。
+ *
+ * <p>其中的双方属性是 {@link BattleEffect#adjustPlayerStats} 等钩子<b>调整之后</b>的快照，
+ * 基础伤害也据此算出，因此效果在回合钩子里读到的一切都已包含战前增减益。
  */
 public class BattleState {
-    private final GameNumber initialPlayerHp;
-    private final GameNumber initialMonsterHp;
+    private final BattleSnapshot playerStats;
+    private final BattleSnapshot monsterStats;
+
+    /** 战前算定的每回合基础伤害（攻击-防御，已 clamp 到非负），不随回合变化 */
+    private final GameNumber basePlayerDamage;
+    private final GameNumber baseMonsterDamage;
 
     private GameNumber playerHp;
     private GameNumber monsterHp;
@@ -15,22 +22,41 @@ public class BattleState {
     private GameNumber playerDamagePerRound;
     private GameNumber monsterDamagePerRound;
 
-    public BattleState(GameNumber initialPlayerHp, GameNumber initialMonsterHp) {
-        this.initialPlayerHp = initialPlayerHp;
-        this.initialMonsterHp = initialMonsterHp;
-        this.playerHp = initialPlayerHp;
-        this.monsterHp = initialMonsterHp;
+    public BattleState(BattleSnapshot playerStats, BattleSnapshot monsterStats,
+                       GameNumber basePlayerDamage, GameNumber baseMonsterDamage) {
+        this.playerStats = playerStats;
+        this.monsterStats = monsterStats;
+        this.basePlayerDamage = basePlayerDamage;
+        this.baseMonsterDamage = baseMonsterDamage;
+        this.playerHp = playerStats.hp();
+        this.monsterHp = monsterStats.hp();
         this.round = 0;
         this.playerDamagePerRound = GameNumber.ZERO;
         this.monsterDamagePerRound = GameNumber.ZERO;
     }
 
+    public BattleSnapshot getPlayerStats() {
+        return playerStats;
+    }
+
+    public BattleSnapshot getMonsterStats() {
+        return monsterStats;
+    }
+
+    public GameNumber getBasePlayerDamage() {
+        return basePlayerDamage;
+    }
+
+    public GameNumber getBaseMonsterDamage() {
+        return baseMonsterDamage;
+    }
+
     public GameNumber getInitialPlayerHp() {
-        return initialPlayerHp;
+        return playerStats.hp();
     }
 
     public GameNumber getInitialMonsterHp() {
-        return initialMonsterHp;
+        return monsterStats.hp();
     }
 
     public GameNumber getPlayerHp() {

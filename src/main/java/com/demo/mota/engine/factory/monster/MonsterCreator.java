@@ -12,5 +12,5 @@ public interface MonsterCreator {
                           GameNumber monsterHealth, GameNumber monsterAttack,
                           GameNumber monsterDefense,
                           long monsterGoldReward, GameNumber monsterExperienceReward,
-                          List<Skill> monsterSkills);
+                          List<Skill> monsterSkills, List<String> monsterTags);
 }

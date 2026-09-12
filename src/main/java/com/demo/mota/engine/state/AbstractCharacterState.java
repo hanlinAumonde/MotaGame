@@ -8,8 +8,10 @@ import com.demo.mota.engine.skill.Skill;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class AbstractCharacterState {
     private final String characterId;
@@ -24,17 +26,36 @@ public abstract class AbstractCharacterState {
      */
     private final List<Skill> skills;
 
+    /**
+     * 角色标签（如 {@code undead} / {@code beast}），供技能效果按「同类数量」等条件检索。
+     *
+     * <p>标签是纯字符串而非枚举：种族、阵营、体型这类分类会随内容增加不断长出新值，
+     * 用字符串可以只改 {@code monsterList.json} 就引入一个新类别，
+     * 技能配置里写同名的 {@code tag} 参数即可与之配对。
+     */
+    private final Set<String> tags;
+
     public AbstractCharacterState(String characterId, String characterName, Map<StateType, GameNumber> stateMap, Direction currentDirection) {
-        this(characterId, characterName, stateMap, currentDirection, List.of());
+        this(characterId, characterName, stateMap, currentDirection, List.of(), List.of());
     }
 
     public AbstractCharacterState(String characterId, String characterName, Map<StateType, GameNumber> stateMap,
                                   Direction currentDirection, List<Skill> skills) {
+        this(characterId, characterName, stateMap, currentDirection, skills, List.of());
+    }
+
+    public AbstractCharacterState(String characterId, String characterName, Map<StateType, GameNumber> stateMap,
+                                  Direction currentDirection, List<Skill> skills, List<String> tags) {
         this.characterId = characterId;
         this.characterName = characterName;
         this.stateMap = new HashMap<>(stateMap);
         this.currentDirection = currentDirection;
         this.skills = skills == null ? new ArrayList<>() : new ArrayList<>(skills);
+        this.tags = new LinkedHashSet<>();
+        if (tags != null) {
+            tags.stream().filter(tag -> tag != null && !tag.isBlank())
+                    .map(String::trim).forEach(this.tags::add);
+        }
     }
 
     public GameNumber getStateValue(StateType stateType) {
@@ -83,5 +104,27 @@ public abstract class AbstractCharacterState {
 
     public void forgetSkill(String skillId) {
         skills.removeIf(skill -> skill.skillId().equals(skillId));
+    }
+
+    // --- 标签 ---
+
+    public Set<String> getTags() {
+        return Collections.unmodifiableSet(tags);
+    }
+
+    public boolean hasTag(String tag) {
+        return tag != null && tags.contains(tag.trim());
+    }
+
+    public void addTag(String tag) {
+        if (tag != null && !tag.isBlank()) {
+            tags.add(tag.trim());
+        }
+    }
+
+    public void removeTag(String tag) {
+        if (tag != null) {
+            tags.remove(tag.trim());
+        }
     }
 }

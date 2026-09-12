@@ -3,7 +3,9 @@ package com.demo.mota.engine;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 
 public final class GameNumber implements Comparable<GameNumber> {
     public static final GameNumber ZERO = new GameNumber(BigInteger.ZERO);
@@ -51,6 +53,21 @@ public final class GameNumber implements Comparable<GameNumber> {
 
     public double dividedBy(GameNumber other) {
         return value.doubleValue() / other.value.doubleValue();
+    }
+
+    /**
+     * 按比例缩放并向下取整。比例型效果（技能的百分比加成 / 减免）统一走这里，
+     * 保证同一份输入永远得到同一个整数结果——战斗模拟依赖这一确定性。
+     */
+    public GameNumber scaledBy(double ratio) {
+        if (ratio == 1.0 || isZero()) {
+            return this;
+        }
+        BigInteger scaled = new BigDecimal(value)
+                .multiply(BigDecimal.valueOf(ratio))
+                .setScale(0, RoundingMode.FLOOR)
+                .toBigInteger();
+        return fromBigInteger(scaled);
     }
     public GameNumber clampMin(GameNumber min) {
         return this.compareTo(min) < 0 ? min : this;

@@ -944,6 +944,11 @@
       "monsterId": "monster-exp-wisp-001",
       "x": 6,
       "y": 1
+    },
+    {
+      "monsterId": "monster-skeleton-captain-001",
+      "x": 6,
+      "y": 8
     }
   ],
   "playerSpawn": {
