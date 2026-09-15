@@ -13,7 +13,7 @@ import java.net.URL;
  * 日后新增读取方式只需实现本接口并注册，无需改动任何读取代码。
  * <p>
  * 路径约定：与类路径资源一致的风格，以 / 开头表示资源根目录，
- * 例如 /data/map/floor_1.json、/images/magictower.png。
+ * 例如 /data/map/floor_1.json、/Graphics/tiles/magictower.png。
  */
 public interface ResourceProvider {
 

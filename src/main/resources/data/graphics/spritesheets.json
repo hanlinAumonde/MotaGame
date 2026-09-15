@@ -1,0 +1,7 @@
+{
+  "_comment": "精灵图拆分配置清单。新增一张需要拆分的图时，在 data/graphics/ 下加一个配置文件并把路径追加到这里即可，Java 代码无需改动。",
+  "spriteSheets": [
+    "/data/graphics/sheet-magictower.json",
+    "/data/graphics/sheet-player.json"
+  ]
+}

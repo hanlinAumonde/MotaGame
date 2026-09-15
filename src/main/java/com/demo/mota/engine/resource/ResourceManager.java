@@ -1,13 +1,16 @@
 package com.demo.mota.engine.resource;
 
+import com.demo.mota.engine.configs.GraphicsConfigConstants;
+import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.resource.provider.ClasspathResourceProvider;
 import com.demo.mota.engine.resource.provider.FileSystemResourceProvider;
 import com.demo.mota.engine.resource.provider.ResourceProvider;
+import com.demo.mota.engine.resource.sprite.CharacterSprites;
+import com.demo.mota.engine.resource.sprite.SpriteSheetLoader;
+import com.demo.mota.engine.resource.sprite.SpriteStore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.WritableImage;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,8 +31,13 @@ import java.util.Map;
  *   <li>系统属性 {@link #EXTERNAL_DIR_PROPERTY} 指定的项目外目录（可选，用于资源外置）</li>
  *   <li>{@link ClasspathResourceProvider}（兜底，保持原有 getResourceAsStream 行为）</li>
  * </ol>
+ * <p>
+ * 图片资源统一位于资源根下的 {@code /Graphics/}，按用途分子目录（见
+ * {@link GraphicsConfigConstants}）。需要切分的大图不在本类里硬编码，
+ * 而是由 {@code resource.sprite} 模块按 {@code data/graphics/} 下的配置清单加载，
+ * 本类只作为切分产物的缓存（实现 {@link SpriteStore}）。
  */
-public class ResourceManager {
+public class ResourceManager implements SpriteStore {
     /**
      * 系统属性：资源外置目录，目录结构镜像资源根目录。
      * 例如 -Dmota.resource.externalDir=D:/mota-resources
@@ -50,7 +58,7 @@ public class ResourceManager {
     private final Map<String, Image> itemImageCache = new HashMap<>();
     private final Map<String, Image> monsterImageCache = new HashMap<>();
     private final Map<String, Image> skillImageCache = new HashMap<>();
-    private final Map<Integer, Image> playerSpriteCache = new HashMap<>();
+    private final Map<String, CharacterSprites> characterSpriteCache = new HashMap<>();
 
     private ResourceManager() {
         providers.addAll(pendingProviders);
@@ -62,8 +70,7 @@ public class ResourceManager {
         }
         providers.add(new ClasspathResourceProvider());
 
-        loadSpriteSheetConfig();
-        loadPlayerSprites();
+        new SpriteSheetLoader(this).loadAll(GraphicsConfigConstants.SPRITE_SHEET_MANIFEST, this);
     }
 
     public static ResourceManager getInstance() {
@@ -142,98 +149,65 @@ public class ResourceManager {
         }
     }
 
-    // --- Sprite Sheet ---
+    // --- 精灵图切分产物（SpriteStore 实现） ---
 
-    @SuppressWarnings("unchecked")
-    private void loadSpriteSheetConfig() {
-        try (InputStream configStream = getResourceStream("/data/spritesheet-config.json")) {
-            Map<String, Object> config = objectMapper.readValue(
-                    configStream, new TypeReference<>() {});
+    @Override
+    public void putTile(String resourceId, Image image) {
+        tileImageCache.put(resourceId, image);
+    }
 
-            String sheetPath = (String) config.get("spriteSheet");
-            int tileWidth = (int) config.get("tileWidth");
-            int tileHeight = (int) config.get("tileHeight");
-
-            Image spriteSheet;
-            try (InputStream sheetStream = getResourceStream(sheetPath)) {
-                spriteSheet = new Image(sheetStream);
-            }
-            PixelReader reader = spriteSheet.getPixelReader();
-
-            Map<String, Map<String, Integer>> tiles =
-                    (Map<String, Map<String, Integer>>) config.get("tiles");
-
-            for (Map.Entry<String, Map<String, Integer>> entry : tiles.entrySet()) {
-                String resourceId = entry.getKey();
-                int col = entry.getValue().get("col");
-                int row = entry.getValue().get("row");
-                WritableImage subImage = new WritableImage(
-                        reader,
-                        col * tileWidth, row * tileHeight,
-                        tileWidth, tileHeight);
-                tileImageCache.put(resourceId, subImage);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load spritesheet config", e);
-        }
+    @Override
+    public void putCharacter(String characterId, CharacterSprites sprites) {
+        characterSpriteCache.put(characterId, sprites);
     }
 
     public Image getTileImage(String resourceId) {
         return tileImageCache.get(resourceId);
     }
 
-    // --- Player Sprites ---
+    // --- Character Sprites ---
 
-    private void loadPlayerSprites() {
-        try (InputStream is = getOptionalResourceStream("/images/011-Braver01.png")) {
-            if (is == null) return;
-            Image playerSheet = new Image(is);
-            PixelReader reader = playerSheet.getPixelReader();
-
-            int frameW = 32;
-            int frameH = (int) (playerSheet.getHeight() / 4);
-            //int staticCol = 0;
-
-            // Direction ordinals: UP=0, DOWN=1, LEFT=2, RIGHT=3
-            // Sprite sheet rows: row0=DOWN, row1=LEFT, row2=RIGHT, row3=UP
-            int[] dirToRow = {3, 0, 1, 2};
-            for (int dirIdx = 0; dirIdx < 4; dirIdx++) {
-                int row = dirToRow[dirIdx];
-                WritableImage frame = new WritableImage(
-                        reader,
-                        0, row * frameH,
-                        frameW, frameH);
-                playerSpriteCache.put(dirIdx, frame);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load player sprites", e);
-        }
+    /**
+     * 取某个角色的全部行走帧。当前只有主角，但缓存按 characterId 分开存放，
+     * 将来加 NPC / 可切换的主角形象时只需多一个拆分配置文件。
+     *
+     * @return 该角色没有配置行走图时返回 {@code null}
+     */
+    public CharacterSprites getCharacterSprites(String characterId) {
+        return characterSpriteCache.get(characterId);
     }
 
-    public Image getPlayerSprite(int directionOrdinal) {
-        return playerSpriteCache.get(directionOrdinal);
+    /** 取某角色某朝向的静止帧；缺图时返回 {@code null}，渲染侧走 fallback */
+    public Image getCharacterSprite(String characterId, Direction direction) {
+        CharacterSprites sprites = characterSpriteCache.get(characterId);
+        return sprites == null ? null : sprites.idle(direction);
+    }
+
+    /** {@link #getCharacterSprite} 针对主角的便捷入口 */
+    public Image getPlayerSprite(Direction direction) {
+        return getCharacterSprite(GraphicsConfigConstants.PLAYER_CHARACTER_ID, direction);
     }
 
     // --- Item / Monster / Skill Images ---
 
     /**
-     * 按文件名加载 {@code /images/} 下的图片并缓存；文件名为空或图片缺失时不写入缓存，
+     * 按文件名加载指定类别目录下的图片并缓存；文件名为空或图片缺失时不写入缓存，
      * 由渲染侧走 fallback。同一 id 已缓存时直接跳过。
      */
-    private void registerImage(Map<String, Image> cache, String id, String imageFileName) {
+    private void registerImage(Map<String, Image> cache, String id, String directory, String imageFileName) {
         if (imageFileName == null || imageFileName.isEmpty()) return;
         if (cache.containsKey(id)) return;
-        try (InputStream is = getOptionalResourceStream("/images/" + imageFileName)) {
+        try (InputStream is = getOptionalResourceStream(directory + imageFileName)) {
             if (is != null) {
                 cache.put(id, new Image(is));
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load image: " + imageFileName, e);
+            throw new RuntimeException("Failed to load image: " + directory + imageFileName, e);
         }
     }
 
     public void registerItemImage(String itemId, String imageFileName) {
-        registerImage(itemImageCache, itemId, imageFileName);
+        registerImage(itemImageCache, itemId, GraphicsConfigConstants.ITEM_IMAGE_DIR, imageFileName);
     }
 
     public Image getItemImage(String itemId) {
@@ -241,7 +215,7 @@ public class ResourceManager {
     }
 
     public void registerMonsterImage(String monsterId, String imageFileName) {
-        registerImage(monsterImageCache, monsterId, imageFileName);
+        registerImage(monsterImageCache, monsterId, GraphicsConfigConstants.MONSTER_IMAGE_DIR, imageFileName);
     }
 
     public Image getMonsterImage(String monsterId) {
@@ -249,7 +223,7 @@ public class ResourceManager {
     }
 
     public void registerSkillImage(String skillId, String imageFileName) {
-        registerImage(skillImageCache, skillId, imageFileName);
+        registerImage(skillImageCache, skillId, GraphicsConfigConstants.SKILL_IMAGE_DIR, imageFileName);
     }
 
     public Image getSkillImage(String skillId) {

@@ -1,7 +1,8 @@
 {
-  "spriteSheet": "/images/magictower.png",
-  "tileWidth": 32,
-  "tileHeight": 32,
+  "type": "tile",
+  "image": "/Graphics/tiles/magictower.png",
+  "cellWidth": 32,
+  "cellHeight": 32,
   "tiles": {
     "bg_default":    { "col": 3, "row": 1 },
     "wall_normal":   { "col": 6, "row": 0 },

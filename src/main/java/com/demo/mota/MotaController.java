@@ -180,7 +180,7 @@ public class MotaController {
         double iconSize = 52;
         double iconX = 14;
 
-        Image playerSprite = resourceManager.getPlayerSprite(Direction.DOWN.ordinal());
+        Image playerSprite = resourceManager.getPlayerSprite(Direction.DOWN);
         if (playerSprite != null) {
             gc.drawImage(playerSprite, iconX, topY, iconSize, iconSize);
         }
@@ -449,7 +449,7 @@ public class MotaController {
         double ppy = playerPos.getY_index() * cellSize;
 
         Direction dir = engine.getPlayerStateManager().getCurrentDirection();
-        Image playerImg = resourceManager.getPlayerSprite(dir.ordinal());
+        Image playerImg = resourceManager.getPlayerSprite(dir);
 
         if (playerImg != null) {
             gc.drawImage(playerImg, ppx, ppy, cellSize, cellSize);

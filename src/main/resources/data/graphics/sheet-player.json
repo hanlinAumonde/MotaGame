@@ -1,0 +1,22 @@
+{
+  "type": "character",
+  "image": "/Graphics/characters/011-Braver01.png",
+
+  "_comment_geometry": "原图 128x132，4 列 x 4 行；不写 cellWidth/cellHeight 时由 columns/rows 反推（本图单帧 32x33，高度除不尽 32，故必须走反推）。",
+  "columns": 4,
+  "rows": 4,
+
+  "characterId": "player",
+
+  "_comment_rows": "行走图每一行是一个朝向。显式声明朝向到行号的映射，不依赖 Direction 枚举的声明顺序。",
+  "directionRows": {
+    "DOWN": 0,
+    "LEFT": 1,
+    "RIGHT": 2,
+    "UP": 3
+  },
+
+  "_comment_frames": "walkColumns 按播放顺序列出行走循环用到的列；idleFrame 是静止时取第几帧（walkColumns 的下标）。动画系统落地前只有 idle 帧会被渲染，其余帧照常切出来缓存着。",
+  "walkColumns": [0, 1, 2, 3],
+  "idleFrame": 0
+}
