@@ -10,21 +10,34 @@ import com.demo.mota.engine.state.monster.Monster;
 
 public class BattleHandler {
 
+    /**
+     * 结算一场战斗。
+     *
+     * <p><b>不再拒绝致命战斗</b>：撞上去就是打，血照扣，扣光了就是死。
+     * 地图上的红色伤害数字因此从「这只怪不能碰」变成了「碰了会死」的警告，
+     * 要不要冒险交给玩家。判死不在这里做——扣完血由调用链上层统一检查
+     * {@code PlayerStateManager.isDead()}，好让岩浆、毒这些将来的掉血途径共用一个判定点。
+     *
+     * @return 是否击败了怪物；false 表示玩家在这一战里倒下了
+     */
     public boolean executeBattle(PlayerStateManager player, GameMap map, Position monsterPos) {
         Monster monster = map.getMonsterAt(monsterPos);
         if (monster == null) {
             return true;
         }
 
-        // OVER_KILL：无论血量多少都打不动
+        GameNumber currentHealth = player.getCurrentHP();
+
+        // OVER_KILL：打不动（伤害为 0 或回合超限），耗到最后倒下的只会是玩家
         if (monster.getCurrentDamageRange() == DamageRange.OVER_KILL) {
+            player.updateState(StateType.HP, GameNumber.ZERO);
             return false;
         }
 
-        // 是否致命由当前生命值判定（伤害等级只以生命上限分级，不参与死活判断）
+        // 预计算伤害即打完这一战要挨的总伤害；够不够扛得住只看当前生命值
         GameNumber damage = monster.getCurrentDamage();
-        GameNumber currentHealth = player.getCurrentHP();
         if (damage.compareTo(currentHealth) >= 0) {
+            player.updateState(StateType.HP, GameNumber.ZERO);
             return false;
         }
 

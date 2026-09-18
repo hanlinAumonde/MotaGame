@@ -60,6 +60,9 @@ public class ResourceManager implements SpriteStore {
     private final Map<String, Image> skillImageCache = new HashMap<>();
     private final Map<String, CharacterSprites> characterSpriteCache = new HashMap<>();
 
+    /** 精灵图是否已拆分，防止重复加载 */
+    private boolean spriteSheetsLoaded = false;
+
     private ResourceManager() {
         providers.addAll(pendingProviders);
         pendingProviders.clear();
@@ -69,8 +72,19 @@ public class ResourceManager implements SpriteStore {
             providers.add(new FileSystemResourceProvider(Path.of(externalDir)));
         }
         providers.add(new ClasspathResourceProvider());
+    }
 
+    /**
+     * 按清单拆分全部精灵图，产物写入本类的缓存。
+     * <p>
+     * 刻意不放在构造里：构造只负责把 provider 链搭好（FXML 等界面资源在加载界面出现之前
+     * 就要通过它读取），而切图是耗时步骤，由 {@code engine.boot.GameBootstrap} 作为
+     * 一项加载任务显式调用，才能在加载界面上体现进度。重复调用会被忽略。
+     */
+    public synchronized void loadSpriteSheets() {
+        if (spriteSheetsLoaded) return;
         new SpriteSheetLoader(this).loadAll(GraphicsConfigConstants.SPRITE_SHEET_MANIFEST, this);
+        spriteSheetsLoaded = true;
     }
 
     public static ResourceManager getInstance() {

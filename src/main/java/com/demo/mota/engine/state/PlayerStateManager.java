@@ -83,6 +83,14 @@ public class PlayerStateManager extends AbstractCharacterState {
     public GameNumber getCurrentHP(){ return this.getStateValue(StateType.HP); }
 
     /**
+     * 是否已阵亡。生命值归零即判死，由 UI 层在每次玩家行动之后统一检查，
+     * 这样战斗、以及将来的岩浆 / 毒 / 陷阱等掉血途径都汇到同一个判定点。
+     */
+    public boolean isDead() {
+        return getCurrentHP().isNonPositive();
+    }
+
+    /**
      * 恢复生命值，结果不超过生命上限。
      */
     public void heal(GameNumber amount) {

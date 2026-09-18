@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static com.demo.mota.engine.configs.LevelConfigConstatnts.LEVEL_CONFIG_PATH;
 
@@ -37,6 +38,15 @@ public class LevelManager {
         this.levelNumber = first.levelNumber;
         this.maxExperienceForCurrentLevel = first.maxExperience;
         this.currentExperience = GameNumber.ZERO;
+    }
+
+    /**
+     * 显式触发等级配置的静态初始化，供启动引导（{@code GameBootstrap}）在加载阶段调用。
+     * 本类的配置读取在静态块里，不主动碰一下这个类就要等到第一次升级时才读盘。
+     */
+    public static void preload() {
+        // 触碰静态字段即可保证静态块已执行；取个引用防止被优化掉
+        Objects.requireNonNull(loadedConfig, "Level config not loaded");
     }
 
     private static LevelConfig initializeConfig() {
