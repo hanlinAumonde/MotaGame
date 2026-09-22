@@ -2,9 +2,9 @@ package com.demo.mota.engine.enums;
 
 public enum Direction {
     UP(0, -1),
+    RIGHT(1, 0),
     DOWN(0, 1),
-    LEFT(-1, 0),
-    RIGHT(1, 0);
+    LEFT(-1, 0);
 
     private final int x;
     private final int y;
@@ -30,5 +30,11 @@ public enum Direction {
             case "RIGHT" -> RIGHT;
             default -> throw new IllegalArgumentException("Invalid direction: " + direction);
         };
+    }
+
+    private static final Direction[] VALUES = values();
+
+    public Direction getNextDirection() {
+        return VALUES[(ordinal() + 1) % VALUES.length];
     }
 }

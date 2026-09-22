@@ -13,8 +13,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.Map;
 
-import static com.demo.mota.engine.configs.GameContextConfigConstants.INITIAL_PLAYER_STATE_PATH;
-import static com.demo.mota.engine.configs.GameContextConfigConstants.PLAYER_ID;
+import static com.demo.mota.engine.configs.GameContextConfigConstants.*;
 
 /**
  * 引擎总控（单例）。
@@ -67,6 +66,8 @@ public class GameEngine {
         return moveHandler.handleMove(direction);
     }
 
+    public void handleDirectionChange() { this.playerStateManager.playerDirectionChange(); }
+
     public GameFlow getGameFlow() {
         return gameFlow;
     }
@@ -101,16 +102,18 @@ public class GameEngine {
         int health = (int) playerData.get(StateType.HP.getValue());
         // 未配置 maxHealth 时，以初始生命值作为初始上限
         Object maxHealth = playerData.getOrDefault(StateType.MAX_HP.getValue(), health);
+        String dir = (String) playerData.get(PLAYER_INIT_POSITION);
+        Direction initialDirection = dir != null ? Direction.fromString(dir) : Direction.DOWN;
         return new PlayerStateManager(
                 (String) playerData.get(PLAYER_ID),
-                (String) playerData.get("playerName"),
+                (String) playerData.get(PLAYER_NAME),
                 Map.of(
                         StateType.HP, GameNumber.of(health),
                         StateType.MAX_HP, GameNumber.of((int) maxHealth),
                         StateType.ATK, GameNumber.of((int) playerData.get(StateType.ATK.getValue())),
                         StateType.DEF, GameNumber.of((int) playerData.get(StateType.DEF.getValue()))
                 ),
-                Direction.DOWN
+                initialDirection
         );
     }
 }

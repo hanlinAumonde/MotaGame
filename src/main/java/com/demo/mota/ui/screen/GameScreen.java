@@ -100,32 +100,49 @@ public class GameScreen implements Screen {
             return true;
         }
 
-        if (code == KeyCode.X) {
-            menu.open();
-            renderMenu();
-            return true;
+        switch (code) {
+            case X:
+
+            case Z:
+
+                break;
         }
 
-        Direction direction = toDirection(code);
-        if (direction == null) return false;
+        return switch (code) {
+            case X -> {
+                menu.open();
+                renderMenu();
+                yield true;
+            }
+            case Z -> {
+                this.engine.handleDirectionChange();
+                //当前玩家站立的tile必定为可通过地形
+                renderTileAndPlayerAt(mapCanvas.getGraphicsContext2D(), this.engine.getMapManager().getPlayerPosition());
+                yield true;
+            }
+            default -> {
+                Direction direction = toDirection(code);
+                if (direction == null) yield false;
 
-        MoveResult result = engine.handlePlayerMove(direction);
-        handleMoveResult(result);
-        renderAll();
+                MoveResult result = engine.handlePlayerMove(direction);
+                handleMoveResult(result);
+                renderAll();
 
-        // 行动之后统一判死：战斗、以及将来的岩浆 / 毒 / 陷阱都汇到这一处
-        if (engine.getPlayerStateManager().isDead()) {
-            flow.toGameOver();
-        }
-        return true;
+                // 行动之后统一判死：战斗、以及将来的岩浆 / 毒 / 陷阱都汇到这一处
+                if (engine.getPlayerStateManager().isDead()) {
+                    flow.toGameOver();
+                }
+                yield true;
+            }
+        };
     }
 
     private static Direction toDirection(KeyCode code) {
         return switch (code) {
-            case UP, W -> Direction.UP;
-            case DOWN, S -> Direction.DOWN;
-            case LEFT, A -> Direction.LEFT;
-            case RIGHT, D -> Direction.RIGHT;
+            case UP -> Direction.UP;
+            case DOWN -> Direction.DOWN;
+            case LEFT -> Direction.LEFT;
+            case RIGHT -> Direction.RIGHT;
             default -> null;
         };
     }
@@ -517,5 +534,11 @@ public class GameScreen implements Screen {
                         new double[]{cy, cy - sz, cy + sz}, 3);
             }
         }
+    }
+
+    private void renderTileAndPlayerAt(GraphicsContext gc, Position playerPos) {
+        Tile tile = this.engine.getMapManager().getCurrentMap().getTileAt(playerPos);
+        renderTile(gc, tile, playerPos.getX_index() * cellSize, playerPos.getY_index() * cellSize);
+        renderPlayer(gc, playerPos);
     }
 }

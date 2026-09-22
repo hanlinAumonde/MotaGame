@@ -12,10 +12,7 @@ import com.demo.mota.engine.state.level.LevelBonus;
 import com.demo.mota.engine.state.level.LevelManager;
 import com.demo.mota.engine.state.level.LevelUpResult;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.demo.mota.engine.configs.ItemConfigConstants.INITIAL_KEY_SET;
 
@@ -204,5 +201,9 @@ public class PlayerStateManager extends AbstractCharacterState {
             case BLUE -> blue_Key.updateItemCount(-1);
         }
         return true;
+    }
+
+    public void playerDirectionChange() {
+        this.setCurrentDirection(this.getCurrentDirection().getNextDirection());
     }
 }

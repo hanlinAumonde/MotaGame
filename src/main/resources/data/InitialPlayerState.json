@@ -4,5 +4,6 @@
   "health": 1000,
   "maxHealth": 1000,
   "attack": 10,
-  "defense": 10
+  "defense": 10,
+  "playerInitialPosition": "UP"
 }
