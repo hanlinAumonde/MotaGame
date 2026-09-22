@@ -2,7 +2,7 @@ package com.demo.mota.engine.Item;
 
 import com.demo.mota.engine.GameNumber;
 
-public class Portion extends Item {
+public final class Portion extends Item {
     private final GameNumber replyAmount;
 
     public Portion(String itemId, String itemName, String itemDescription,

@@ -4,6 +4,7 @@ import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.Item.AbilityGem;
 import com.demo.mota.engine.Item.Equipment;
+import com.demo.mota.engine.Item.GenericItem.GenericItem;
 import com.demo.mota.engine.Item.Item;
 import com.demo.mota.engine.Item.Key;
 import com.demo.mota.engine.Item.Portion;
@@ -341,38 +342,39 @@ public class GameScreen implements Screen {
             gc.fillRect(px, py, cellSize, cellSize);
         }
 
-        if (tile instanceof BackGroundTile) {
-            return;
+        // 背景格没有前景层，上面那层底图就是全部；其余格子各取前景图，缺图时用纯色兜底。
+        // Tile 同为封闭类型，这里也是穷尽匹配
+        Image fgImage;
+        Color fallbackColor;
+        switch (tile) {
+            case BackGroundTile _ -> {
+                return;
+            }
+            case WallTile wallTile -> {
+                fgImage = resourceManager.getTileImage(wallTile.getWallResourceId());
+                fallbackColor = switch (wallTile.getWallType()) {
+                    case NORMAL, DARK -> Color.web("#4a4a4a");
+                    case MAGMA -> Color.web("#ff4500");
+                };
+            }
+            case DoorTile doorTile -> {
+                fgImage = resourceManager.getTileImage(doorTile.getDoorResourceId());
+                fallbackColor = keyColor(doorTile.getKeyColor());
+            }
+            case FloorSwitcherTile fsTile -> {
+                fgImage = resourceManager.getTileImage(fsTile.getSwitcherResourceId());
+                fallbackColor = Color.web("#32cd32");
+            }
+            case TrickyTile trickyTile -> {
+                fgImage = resourceManager.getTileImage(trickyTile.getTrickyResourceId());
+                fallbackColor = Color.web("#4a4a4a");
+            }
         }
 
-        Image fgImage = null;
-        Color fallbackColor = null;
-
-        if (tile instanceof WallTile wallTile) {
-            fgImage = resourceManager.getTileImage(wallTile.getWallResourceId());
-            fallbackColor = switch (wallTile.getWallType()) {
-                case NORMAL, DARK -> Color.web("#4a4a4a");
-                case MAGMA -> Color.web("#ff4500");
-            };
-        } else if (tile instanceof DoorTile doorTile) {
-            fgImage = resourceManager.getTileImage(doorTile.getDoorResourceId());
-            fallbackColor = switch (doorTile.getKeyColor()) {
-                case YELLOW -> Color.web("#ffd700");
-                case BLUE -> Color.web("#4169e1");
-                case RED -> Color.web("#dc143c");
-                case GREEN -> Color.web("#2e8b57");
-            };
-        } else if (tile instanceof FloorSwitcherTile fsTile) {
-            fgImage = resourceManager.getTileImage(fsTile.getSwitcherResourceId());
-            fallbackColor = Color.web("#32cd32");
-        } else if (tile instanceof TrickyTile trickyTile) {
-            fgImage = resourceManager.getTileImage(trickyTile.getTrickyResourceId());
-            fallbackColor = Color.web("#4a4a4a");
-        }
-
+        // 走到这里的四种格子都已给出兜底色，无需再判空
         if (fgImage != null) {
             gc.drawImage(fgImage, px, py, cellSize, cellSize);
-        } else if (fallbackColor != null) {
+        } else {
             gc.setFill(fallbackColor);
             gc.fillRect(px + 0.5, py + 0.5, cellSize - 1, cellSize - 1);
         }
@@ -385,13 +387,14 @@ public class GameScreen implements Screen {
             return;
         }
 
-        // 缺少图片资源时的占位：宝石画成菱形，其余画成圆角方块，颜色按道具语义取
-        if (item instanceof AbilityGem gem) {
-            drawGemPlaceholder(gc, px, py, abilityGemColor(gem));
-        } else {
-            gc.setFill(itemFallbackColor(item));
-            double margin = cellSize * 0.3;
-            gc.fillRoundRect(px + margin, py + margin, cellSize - 2 * margin, cellSize - 2 * margin, 4, 4);
+        // 缺少图片资源时的占位：宝石画成菱形，其余画成圆角方块，颜色按道具语义取。
+        // Item 是封闭类型，新增一个道具大类会让这里编译失败，不会静默落到某个兜底色
+        switch (item) {
+            case AbilityGem gem -> drawGemPlaceholder(gc, px, py, abilityGemColor(gem));
+            case Key key -> drawItemBlock(gc, px, py, keyColor(key.getKeyColor()));
+            case Portion _ -> drawItemBlock(gc, px, py, Color.web("#ff5a5a"));
+            case Equipment _ -> drawItemBlock(gc, px, py, Color.web("#9aa5b1"));
+            case GenericItem _ -> drawItemBlock(gc, px, py, Color.web("#ffa500"));
         }
     }
 
@@ -405,18 +408,21 @@ public class GameScreen implements Screen {
         };
     }
 
-    private Color itemFallbackColor(Item item) {
-        if (item instanceof Key key) {
-            return switch (key.getKeyColor()) {
-                case YELLOW -> Color.web("#ffd700");
-                case BLUE -> Color.web("#4169e1");
-                case RED -> Color.web("#dc143c");
-                case GREEN -> Color.web("#2e8b57");
-            };
-        }
-        if (item instanceof Portion) return Color.web("#ff5a5a");
-        if (item instanceof Equipment) return Color.web("#9aa5b1");
-        return Color.web("#ffa500");
+    /** 钥匙与门共用同一套配色——分开写两份，改了一处忘另一处就会对不上 */
+    private static Color keyColor(KeyColor color) {
+        return switch (color) {
+            case YELLOW -> Color.web("#ffd700");
+            case BLUE -> Color.web("#4169e1");
+            case RED -> Color.web("#dc143c");
+            case GREEN -> Color.web("#2e8b57");
+        };
+    }
+
+    /** 道具缺图时的占位方块 */
+    private void drawItemBlock(GraphicsContext gc, double px, double py, Color color) {
+        gc.setFill(color);
+        double margin = cellSize * 0.3;
+        gc.fillRoundRect(px + margin, py + margin, cellSize - 2 * margin, cellSize - 2 * margin, 4, 4);
     }
 
     /** 用色块画一颗菱形宝石（带描边与高光，便于和普通道具方块区分） */

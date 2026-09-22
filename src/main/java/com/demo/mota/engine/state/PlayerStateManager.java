@@ -145,29 +145,35 @@ public class PlayerStateManager extends AbstractCharacterState {
         this.currentGoldAmount += goldAmount;
     }
 
+    /**
+     * 拾取道具：按道具大类分派。
+     *
+     * <p>{@link Item} 是封闭类型，这里的 switch 因而是穷尽的——将来新增一个大类，
+     * 编译器会直接指着这里报错，不会出现「捡起来却什么都没发生」的静默漏处理。
+     */
     public void gainItem(Item item){
-        if(item instanceof GenericItem genericItem){
-            this.genericItemsOwned.add(genericItem);
-        } else if(item instanceof Equipment equipment){
-            this.equipmentsOwned.add(equipment);
-        } else if(item instanceof Key key){
-            switch (key.getKeyColor()){
-                case YELLOW -> this.yellow_Key.updateItemCount(1);
-                case RED -> this.red_Key.updateItemCount(1);
-                case BLUE -> this.blue_Key.updateItemCount(1);
-                default -> throw new IllegalArgumentException("Invalid key color: " + key.getKeyColor());
+        switch (item) {
+            case GenericItem genericItem -> this.genericItemsOwned.add(genericItem);
+            case Equipment equipment -> this.equipmentsOwned.add(equipment);
+            case Key key -> {
+                switch (key.getKeyColor()) {
+                    case YELLOW -> this.yellow_Key.updateItemCount(1);
+                    case RED -> this.red_Key.updateItemCount(1);
+                    case BLUE -> this.blue_Key.updateItemCount(1);
+                    default -> throw new IllegalArgumentException("Invalid key color: " + key.getKeyColor());
+                }
             }
-        } else if(item instanceof Portion portion){
-            heal(portion.getReplyAmount());
-        } else if(item instanceof AbilityGem abilityGem){
-            StateType effectedAbilityType = abilityGem.getEffectedAbilityType();
-            GameNumber effectValue = abilityGem.getEffectValue();
-            switch (effectedAbilityType) {
-                // 生命上限宝石：抬高上限并回复等量生命值
-                case MAX_HP -> increaseMaxHP(effectValue);
-                case HP -> heal(effectValue);
-                default -> this.updateState(effectedAbilityType,
-                        this.getStateValue(effectedAbilityType).plus(effectValue));
+            case Portion portion -> heal(portion.getReplyAmount());
+            case AbilityGem abilityGem -> {
+                StateType effectedAbilityType = abilityGem.getEffectedAbilityType();
+                GameNumber effectValue = abilityGem.getEffectValue();
+                switch (effectedAbilityType) {
+                    // 生命上限宝石：抬高上限并回复等量生命值
+                    case MAX_HP -> increaseMaxHP(effectValue);
+                    case HP -> heal(effectValue);
+                    default -> this.updateState(effectedAbilityType,
+                            this.getStateValue(effectedAbilityType).plus(effectValue));
+                }
             }
         }
     }

@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static com.demo.mota.engine.configs.LevelConfigConstatnts.LEVEL_CONFIG_PATH;
+import static com.demo.mota.engine.configs.LevelConfigConstants.LEVEL_CONFIG_PATH;
 
 public class LevelManager {
     private static final LevelConfig loadedConfig;

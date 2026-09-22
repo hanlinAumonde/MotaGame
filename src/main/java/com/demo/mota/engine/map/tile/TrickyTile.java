@@ -10,7 +10,7 @@ import java.util.List;
  * boundMonsterIds 记录绑定的怪物ID列表（可跨楼层），
  * 由事件处理器在怪物被击败时检查并更新状态。
  */
-public class TrickyTile extends Tile {
+public final class TrickyTile extends Tile {
     private final List<String> boundMonsterIds;
     private final String trickyResourceId;
 

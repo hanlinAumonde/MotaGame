@@ -2,7 +2,7 @@ package com.demo.mota.engine.Item.GenericItem;
 
 import com.demo.mota.engine.GameEngine;
 
-public class FloorJumper extends GenericItem{
+public final class FloorJumper extends GenericItem{
     private int floorNumberSelected;
 
     public FloorJumper(String itemId, String itemName, String itemDescription,

@@ -3,7 +3,7 @@ package com.demo.mota.engine.map.tile;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.map.Position;
 
-public class DoorTile extends Tile {
+public final class DoorTile extends Tile {
     private final KeyColor keyColor;
     private final String doorResourceId;
 

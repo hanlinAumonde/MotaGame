@@ -2,7 +2,7 @@ package com.demo.mota.engine.map.tile;
 
 import com.demo.mota.engine.map.Position;
 
-public class FloorSwitcherTile extends Tile {
+public final class FloorSwitcherTile extends Tile {
     private final String aimedFloorId;
     private final String switcherResourceId;
     // 玩家在目标楼层落地的坐标（通常直接指向目标楼层对应楼梯的自身坐标，

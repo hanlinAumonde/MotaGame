@@ -3,7 +3,7 @@ package com.demo.mota.engine.Item;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.GameNumber;
 
-public class AbilityGem extends Item {
+public final class AbilityGem extends Item {
     private final StateType effectedAbilityType;
     private final GameNumber effectValue;
 

@@ -37,19 +37,16 @@ public class MoveHandler {
         GameMap map = mapManager.getCurrentMap();
         Tile targetTile = map.getTileAt(targetPos);
 
-        if (targetTile instanceof BackGroundTile) {
-            return handleBackgroundTile(map, targetPos);
-        } else if (targetTile instanceof WallTile wallTile) {
-            return handleWallTile(wallTile, targetPos);
-        } else if (targetTile instanceof DoorTile doorTile) {
-            return handleDoorTile(doorTile, targetPos);
-        } else if (targetTile instanceof FloorSwitcherTile switcherTile) {
-            return handleFloorSwitcher(switcherTile);
-        } else if (targetTile instanceof TrickyTile) {
-            return MoveResult.of(MoveResult.Type.BLOCKED);
-        }
-
-        return MoveResult.of(MoveResult.Type.BLOCKED);
+        // 穷尽匹配：新增一种 Tile 却没在这里处理，编译期直接报错，不会静默落到兜底分支
+        return switch (targetTile) {
+            case BackGroundTile _ -> handleBackgroundTile(map, targetPos);
+            case WallTile wallTile -> handleWallTile(wallTile, targetPos);
+            case DoorTile doorTile -> handleDoorTile(doorTile, targetPos);
+            case FloorSwitcherTile switcherTile -> handleFloorSwitcher(switcherTile);
+            case TrickyTile _ -> MoveResult.of(MoveResult.Type.BLOCKED);
+            // 地图数据有空洞时 getTileAt 会返回 null，与改造前一样按「走不过去」处理
+            case null -> MoveResult.of(MoveResult.Type.BLOCKED);
+        };
     }
 
     private MoveResult handleBackgroundTile(GameMap map, Position targetPos) {

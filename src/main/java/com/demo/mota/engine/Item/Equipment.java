@@ -6,7 +6,7 @@ import com.demo.mota.engine.GameNumber;
 
 import java.util.Map;
 
-public class Equipment extends Item {
+public final class Equipment extends Item {
     private final Map<StateType, GameNumber> stateEffectMap;
     private EquipSlot slot;
 

@@ -3,7 +3,7 @@ package com.demo.mota.engine.map.tile;
 import com.demo.mota.engine.enums.WallType;
 import com.demo.mota.engine.map.Position;
 
-public class WallTile extends Tile {
+public final class WallTile extends Tile {
     private final WallType wallType;
     private final String wallResourceId;
 
