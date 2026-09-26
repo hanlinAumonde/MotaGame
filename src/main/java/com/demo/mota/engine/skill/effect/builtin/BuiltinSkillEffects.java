@@ -36,7 +36,19 @@ import java.util.function.BiConsumer;
  *   <tr><td>{@code periodic-damage-multiplier}</td>
  *       <td>target / interval / multiplier</td>
  *       <td>每满 interval 回合，该方伤害乘以 multiplier</td></tr>
+ *   <tr><td>{@code round-damage-multiplier}</td>
+ *       <td>target / multiplier / round</td>
+ *       <td>【回合型】释放回合内该方伤害乘以 multiplier</td></tr>
+ *   <tr><td>{@code round-stun}</td>
+ *       <td>target / duration / round</td>
+ *       <td>【回合型】从释放回合起 duration 个回合内怪物不反击（target 缺省为 OPPONENT）</td></tr>
+ *   <tr><td>{@code extra-strike}</td>
+ *       <td>target / times / multiplier / round</td>
+ *       <td>【回合型】释放回合追加 times 次「基础伤害 × multiplier」；战前释放即先手</td></tr>
  * </table>
+ *
+ * <p>【回合型】机制的释放回合取自玩家预设（{@code SkillEffectContext.castRound}）；
+ * 作为怪物技能（整场生效、没有预设）挂上去时，改由参数 {@code round} 指定，缺省第 1 回合。
  */
 public final class BuiltinSkillEffects {
 
@@ -44,6 +56,9 @@ public final class BuiltinSkillEffects {
     public static final String TAG_COUNT_STAT_BONUS = "tag-count-stat-bonus";
     public static final String FIRST_STRIKE = "first-strike";
     public static final String PERIODIC_DAMAGE_MULTIPLIER = "periodic-damage-multiplier";
+    public static final String ROUND_DAMAGE_MULTIPLIER = "round-damage-multiplier";
+    public static final String ROUND_STUN = "round-stun";
+    public static final String EXTRA_STRIKE = "extra-strike";
 
     private BuiltinSkillEffects() {}
 
@@ -55,6 +70,9 @@ public final class BuiltinSkillEffects {
         registrar.accept(TAG_COUNT_STAT_BONUS, BuiltinSkillEffects::tagCountStatBonus);
         registrar.accept(FIRST_STRIKE, BuiltinSkillEffects::firstStrike);
         registrar.accept(PERIODIC_DAMAGE_MULTIPLIER, BuiltinSkillEffects::periodicDamageMultiplier);
+        registrar.accept(ROUND_DAMAGE_MULTIPLIER, BuiltinSkillEffects::roundDamageMultiplier);
+        registrar.accept(ROUND_STUN, BuiltinSkillEffects::roundStun);
+        registrar.accept(EXTRA_STRIKE, BuiltinSkillEffects::extraStrike);
     }
 
     private static StatModifierEffect statModifier(SkillEffectContext context) {
@@ -112,10 +130,37 @@ public final class BuiltinSkillEffects {
         );
     }
 
+    private static RoundDamageMultiplierEffect roundDamageMultiplier(SkillEffectContext context) {
+        return new RoundDamageMultiplierEffect(targetSide(context), castRound(context),
+                context.params().getDouble("multiplier", 1.0));
+    }
+
+    private static RoundStunEffect roundStun(SkillEffectContext context) {
+        return new RoundStunEffect(targetSide(context, EffectTarget.OPPONENT), castRound(context),
+                context.params().getInt("duration", 1));
+    }
+
+    private static ExtraStrikeEffect extraStrike(SkillEffectContext context) {
+        SkillParams params = context.params();
+        return new ExtraStrikeEffect(targetSide(context), castRound(context),
+                params.getInt("times", 1), params.getDouble("multiplier", 1.0));
+    }
+
+    /** 回合型机制的释放回合：预设排定的优先；整场生效的持有方式（怪物）改读参数 {@code round} */
+    private static int castRound(SkillEffectContext context) {
+        return context.isPassiveCast()
+                ? Math.max(0, context.params().getInt("round", 1))
+                : context.castRound();
+    }
+
     /** {@code target} 参数缺省为 {@code SELF}，即「作用于技能持有者自己」 */
     private static BattleSide targetSide(SkillEffectContext context) {
+        return targetSide(context, EffectTarget.SELF);
+    }
+
+    private static BattleSide targetSide(SkillEffectContext context, EffectTarget defaultTarget) {
         return context.params()
-                .getEnum(EffectTarget.class, "target", EffectTarget.SELF)
+                .getEnum(EffectTarget.class, "target", defaultTarget)
                 .resolve(context.ownerSide());
     }
 

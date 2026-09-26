@@ -4,6 +4,7 @@ import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.skill.Skill;
+import com.demo.mota.engine.skill.SkillCast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,7 +90,18 @@ public abstract class AbstractCharacterState {
     }
 
     public boolean hasSkills() {
-        return !skills.isEmpty();
+        return !getSkills().isEmpty();
+    }
+
+    /**
+     * 本角色在一场战斗中的技能释放，供 {@code SkillEffectResolver} 翻译成战斗效果。
+     *
+     * <p>默认把持有的每个技能都当作整场生效——这正是怪物的语义
+     * （怪物的主动技能若要在特定回合释放，由效果参数里的 {@code round} 指定）。
+     * 玩家覆写为「开启的被动技能 + 就绪预设里排定回合的主动技能」。
+     */
+    public List<SkillCast> getBattleSkillCasts() {
+        return getSkills().stream().map(SkillCast::passive).toList();
     }
 
     /** 习得技能；同一技能 id 不重复持有 */

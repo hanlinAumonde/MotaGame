@@ -2,6 +2,7 @@ package com.demo.mota.engine.skill.effect;
 
 import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.skill.Skill;
+import com.demo.mota.engine.skill.SkillCast;
 import com.demo.mota.engine.skill.SkillParams;
 import com.demo.mota.engine.state.AbstractCharacterState;
 
@@ -20,8 +21,14 @@ import com.demo.mota.engine.state.AbstractCharacterState;
  * @param opponent  战斗的另一方
  * @param map       战斗发生时的当前地图；怪物构造阶段尚无地图，此时为 null，
  *                  依赖地图的效果需自行判空（随后的 {@code recalculateAllDamage} 会带着地图重算）
+ * @param castRound 释放回合：被动技能为 {@link SkillCast#PASSIVE_ROUND}（整场生效），
+ *                  主动技能为预设中排定的回合（0 = 战前）。回合型机制用它决定在哪一回合生效
  */
 public record SkillEffectContext(Skill skill, SkillParams params, BattleSide ownerSide,
                                  AbstractCharacterState owner, AbstractCharacterState opponent,
-                                 GameMap map) {
+                                 GameMap map, int castRound) {
+
+    public boolean isPassiveCast() {
+        return castRound < 0;
+    }
 }

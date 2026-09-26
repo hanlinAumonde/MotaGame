@@ -13,6 +13,7 @@ module com.demo.mota {
     opens com.demo.mota.engine.factory.skill to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.resource to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.state.level to com.fasterxml.jackson.databind;
+    opens com.demo.mota.engine.rules to com.fasterxml.jackson.databind;
 
     exports com.demo.mota;
     exports com.demo.mota.engine;
@@ -27,6 +28,10 @@ module com.demo.mota {
     exports com.demo.mota.engine.skill;
     exports com.demo.mota.engine.skill.effect;
     exports com.demo.mota.engine.skill.effect.builtin;
+    exports com.demo.mota.engine.skill.book;
+    exports com.demo.mota.engine.skill.preset;
+    exports com.demo.mota.engine.skill.cost;
+    exports com.demo.mota.engine.rules;
     exports com.demo.mota.engine.battle;
     exports com.demo.mota.engine.resource;
     exports com.demo.mota.engine.resource.provider;
@@ -37,4 +42,6 @@ module com.demo.mota {
     exports com.demo.mota.engine.app;
     exports com.demo.mota.ui;
     exports com.demo.mota.ui.screen;
+    exports com.demo.mota.ui.side;
+    exports com.demo.mota.ui.overlay;
 }

@@ -13,13 +13,9 @@ import com.demo.mota.engine.state.monster.Monster;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Stop;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,31 +38,29 @@ public class MenuRenderer {
     private static final double ROW_GAP = 10;
     private static final int VISIBLE_ROWS = 5;
 
-    // --- 配色 ---
-    private static final Color PANEL_FILL = Color.rgb(24, 28, 62, 0.86);
-    private static final Color PANEL_BORDER = Color.web("#aab6ff");
-    private static final Color PANEL_BORDER_DIM = Color.rgb(170, 182, 255, 0.45);
-    private static final Color FOCUS_FILL = Color.rgb(255, 255, 255, 0.20);
-    private static final Color FOCUS_FILL_DIM = Color.rgb(255, 255, 255, 0.08);
-    private static final Color LABEL_COLOR = Color.web("#4cf04c");
-    private static final Color VALUE_COLOR = Color.web("#9fe8ff");
+    // --- 配色（面板与通用文字色见 PanelStyle） ---
+    private static final Color FOCUS_FILL = PanelStyle.FOCUS_FILL;
+    private static final Color FOCUS_FILL_DIM = PanelStyle.FOCUS_FILL_DIM;
+    private static final Color PANEL_BORDER = PanelStyle.PANEL_BORDER;
+    private static final Color PANEL_BORDER_DIM = PanelStyle.PANEL_BORDER_DIM;
+    private static final Color LABEL_COLOR = PanelStyle.LABEL_COLOR;
+    private static final Color VALUE_COLOR = PanelStyle.VALUE_COLOR;
     private static final Color GOLD_COLOR = Color.web("#ffd95a");
     private static final Color EXP_COLOR = Color.web("#b9ff7a");
-    private static final Color HINT_COLOR = Color.web("#c6ccf5");
-    private static final Color PASSIVE_SKILL_COLOR = Color.web("#ff9ad8");
-    private static final Color ACTIVE_SKILL_COLOR = Color.web("#ff7a6b");
+    private static final Color HINT_COLOR = PanelStyle.HINT_COLOR;
+    private static final Color PASSIVE_SKILL_COLOR = PanelStyle.PASSIVE_SKILL_COLOR;
+    private static final Color ACTIVE_SKILL_COLOR = PanelStyle.ACTIVE_SKILL_COLOR;
     private static final Color PLAIN_MONSTER_COLOR = Color.web("#9aa5b1");
-    private static final Color TITLE_COLOR = Color.web("#ffb144");
-    /** 技能详情页的技能名统一用绿色，技能类型仅在列表标签上以颜色区分 */
-    private static final Color SKILL_TITLE_COLOR = Color.web("#7cfc7c");
-    private static final Color SECTION_COLOR = Color.web("#7fdfff");
-    private static final Color DESC_COLOR = Color.web("#bfe9ff");
+    private static final Color TITLE_COLOR = PanelStyle.TITLE_COLOR;
+    private static final Color SECTION_COLOR = PanelStyle.SECTION_COLOR;
 
     private final ResourceManager resourceManager;
     private final TextPainter painter = new TextPainter();
+    private final SkillCardPainter cardPainter;
 
     public MenuRenderer(ResourceManager resourceManager) {
         this.resourceManager = resourceManager;
+        this.cardPainter = new SkillCardPainter(painter, new IconPainter(resourceManager, painter));
     }
 
     public void render(GraphicsContext gc, GameMenu menu, PlayerStateManager player,
@@ -81,9 +75,7 @@ public class MenuRenderer {
     }
 
     private void drawBackground(GraphicsContext gc, double width, double height) {
-        gc.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-                new Stop(0, Color.web("#2e3566")), new Stop(1, Color.web("#171a33"))));
-        gc.fillRect(0, 0, width, height);
+        PanelStyle.drawBackground(gc, width, height);
     }
 
     // ==================== 左侧菜单项 ====================
@@ -283,17 +275,16 @@ public class MenuRenderer {
         double cardX = 40;
         double cardW = width - 80;
         double cardY = 140;
-        Font descFont = Font.font("SimHei", FontWeight.NORMAL, 18);
         List<Skill> skills = monster.getSkills();
 
         for (int i = 0; i < skills.size(); i++) {
             Skill skill = skills.get(i);
-            List<String> lines = layoutDescription(skill, descFont, cardW - 160);
-            double cardH = Math.max(104, 64 + lines.size() * 26);
+            List<String> lines = cardPainter.layout(skill, cardW);
+            double cardH = cardPainter.height(lines);
             if (cardY + cardH > height - 60) break;
 
-            drawSkillCard(gc, skill, lines, descFont, cardX, cardY, cardW, cardH,
-                    i == menu.getSelectedSkillIndex());
+            cardPainter.draw(gc, skill, lines, cardX, cardY, cardW, cardH,
+                    i == menu.getSelectedSkillIndex(), null, false);
             cardY += cardH + 12;
         }
 
@@ -302,59 +293,9 @@ public class MenuRenderer {
                 40, height - 28, HINT_COLOR);
     }
 
-    private void drawSkillCard(GraphicsContext gc, Skill skill, List<String> lines, Font descFont,
-                               double x, double y, double w, double h, boolean selected) {
-        drawPanel(gc, x, y, w, h, selected);
-        if (selected) {
-            gc.setFill(FOCUS_FILL_DIM);
-            gc.fillRect(x, y, w, h);
-        }
-
-        // 图标：技能美术资源缺失时用带首字的色块占位
-        double iconW = 104;
-        double iconH = h - 32;
-        Image skillIcon = resourceManager.getSkillImage(skill.skillId());
-        if (skillIcon != null) {
-            gc.drawImage(skillIcon, x + 14, y + 16, iconW, iconH);
-        } else {
-            gc.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-                    new Stop(0, Color.web("#6a4b2a")), new Stop(1, Color.web("#2d1e10"))));
-            gc.fillRect(x + 14, y + 16, iconW, iconH);
-            gc.setStroke(PANEL_BORDER_DIM);
-            gc.setLineWidth(1);
-            gc.strokeRect(x + 14, y + 16, iconW, iconH);
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 34));
-            painter.drawCenteredShadowText(gc, skill.skillName().substring(0, 1),
-                    x + 14 + iconW / 2, y + 16 + iconH / 2 + 12, Color.web("#ffcf8a"));
-        }
-
-        double textX = x + 14 + iconW + 20;
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 22));
-        painter.drawShadowText(gc, skill.skillName() + "（" + skill.skillType().getDisplayName() + "）",
-                textX, y + 42, SKILL_TITLE_COLOR);
-
-        gc.setFont(descFont);
-        for (int i = 0; i < lines.size(); i++) {
-            painter.drawShadowText(gc, lines.get(i), textX, y + 72 + i * 26, DESC_COLOR);
-        }
-    }
-
-    /** 先按说明里的手动换行拆行，再按卡片可用宽度折行 */
-    private List<String> layoutDescription(Skill skill, Font font, double maxWidth) {
-        List<String> lines = new ArrayList<>();
-        for (String paragraph : skill.descriptionLines()) {
-            lines.addAll(painter.wrap(paragraph, font, maxWidth));
-        }
-        return lines;
-    }
-
     // ==================== 通用面板 ====================
 
     private void drawPanel(GraphicsContext gc, double x, double y, double w, double h, boolean focused) {
-        gc.setFill(PANEL_FILL);
-        gc.fillRect(x, y, w, h);
-        gc.setStroke(focused ? PANEL_BORDER : PANEL_BORDER_DIM);
-        gc.setLineWidth(focused ? 3 : 1.5);
-        gc.strokeRect(x, y, w, h);
+        PanelStyle.drawPanel(gc, x, y, w, h, focused);
     }
 }

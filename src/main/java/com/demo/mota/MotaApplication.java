@@ -20,7 +20,7 @@ public class MotaApplication extends Application {
         // 此时 ResourceManager 只搭好 provider 链，精灵图与各配置表留给下面的加载任务。
         FXMLLoader fxmlLoader = new FXMLLoader(
                 ResourceManager.getInstance().getResourceUrl("/com/demo/mota/mota-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 1040, 840);
+        Scene scene = new Scene(fxmlLoader.load(), 1296, 840);
 
         // 获取 controller 并绑定键盘事件
         MotaController controller = fxmlLoader.getController();

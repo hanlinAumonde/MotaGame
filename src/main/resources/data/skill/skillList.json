@@ -51,5 +51,55 @@
       "stat": "ATK",
       "multiplier": 0.9
     }
+  },
+  {
+    "id": "skill-power-slash",
+    "name": "重斩",
+    "skillType": "ACTIVE",
+    "description": "集中全身力量劈出一刀\n释放回合造成的伤害翻倍（战前释放无效）",
+    "resourceId": "",
+    "effectId": "round-damage-multiplier",
+    "params": {
+      "target": "SELF",
+      "multiplier": 2.0
+    }
+  },
+  {
+    "id": "skill-shield-bash",
+    "name": "盾击",
+    "skillType": "ACTIVE",
+    "description": "用盾牌猛击对手使其眩晕\n释放回合内敌人无法反击",
+    "resourceId": "",
+    "effectId": "round-stun",
+    "params": {
+      "target": "OPPONENT",
+      "duration": 1
+    }
+  },
+  {
+    "id": "skill-quick-draw",
+    "name": "拔刀术",
+    "skillType": "ACTIVE",
+    "description": "出鞘即是一击\n释放回合追加一次普通攻击；排在战前即为先手，不会遭到反击",
+    "resourceId": "",
+    "effectId": "extra-strike",
+    "params": {
+      "target": "SELF",
+      "times": 1,
+      "multiplier": 1.0
+    }
+  },
+  {
+    "id": "skill-iron-wall",
+    "name": "铁壁",
+    "skillType": "PASSIVE",
+    "description": "厚重的盾牌让防御更加稳固\n战斗期间防御力 +5",
+    "resourceId": "",
+    "effectId": "stat-modifier",
+    "params": {
+      "target": "SELF",
+      "stat": "DEF",
+      "flat": 5
+    }
   }
 ]

@@ -11,7 +11,9 @@
           "isStorable": true,
           "isConsumable": false,
           "parameters": {
-            "attack": 10
+            "stats": { "attack": 10 },
+            "skills": ["skill-quick-draw"],
+            "slotType": "weapon"
           },
           "resourceId": null
         },
@@ -24,7 +26,9 @@
           "isStorable": true,
           "isConsumable": false,
           "parameters": {
-            "defense": 10
+            "stats": { "defense": 10 },
+            "skills": ["skill-iron-wall"],
+            "slotType": "shield"
           },
           "resourceId": null
         }

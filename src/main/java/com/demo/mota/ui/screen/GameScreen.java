@@ -15,16 +15,24 @@ import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.map.Position;
 import com.demo.mota.engine.map.tile.*;
-import com.demo.mota.engine.menu.GameMenu;
-import com.demo.mota.engine.menu.MenuCommand;
 import com.demo.mota.engine.resource.ResourceManager;
+import com.demo.mota.engine.rules.GameRules;
+import com.demo.mota.engine.skill.preset.SkillPreset;
+import com.demo.mota.engine.skill.preset.SkillPresetBook;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.engine.state.monster.DamageRange;
 import com.demo.mota.engine.state.monster.Monster;
 import com.demo.mota.ui.DamagePalette;
+import com.demo.mota.ui.EquipmentRenderer;
 import com.demo.mota.ui.MenuRenderer;
+import com.demo.mota.ui.SkillSetupRenderer;
 import com.demo.mota.ui.TextPainter;
 import com.demo.mota.ui.ValueFormatter;
+import com.demo.mota.ui.overlay.EquipmentOverlay;
+import com.demo.mota.ui.overlay.GameMenuOverlay;
+import com.demo.mota.ui.overlay.Overlay;
+import com.demo.mota.ui.overlay.SkillSetupOverlay;
+import com.demo.mota.ui.side.SidePanelRenderer;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -32,6 +40,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.demo.mota.engine.configs.MapConfigConstants.MAP_SIDE_LENGTH;
 
@@ -60,8 +72,16 @@ public class GameScreen implements Screen {
 
     private final Canvas statusCanvas;
     private final Canvas mapCanvas;
+    private final Canvas sideCanvas;
     private final Canvas menuCanvas;
-    private final MenuRenderer menuRenderer;
+    private final SidePanelRenderer sidePanelRenderer;
+
+    /** 可呼出的覆盖层（X 游戏菜单 / D 技能设置 / Q 装备），同一时刻至多一个打开 */
+    private final List<Overlay> overlays;
+    private Overlay activeOverlay;
+
+    /** 切换就绪预设的按键 → 预设下标，取自塔规则 {@code skill.hotkeys} */
+    private final Map<KeyCode, Integer> presetHotkeys;
 
     /** 文本测量与绘制工具（阴影描边、自适应字号、折行） */
     private final TextPainter painter = new TextPainter();
@@ -70,50 +90,88 @@ public class GameScreen implements Screen {
     private String currentMessage = "";
 
     public GameScreen(GameEngine engine, ResourceManager resourceManager, GameFlow flow,
-                      Canvas statusCanvas, Canvas mapCanvas, Canvas menuCanvas) {
+                      Canvas statusCanvas, Canvas mapCanvas, Canvas sideCanvas, Canvas menuCanvas) {
         this.engine = engine;
         this.resourceManager = resourceManager;
         this.flow = flow;
         this.statusCanvas = statusCanvas;
         this.mapCanvas = mapCanvas;
+        this.sideCanvas = sideCanvas;
         this.menuCanvas = menuCanvas;
-        this.menuRenderer = new MenuRenderer(resourceManager);
+        this.sidePanelRenderer = new SidePanelRenderer(resourceManager);
+        this.overlays = List.of(
+                new GameMenuOverlay(engine, new MenuRenderer(resourceManager)),
+                new SkillSetupOverlay(engine, new SkillSetupRenderer(resourceManager)),
+                new EquipmentOverlay(engine, new EquipmentRenderer(resourceManager)));
+        this.presetHotkeys = parseHotkeys(GameRules.get().skill().hotkeys());
         this.cellSize = mapCanvas.getWidth() / MAP_SIDE_LENGTH;
+    }
+
+    /** 规则里写的是 JavaFX {@code KeyCode} 名；写错的忽略，不影响其余按键 */
+    private static Map<KeyCode, Integer> parseHotkeys(List<String> names) {
+        Map<KeyCode, Integer> keys = new EnumMap<>(KeyCode.class);
+        for (int i = 0; i < names.size(); i++) {
+            try {
+                keys.put(KeyCode.valueOf(names.get(i).trim().toUpperCase()), i);
+            } catch (IllegalArgumentException e) {
+                System.err.println("[GameScreen] 无法识别的预设按键: " + names.get(i));
+            }
+        }
+        return keys;
     }
 
     /** 每次进入对局都是一局新游戏的开头，清掉上一局残留的消息 */
     @Override
     public void onEnter() {
         this.currentMessage = "";
+        this.activeOverlay = null;
     }
 
     // ==================== 输入 ====================
 
     @Override
     public boolean handleKey(KeyCode code) {
-        GameMenu menu = engine.getGameMenu();
-
-        // 菜单打开时独占输入：先把按键翻译成菜单语义，再交给菜单状态机
-        if (menu.isOpen()) {
-            menu.handle(toMenuCommand(code));
-            renderMenu();
+        // 覆盖层打开时独占输入（技能设置界面里也允许用数字键切换就绪预设，方便边改边看）
+        if (activeOverlay != null && activeOverlay.isOpen()) {
+            boolean changed = false;
+            if (code == Overlay.CLOSE_KEY) {
+                // 所有游戏内界面统一用 X 返回游戏，各覆盖层不单独处理
+                activeOverlay.close();
+            } else if (presetHotkeys.containsKey(code) && activeOverlay instanceof SkillSetupOverlay) {
+                // 技能设置界面里，数字键切换正在编辑（同时激活）的预设
+                changed = engine.getSkillSetupMenu().selectPreset(presetHotkeys.get(code));
+            } else {
+                changed = activeOverlay.handleKey(code);
+            }
+            if (changed) {
+                engine.recalculateCurrentFloorDamage();
+            }
+            if (!activeOverlay.isOpen()) {
+                activeOverlay = null;
+                renderAll();
+            }
+            renderOverlay();
             return true;
         }
 
-        switch (code) {
-            case X:
+        for (Overlay overlay : overlays) {
+            if (overlay.toggleKey() == code) {
+                overlay.open();
+                activeOverlay = overlay;
+                renderOverlay();
+                return true;
+            }
+        }
 
-            case Z:
-
-                break;
+        if (presetHotkeys.containsKey(code)) {
+            if (togglePreset(presetHotkeys.get(code))) {
+                engine.recalculateCurrentFloorDamage();
+            }
+            renderAll();
+            return true;
         }
 
         return switch (code) {
-            case X -> {
-                menu.open();
-                renderMenu();
-                yield true;
-            }
             case Z -> {
                 this.engine.handleDirectionChange();
                 //当前玩家站立的tile必定为可通过地形
@@ -147,16 +205,24 @@ public class GameScreen implements Screen {
         };
     }
 
-    /** 按键 → 菜单语义；返回 null 表示该键在菜单中无意义 */
-    private static MenuCommand toMenuCommand(KeyCode code) {
-        return switch (code) {
-            case UP, W -> MenuCommand.UP;
-            case DOWN, S -> MenuCommand.DOWN;
-            case ENTER, SPACE -> MenuCommand.CONFIRM;
-            case ESCAPE -> MenuCommand.BACK;
-            case X -> MenuCommand.CLOSE;
-            default -> null;
-        };
+    /**
+     * 游戏中按数字键：激活对应预设；对已激活的那套再按一次则停用（全程普攻）。结果写进状态栏消息。
+     *
+     * @return 是否真的切换了（下标超出预设套数时不动）
+     */
+    private boolean togglePreset(int presetIndex) {
+        PlayerStateManager player = engine.getPlayerStateManager();
+        if (presetIndex >= player.getPresetBook().presetCount()) {
+            return false;
+        }
+        int armed = player.togglePreset(presetIndex);
+        if (armed == SkillPresetBook.NONE) {
+            currentMessage = "已停用技能组（全程普攻）";
+        } else {
+            SkillPreset preset = player.getPresetBook().get(armed);
+            currentMessage = preset.getName() + (preset.isEmpty() ? " 已激活（未编排）" : " 已激活");
+        }
+        return true;
     }
 
     // ==================== 渲染入口 ====================
@@ -164,12 +230,13 @@ public class GameScreen implements Screen {
     @Override
     public void render() {
         renderAll();
-        renderMenu();
+        renderOverlay();
     }
 
     private void renderAll() {
         renderMap();
         renderStatusPanel();
+        sidePanelRenderer.render(sideCanvas, engine.getPlayerStateManager());
     }
 
     private void handleMoveResult(MoveResult result) {
@@ -187,13 +254,12 @@ public class GameScreen implements Screen {
 
     // ==================== 菜单渲染 ====================
 
-    /** 菜单画布平时隐藏，打开时整屏覆盖游戏画面 */
-    private void renderMenu() {
-        GameMenu menu = engine.getGameMenu();
-        menuCanvas.setVisible(menu.isOpen());
-        if (!menu.isOpen()) return;
-        menuRenderer.render(menuCanvas.getGraphicsContext2D(), menu, engine.getPlayerStateManager(),
-                menuCanvas.getWidth(), menuCanvas.getHeight());
+    /** 菜单画布平时隐藏，有覆盖层打开时整屏盖住游戏画面 */
+    private void renderOverlay() {
+        boolean open = activeOverlay != null && activeOverlay.isOpen();
+        menuCanvas.setVisible(open);
+        if (!open) return;
+        activeOverlay.render(menuCanvas.getGraphicsContext2D(), menuCanvas.getWidth(), menuCanvas.getHeight());
     }
 
     // ==================== 状态面板渲染 ====================

@@ -5,6 +5,7 @@ import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.skill.Skill;
 import com.demo.mota.engine.skill.SkillParams;
 import com.demo.mota.engine.skill.SkillType;
+import com.demo.mota.engine.skill.cost.SkillCostSpec;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -58,7 +59,12 @@ public class SkillFactory extends AbstractFactory<Skill, SkillFactory.SkillData,
     protected Skill createProduct(SkillCreator creator, SkillData data) {
         return creator.createSkill(data.id, data.name, SkillType.fromString(data.skillType),
                 data.description, data.resourceId,
-                data.effectId, new SkillParams(data.params));
+                data.effectId, new SkillParams(data.params), toCostSpec(data.cost),
+                data.maxCasts == null ? Skill.DEFAULT_MAX_CASTS : data.maxCasts);
+    }
+
+    private static SkillCostSpec toCostSpec(CostData cost) {
+        return cost == null ? SkillCostSpec.NONE : new SkillCostSpec(cost.costId, new SkillParams(cost.params));
     }
 
     /**
@@ -74,6 +80,11 @@ public class SkillFactory extends AbstractFactory<Skill, SkillFactory.SkillData,
 
     public record SkillData(String id, String name, String skillType,
                             String description, String resourceId,
-                            String effectId, Map<String, Object> params) implements Serializable {
+                            String effectId, Map<String, Object> params,
+                            CostData cost, Integer maxCasts) implements Serializable {
+    }
+
+    /** 可选的消耗声明；缺省表示不消耗 */
+    public record CostData(String costId, Map<String, Object> params) implements Serializable {
     }
 }

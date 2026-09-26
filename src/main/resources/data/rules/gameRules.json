@@ -1,0 +1,16 @@
+{
+  "skill": {
+    "maxRound": 10,
+    "presetCount": 10,
+    "presetEditable": true,
+    "fixedPresets": [],
+    "hotkeys": ["DIGIT1", "DIGIT2", "DIGIT3", "DIGIT4", "DIGIT5",
+                "DIGIT6", "DIGIT7", "DIGIT8", "DIGIT9", "DIGIT0"]
+  },
+  "equipment": {
+    "slotCount": 6
+  },
+  "sidePanel": {
+    "sections": ["skillCombo", "passiveSkills", "equipment"]
+  }
+}

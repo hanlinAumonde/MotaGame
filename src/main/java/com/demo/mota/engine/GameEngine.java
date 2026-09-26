@@ -6,7 +6,9 @@ import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.event.MoveHandler;
 import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.MapManager;
+import com.demo.mota.engine.menu.EquipmentMenu;
 import com.demo.mota.engine.menu.GameMenu;
+import com.demo.mota.engine.menu.SkillSetupMenu;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -33,6 +35,8 @@ public class GameEngine {
     private MapManager mapManager;
     private MoveHandler moveHandler;
     private GameMenu gameMenu;
+    private SkillSetupMenu skillSetupMenu;
+    private EquipmentMenu equipmentMenu;
 
     private GameEngine() {
         // 只保证 provider 链就位；精灵图与各配置表由 GameBootstrap 在加载阶段统一加载
@@ -62,11 +66,27 @@ public class GameEngine {
         return gameMenu;
     }
 
+    public SkillSetupMenu getSkillSetupMenu() {
+        return skillSetupMenu;
+    }
+
+    public EquipmentMenu getEquipmentMenu() {
+        return equipmentMenu;
+    }
+
     public MoveResult handlePlayerMove(Direction direction) {
         return moveHandler.handleMove(direction);
     }
 
     public void handleDirectionChange() { this.playerStateManager.playerDirectionChange(); }
+
+    /**
+     * 玩家在菜单里改了会影响战斗的东西（穿脱装备、切换就绪预设、改预设内容）之后调用，
+     * 让当前层的伤害数字与之同步。
+     */
+    public void recalculateCurrentFloorDamage() {
+        moveHandler.getBattleHandler().recalculateAllDamage(playerStateManager, mapManager.getCurrentMap());
+    }
 
     public GameFlow getGameFlow() {
         return gameFlow;
@@ -89,6 +109,8 @@ public class GameEngine {
         this.mapManager = new MapManager();
         this.moveHandler = new MoveHandler(mapManager, playerStateManager);
         this.gameMenu = new GameMenu(mapManager);
+        this.skillSetupMenu = new SkillSetupMenu(playerStateManager);
+        this.equipmentMenu = new EquipmentMenu(playerStateManager);
 
         mapManager.loadFloor(initialFloor);
         moveHandler.getBattleHandler().recalculateAllDamage(playerStateManager, mapManager.getCurrentMap());

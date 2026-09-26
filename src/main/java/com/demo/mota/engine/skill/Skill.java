@@ -1,5 +1,7 @@
 package com.demo.mota.engine.skill;
 
+import com.demo.mota.engine.skill.cost.SkillCostSpec;
+
 import java.util.List;
 
 /**
@@ -23,18 +25,52 @@ import java.util.List;
  * @param effectId    战斗效果机制标识，对应 {@code SkillEffectRegistry} 中注册的 provider；
  *                    留空表示纯展示技能（不参与战斗计算）
  * @param params      效果参数，永不为 null（无参数时为 {@link SkillParams#EMPTY}）
+ * @param cost        释放消耗，永不为 null（未声明时为 {@link SkillCostSpec#NONE}）；
+ *                    只对主动技能有意义，见 {@code SkillCostRegistry}
+ * @param maxCasts    一场战斗中最多释放几次（只对主动技能有意义）：
+ *                    配置缺省为 {@link #DEFAULT_MAX_CASTS}，{@link #UNLIMITED_CASTS}（任意负数）表示不限；
+ *                    预设里超出次数的格子不允许放入，即使放入了（例如规则里的固定预设）也按普攻处理
  */
 public record Skill(String skillId, String skillName, SkillType skillType,
                     String description, String resourceId,
-                    String effectId, SkillParams params) {
+                    String effectId, SkillParams params, SkillCostSpec cost, int maxCasts) {
+
+    public static final int DEFAULT_MAX_CASTS = 1;
+    public static final int UNLIMITED_CASTS = -1;
 
     public Skill {
         params = params == null ? SkillParams.EMPTY : params;
+        cost = cost == null ? SkillCostSpec.NONE : cost;
+        maxCasts = maxCasts < 0 ? UNLIMITED_CASTS : Math.max(1, maxCasts);
+    }
+
+    public Skill(String skillId, String skillName, SkillType skillType,
+                 String description, String resourceId,
+                 String effectId, SkillParams params) {
+        this(skillId, skillName, skillType, description, resourceId, effectId, params,
+                SkillCostSpec.NONE, DEFAULT_MAX_CASTS);
+    }
+
+    public boolean hasCastLimit() {
+        return maxCasts != UNLIMITED_CASTS;
+    }
+
+    /** 一场战斗里已排了 {@code alreadyScheduled} 次之后，还能不能再排一次 */
+    public boolean canCastAgain(int alreadyScheduled) {
+        return !hasCastLimit() || alreadyScheduled < maxCasts;
     }
 
     /** 是否声明了战斗效果；未声明的技能只在怪物手册里展示 */
     public boolean hasEffect() {
         return effectId != null && !effectId.isBlank();
+    }
+
+    public boolean isActive() {
+        return skillType == SkillType.ACTIVE;
+    }
+
+    public boolean isPassive() {
+        return skillType == SkillType.PASSIVE;
     }
 
     /** 按手动换行符拆出的说明行，供渲染层继续做宽度折行 */

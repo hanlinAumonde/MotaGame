@@ -33,6 +33,7 @@ public class MotaController {
     @FXML private HBox gameBox;
     @FXML private Canvas mapCanvas;
     @FXML private Canvas statusCanvas;
+    @FXML private Canvas sideCanvas;
     @FXML private Canvas menuCanvas;
     @FXML private Canvas screenCanvas;
 
@@ -54,7 +55,7 @@ public class MotaController {
         screens.put(GamePhase.LOADING, loadingScreen);
         screens.put(GamePhase.TITLE, new TitleScreen(screenCanvas, engine));
         screens.put(GamePhase.PLAYING, new GameScreen(engine, ResourceManager.getInstance(), flow,
-                statusCanvas, mapCanvas, menuCanvas));
+                statusCanvas, mapCanvas, sideCanvas, menuCanvas));
         screens.put(GamePhase.GAME_OVER, new GameOverOverlay(screenCanvas, flow));
 
         flow.addListener(this::onPhaseChanged);

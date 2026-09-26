@@ -19,6 +19,7 @@
       "levelNumber": 3,
       "levelName": "等级3",
       "maxExperience": 20,
+      "learnSkills": ["skill-power-slash"],
       "bonus": [
         { "stat": "maxHealth", "type": "flat", "value": 100 },
         { "stat": "attack", "type": "flat", "value": 5 }
@@ -34,6 +35,7 @@
       "levelName": "等级5",
       "maxExperience": 80,
       "fullHeal": true,
+      "learnSkills": ["skill-shield-bash"],
       "bonus": [
         { "stat": "maxHealth", "type": "percentage", "value": 10 },
         { "stat": "attack", "type": "flat", "value": 5 },

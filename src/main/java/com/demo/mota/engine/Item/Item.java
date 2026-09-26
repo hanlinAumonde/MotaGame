@@ -14,9 +14,9 @@ import com.demo.mota.engine.Item.GenericItem.GenericItem;
  */
 public abstract sealed class Item
         permits Key, Equipment, Portion, AbilityGem, GenericItem {
-    private String itemId;
-    private String itemName;
-    private String itemDescription;
+    private final String itemId;
+    private final String itemName;
+    private final String itemDescription;
 
     private long itemPrice;
     private int itemCount;
@@ -42,6 +42,10 @@ public abstract sealed class Item
 
     public String getItemName() {
         return itemName;
+    }
+
+    public String getItemDescription() {
+        return itemDescription;
     }
 
     public int getItemCount() {

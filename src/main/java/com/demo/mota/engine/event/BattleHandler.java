@@ -4,6 +4,9 @@ import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.map.Position;
 import com.demo.mota.engine.GameNumber;
+import com.demo.mota.engine.skill.SkillCast;
+import com.demo.mota.engine.skill.cost.SkillCostRegistry;
+import com.demo.mota.engine.skill.effect.SkillEffectResolver;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.engine.state.monster.DamageRange;
 import com.demo.mota.engine.state.monster.Monster;
@@ -42,11 +45,26 @@ public class BattleHandler {
         }
 
         player.updateState(StateType.HP, currentHealth.minus(damage));
+        payActiveSkillCosts(player, monster.getCurrentRounds());
 
         player.updateGoldAmount(monster.getGoldReward());
         player.updateLevel(monster.getExperienceReward());
 
         return true;
+    }
+
+    /**
+     * 支付本场实际释放了的主动技能的消耗：战前（第 0 回合）一定放出，
+     * 第 r 回合的技能只有战斗打到了第 r 回合才算放出——怪物提前倒下，后面排的技能不扣。
+     * 参与结算的释放与伤害预览出自同一份 {@code affordableCasts}，扣的正是算进伤害的那一批。
+     */
+    private void payActiveSkillCosts(PlayerStateManager player, int rounds) {
+        SkillCostRegistry costs = SkillCostRegistry.getInstance();
+        for (SkillCast cast : SkillEffectResolver.affordableCasts(player)) {
+            if (!cast.isPassive() && cast.castRound() <= rounds) {
+                costs.pay(cast, player);
+            }
+        }
     }
 
     /**

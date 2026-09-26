@@ -5,6 +5,8 @@ import com.demo.mota.engine.factory.monster.MonsterFactory;
 import com.demo.mota.engine.factory.skill.SkillFactory;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.resource.sprite.SheetSlicerRegistry;
+import com.demo.mota.engine.rules.GameRules;
+import com.demo.mota.engine.skill.cost.SkillCostRegistry;
 import com.demo.mota.engine.skill.effect.SkillEffectRegistry;
 import com.demo.mota.engine.state.level.LevelManager;
 
@@ -53,15 +55,20 @@ public final class GameBootstrap {
         tasks.add(new LoadingTask("加载图像资源", 40,
                 () -> ResourceManager.getInstance().loadSpriteSheets()));
         tasks.add(new LoadingTask("注册切图规则", 5,
-                SheetSlicerRegistry::getInstance));
+                () -> {var _ = SheetSlicerRegistry.getInstance();}));
+        tasks.add(new LoadingTask("载入规则配置", 3,
+                () -> {var _ = GameRules.get();}));
         tasks.add(new LoadingTask("注册技能效果", 5,
-                SkillEffectRegistry::getInstance));
+                () -> {
+                    var _ = SkillEffectRegistry.getInstance();
+                    var _ = SkillCostRegistry.getInstance();
+                }));
         tasks.add(new LoadingTask("载入技能表", 10,
-                SkillFactory::getInstance));
+                () -> {var _ = SkillFactory.getInstance();}));
         tasks.add(new LoadingTask("载入道具表", 10,
-                ItemFactory::getInstance));
+                () -> {var _ = ItemFactory.getInstance();}));
         tasks.add(new LoadingTask("载入怪物表", 20,
-                MonsterFactory::getInstance));
+                () -> {var _ = MonsterFactory.getInstance();}));
         tasks.add(new LoadingTask("载入等级表", 10,
                 LevelManager::preload));
         return tasks;

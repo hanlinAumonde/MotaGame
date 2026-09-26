@@ -17,9 +17,13 @@ public class LevelManager {
     private static final LevelConfig loadedConfig;
 
     private record BonusData(String stat, String type, int value) implements Serializable {}
-    /** {@code fullHeal} 为 true 时，升到该等级会直接回满生命值（缺省视为 false） */
+    /**
+     * {@code fullHeal} 为 true 时，升到该等级会直接回满生命值（缺省视为 false）；
+     * {@code learnSkills} 为升到该等级时习得的技能 id（缺省为不习得）
+     */
     private record LevelData(int levelNumber, String levelName, GameNumber maxExperience,
-                             List<BonusData> bonus, Boolean fullHeal) implements Serializable {}
+                             List<BonusData> bonus, Boolean fullHeal,
+                             List<String> learnSkills) implements Serializable {}
     private record LevelConfig(List<BonusData> defaultBonus,
                                List<LevelData> levels) implements Serializable {}
 
@@ -64,6 +68,7 @@ public class LevelManager {
     public LevelUpResult cumulateExperience(GameNumber experience) {
         int previousLevel = this.levelNumber;
         List<LevelBonus> allBonuses = new ArrayList<>();
+        List<String> learnedSkillIds = new ArrayList<>();
         boolean fullHeal = false;
 
         GameNumber remainingExp = this.currentExperience.plus(experience);
@@ -73,12 +78,24 @@ public class LevelManager {
             remainingExp = remainingExp.minus(maxExperienceForCurrentLevel);
             allBonuses.addAll(getBonusesForNextLevel());
             fullHeal |= isNextLevelFullHeal();
+            learnedSkillIds.addAll(getSkillsForNextLevel());
             loadNextLevel();
         }
 
         this.currentExperience = remainingExp;
         return new LevelUpResult(previousLevel, this.levelNumber,
-                Collections.unmodifiableList(allBonuses), fullHeal);
+                Collections.unmodifiableList(allBonuses), fullHeal,
+                Collections.unmodifiableList(learnedSkillIds));
+    }
+
+    /** 即将升入的等级配置的习得技能 */
+    private List<String> getSkillsForNextLevel() {
+        int nextIndex = this.levelNumber;
+        if (nextIndex >= loadedConfig.levels.size()) {
+            return List.of();
+        }
+        List<String> skills = loadedConfig.levels.get(nextIndex).learnSkills;
+        return skills == null ? List.of() : skills;
     }
 
     /** 即将升入的等级是否配置了回满生命值 */

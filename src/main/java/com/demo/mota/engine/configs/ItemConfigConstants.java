@@ -4,6 +4,9 @@ public class ItemConfigConstants {
     public static final String ITEM_LIST_FILE = "/data/item/itemList.json";
 
     public static final String EQUIPMENT = "Equipment";
+    public static final String EQUIPMENT_STATS = "stats";
+    public static final String EQUIPMENT_SKILLS = "skills";
+    public static final String EQUIPMENT_SLOT_TYPE = "slotType";
 
     public static final String KEY = "Key";
     public static final String KEY_COLOR = "keyColor";

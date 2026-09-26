@@ -5,6 +5,7 @@ import com.demo.mota.engine.Item.GenericItem.FloorJumper;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.factory.AbstractFactory;
+import com.demo.mota.engine.factory.skill.SkillFactory;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.GameNumber;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -56,15 +57,23 @@ public class ItemFactory extends AbstractFactory<Item, ItemFactory.ItemData, Ite
                     (itemId, itemName, itemDescription, itemPrice, itemCount,
                      isStorable, isConsumable, parameters) ->
                     {
+                        // parameters: { stats: { attack: 10, ... }, skills: [skillId...], slotType: "" }
                         Map<StateType, GameNumber> stateEffectMap = new HashMap<>();
-                        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
-                            stateEffectMap.put(StateType.fromString(entry.getKey()),
-                                    GameNumber.of((int) entry.getValue()));
+                        if (parameters.get(EQUIPMENT_STATS) instanceof Map<?, ?> stats) {
+                            for (Map.Entry<?, ?> entry : stats.entrySet()) {
+                                stateEffectMap.put(StateType.fromString(String.valueOf(entry.getKey())),
+                                        GameNumber.of(((Number) entry.getValue()).longValue()));
+                            }
                         }
+                        List<String> skillIds = parameters.get(EQUIPMENT_SKILLS) instanceof List<?> ids
+                                ? ids.stream().map(String::valueOf).toList()
+                                : List.of();
                         return new Equipment(itemId, itemName, itemDescription,
                                 itemPrice, itemCount,
                                 isStorable, isConsumable,
-                                stateEffectMap);
+                                stateEffectMap,
+                                SkillFactory.getInstance().createByIds(skillIds),
+                                (String) parameters.get(EQUIPMENT_SLOT_TYPE));
                     };
             case KEY ->
                     (itemId, itemName, itemDescription, itemPrice, itemCount,

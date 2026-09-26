@@ -15,14 +15,17 @@
         <!-- 左侧：玩家状态面板（Canvas绘制） -->
         <Canvas fx:id="statusCanvas" width="208" height="832"/>
 
-        <!-- 右侧：地图画布 -->
+        <!-- 中间：地图画布 -->
         <Canvas fx:id="mapCanvas" width="832" height="832"/>
+
+        <!-- 右侧：技能 / 装备栏（分区由 gameRules.json 的 sidePanel.sections 决定） -->
+        <Canvas fx:id="sideCanvas" width="256" height="832"/>
     </HBox>
 
-    <!-- 游戏内菜单（按 X 呼出），整屏覆盖 -->
-    <Canvas fx:id="menuCanvas" width="1040" height="840" visible="false"/>
+    <!-- 游戏内覆盖层（X 游戏菜单 / D 技能设置 / Q 装备），整屏覆盖 -->
+    <Canvas fx:id="menuCanvas" width="1296" height="840" visible="false"/>
 
     <!-- 最外层界面：加载 / 标题铺满整屏，游戏结束只画底部提示框、其余部分透出游戏画面 -->
-    <Canvas fx:id="screenCanvas" width="1040" height="840"/>
+    <Canvas fx:id="screenCanvas" width="1296" height="840"/>
 
 </StackPane>
