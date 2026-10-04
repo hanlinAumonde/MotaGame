@@ -1,6 +1,7 @@
 package com.demo.mota;
 
 import com.demo.mota.engine.GameEngine;
+import com.demo.mota.engine.app.GamePhase;
 import com.demo.mota.engine.boot.GameBootstrap;
 import com.demo.mota.engine.resource.ResourceManager;
 import javafx.application.Application;
@@ -55,7 +56,7 @@ public class MotaApplication extends Application {
             }
         };
 
-        task.setOnSucceeded(e -> GameEngine.getGameEngine().getGameFlow().toTitle());
+        task.setOnSucceeded(e -> GameEngine.getGameEngine().getGameFlow().to(GamePhase.TITLE));
         task.setOnFailed(e -> {
             Throwable error = task.getException();
             // 资源 / 配置缺失属于打包错误，把原因摆到界面上，同时保留完整堆栈便于排查
@@ -71,7 +72,7 @@ public class MotaApplication extends Application {
         thread.start();
     }
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         launch();
     }
 }

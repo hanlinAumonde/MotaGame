@@ -868,6 +868,11 @@
   ],
   "items": [
     {
+      "itemId": "monster-book-001",
+      "x": 7,
+      "y": 11
+    },
+    {
       "itemId": "key-001-yellow",
       "x": 6,
       "y": 9

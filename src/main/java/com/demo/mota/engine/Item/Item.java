@@ -13,7 +13,7 @@ import com.demo.mota.engine.Item.GenericItem.GenericItem;
  * 每加一件都要回来改 permits 列表并不合理，而分派只需认到「这是个通用道具」这一层。
  */
 public abstract sealed class Item
-        permits Key, Equipment, Portion, AbilityGem, GenericItem {
+        permits Key, Equipment, Portion, AbilityGem, AuxiliaryItem, GenericItem {
     private final String itemId;
     private final String itemName;
     private final String itemDescription;

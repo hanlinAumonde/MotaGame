@@ -6,9 +6,6 @@ import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.event.MoveHandler;
 import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.MapManager;
-import com.demo.mota.engine.menu.EquipmentMenu;
-import com.demo.mota.engine.menu.GameMenu;
-import com.demo.mota.engine.menu.SkillSetupMenu;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -21,8 +18,9 @@ import static com.demo.mota.engine.configs.GameContextConfigConstants.*;
  * 引擎总控（单例）。
  *
  * <p>单例本身的生命周期与进程一致，但<b>一局游戏</b>的生命周期不是——
- * 从标题界面反复开局要求玩家状态、地图、移动分发与菜单都能整套重建，
- * 因此这四者不再是 final，统一由 {@link #startNewGame(int)} 装配。
+ * 从标题界面反复开局要求玩家状态、地图与移动分发都能整套重建，
+ * 因此这三者不再是 final，统一由 {@link #startNewGame(int)} 装配。
+ * 各界面的状态属于 UI 层，由对应 Screen 在「新开一局」事件（{@code GameFlow.startNewGame}）里自行重建，不归引擎管。
  * 无状态的 {@code ResourceManager} 与各工厂不参与重建。
  */
 public class GameEngine {
@@ -34,9 +32,6 @@ public class GameEngine {
     private PlayerStateManager playerStateManager;
     private MapManager mapManager;
     private MoveHandler moveHandler;
-    private GameMenu gameMenu;
-    private SkillSetupMenu skillSetupMenu;
-    private EquipmentMenu equipmentMenu;
 
     private GameEngine() {
         // 只保证 provider 链就位；精灵图与各配置表由 GameBootstrap 在加载阶段统一加载
@@ -62,18 +57,6 @@ public class GameEngine {
         return mapManager;
     }
 
-    public GameMenu getGameMenu() {
-        return gameMenu;
-    }
-
-    public SkillSetupMenu getSkillSetupMenu() {
-        return skillSetupMenu;
-    }
-
-    public EquipmentMenu getEquipmentMenu() {
-        return equipmentMenu;
-    }
-
     public MoveResult handlePlayerMove(Direction direction) {
         return moveHandler.handleMove(direction);
     }
@@ -96,8 +79,8 @@ public class GameEngine {
     public boolean hasActiveGame() { return playerStateManager != null; }
 
     /**
-     * 开始全新的一局：整套重建玩家状态 / 地图 / 移动分发 / 菜单，随后载入初始楼层并预计算伤害，
-     * 最后把阶段推进到 {@code PLAYING}。
+     * 开始全新的一局：整套重建玩家状态 / 地图 / 移动分发，随后载入初始楼层并预计算伤害，
+     * 最后经 {@code GameFlow.startNewGame} 广播「新开一局」并把阶段推进到 {@code PLAYING}。
      *
      * <p>装配顺序不能调：{@code MonsterFactory} 在创建怪物时会回头取
      * {@code GameEngine.getPlayerStateManager()} 做首次战斗预计算，
@@ -108,14 +91,11 @@ public class GameEngine {
         this.playerStateManager = loadInitialPlayerState();
         this.mapManager = new MapManager();
         this.moveHandler = new MoveHandler(mapManager, playerStateManager);
-        this.gameMenu = new GameMenu(mapManager);
-        this.skillSetupMenu = new SkillSetupMenu(playerStateManager);
-        this.equipmentMenu = new EquipmentMenu(playerStateManager);
 
         mapManager.loadFloor(initialFloor);
         moveHandler.getBattleHandler().recalculateAllDamage(playerStateManager, mapManager.getCurrentMap());
 
-        gameFlow.toPlaying();
+        gameFlow.startNewGame();
     }
 
     private PlayerStateManager loadInitialPlayerState() {

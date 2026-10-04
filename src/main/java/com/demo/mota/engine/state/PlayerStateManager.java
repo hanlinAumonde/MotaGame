@@ -23,6 +23,7 @@ import com.demo.mota.engine.state.level.LevelManager;
 import com.demo.mota.engine.state.level.LevelUpResult;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.demo.mota.engine.configs.ItemConfigConstants.INITIAL_KEY_SET;
 
@@ -50,6 +51,8 @@ public class PlayerStateManager extends AbstractCharacterState {
     private List<Key> ancientKeys;
 
     private final List<GenericItem> genericItemsOwned;
+    /** 辅助类道具（怪物手册……），按拾取顺序 */
+    private final List<AuxiliaryItem> auxiliaryItemsOwned;
 
     public PlayerStateManager(String characterId, String characterName, Map<StateType, GameNumber> stateMap, Direction currentDirection){
         this(characterId, characterName, stateMap, currentDirection, GameRules.get());
@@ -73,6 +76,7 @@ public class PlayerStateManager extends AbstractCharacterState {
 
         setCurrentKeySet(INITIAL_KEY_SET);
         this.genericItemsOwned = new ArrayList<>();
+        this.auxiliaryItemsOwned = new ArrayList<>();
     }
 
     public void setCurrentKeySet(String currentKeySet) {
@@ -408,6 +412,7 @@ public class PlayerStateManager extends AbstractCharacterState {
     public void gainItem(Item item){
         switch (item) {
             case GenericItem genericItem -> this.genericItemsOwned.add(genericItem);
+            case AuxiliaryItem auxiliaryItem -> this.auxiliaryItemsOwned.add(auxiliaryItem);
             case Equipment equipment -> this.equipmentsOwned.add(equipment);
             case Key key -> {
                 switch (key.getKeyColor()) {
@@ -430,6 +435,26 @@ public class PlayerStateManager extends AbstractCharacterState {
                 }
             }
         }
+    }
+
+    // ==================== 物品栏（供菜单读取） ====================
+
+    /** 当前钥匙组的三把钥匙（黄 / 蓝 / 红），数量见各自的 {@code getItemCount} */
+    public List<Key> getCurrentKeys() {
+        return Stream.of(yellow_Key, blue_Key, red_Key).filter(Objects::nonNull).toList();
+    }
+
+    public List<GenericItem> getGenericItemsOwned() {
+        return Collections.unmodifiableList(genericItemsOwned);
+    }
+
+    public List<AuxiliaryItem> getAuxiliaryItemsOwned() {
+        return Collections.unmodifiableList(auxiliaryItemsOwned);
+    }
+
+    /** 是否持有解锁某项功能的辅助道具（例如怪物手册） */
+    public boolean hasAuxiliary(AuxiliaryType type) {
+        return auxiliaryItemsOwned.stream().anyMatch(item -> item.getAuxiliaryType() == type);
     }
 
     /**

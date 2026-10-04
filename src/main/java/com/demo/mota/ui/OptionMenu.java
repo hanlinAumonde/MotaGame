@@ -1,13 +1,11 @@
 package com.demo.mota.ui;
 
-import com.demo.mota.engine.menu.MenuCommand;
-
 import java.util.List;
 
 /**
  * 「一列选项 + 上下选择 + 确认」的通用状态机，标题界面与游戏结束提示框共用。
  *
- * <p>与 {@code GameMenu} 一样只管状态、不碰绘制；输入同样走 {@link MenuCommand} 语义，
+ * <p>与 {@code GameMenuState} 一样只管状态、不碰绘制；输入同样走 {@link MenuCommand} 语义，
  * 按键到语义的翻译留在各 Screen 里。
  *
  * <p><b>禁用项会被跳过</b>而不是选中后无响应：存档功能落地前，「继续游戏」「读档」

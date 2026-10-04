@@ -18,11 +18,11 @@ module com.demo.mota {
     exports com.demo.mota;
     exports com.demo.mota.engine;
     exports com.demo.mota.engine.enums;
-    exports com.demo.mota.engine.menu;
     exports com.demo.mota.engine.event;
     exports com.demo.mota.engine.map;
     exports com.demo.mota.engine.map.tile;
     exports com.demo.mota.engine.Item;
+    exports com.demo.mota.engine.Item.GenericItem;
     exports com.demo.mota.engine.state;
     exports com.demo.mota.engine.state.monster;
     exports com.demo.mota.engine.skill;
@@ -42,6 +42,14 @@ module com.demo.mota {
     exports com.demo.mota.engine.app;
     exports com.demo.mota.ui;
     exports com.demo.mota.ui.screen;
-    exports com.demo.mota.ui.side;
-    exports com.demo.mota.ui.overlay;
+    exports com.demo.mota.ui.screen.loading;
+    exports com.demo.mota.ui.screen.title;
+    exports com.demo.mota.ui.screen.game;
+    exports com.demo.mota.ui.screen.game.side;
+    exports com.demo.mota.ui.screen.gameover;
+    exports com.demo.mota.ui.screen.gamemenu;
+    exports com.demo.mota.ui.screen.gamemenu.option;
+    exports com.demo.mota.ui.screen.inventory;
+    exports com.demo.mota.ui.screen.equipment;
+    exports com.demo.mota.ui.screen.skill;
 }

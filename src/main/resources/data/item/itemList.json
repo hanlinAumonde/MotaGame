@@ -184,6 +184,24 @@
     ]
   },
   {
+    "AuxiliaryItem":
+    [
+      {
+        "itemId": "monster-book-001",
+        "itemType": "AuxiliaryItem",
+        "itemName": "怪物手册",
+        "itemDescription": "记载着各种敌物的情报，持有后可在菜单（X）的「敌物资料」中查看本层敌物",
+        "itemPrice": -1,
+        "isStorable": true,
+        "isConsumable": false,
+        "parameters": {
+          "auxiliaryType": "monsterBook"
+        },
+        "resourceId": null
+      }
+    ]
+  },
+  {
     "GenericItem":
     [
       {

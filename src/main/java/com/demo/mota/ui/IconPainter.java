@@ -1,6 +1,7 @@
 package com.demo.mota.ui;
 
 import com.demo.mota.engine.Item.Equipment;
+import com.demo.mota.engine.Item.Item;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.skill.Skill;
 import javafx.scene.canvas.GraphicsContext;
@@ -46,6 +47,13 @@ public class IconPainter {
         Image image = resourceManager.getItemImage(equipment.getItemId());
         drawIcon(gc, image, equipment.getItemName(), Color.web("#5b6572"), Color.web("#262b33"),
                 Color.web("#e6edf5"), x, y, w, h);
+    }
+
+    /** 物品栏里的道具图标；缺图时同样画带首字的色块 */
+    public void drawItemIcon(GraphicsContext gc, Item item, double x, double y, double w, double h) {
+        Image image = resourceManager.getItemImage(item.getItemId());
+        drawIcon(gc, image, item.getItemName(), Color.web("#4b3f7a"), Color.web("#1f1a38"),
+                Color.web("#e8dcff"), x, y, w, h);
     }
 
     private void drawIcon(GraphicsContext gc, Image image, String name, Color top, Color bottom, Color textColor,

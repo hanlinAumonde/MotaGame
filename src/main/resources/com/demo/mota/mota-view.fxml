@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 
-<!-- 自下而上三层：游戏画面 → 游戏内菜单 → 标题/加载/结束界面 -->
+<!-- 自下而上两层：游戏画面 → 其余全部界面（加载 / 标题 / 游戏菜单 / 物品栏 / 装备 / 技能设置 / 结束） -->
 <StackPane xmlns:fx="http://javafx.com/fxml"
            fx:controller="com.demo.mota.MotaController"
            stylesheets="@mota-style.css"
@@ -22,10 +22,7 @@
         <Canvas fx:id="sideCanvas" width="256" height="832"/>
     </HBox>
 
-    <!-- 游戏内覆盖层（X 游戏菜单 / D 技能设置 / Q 装备），整屏覆盖 -->
-    <Canvas fx:id="menuCanvas" width="1296" height="840" visible="false"/>
-
-    <!-- 最外层界面：加载 / 标题铺满整屏，游戏结束只画底部提示框、其余部分透出游戏画面 -->
+    <!-- 最外层界面：多数铺满整屏；游戏结束只画底部提示框、其余部分透出游戏画面（Screen.overlaysGame） -->
     <Canvas fx:id="screenCanvas" width="1296" height="840"/>
 
 </StackPane>

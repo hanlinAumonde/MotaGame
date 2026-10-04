@@ -40,12 +40,10 @@ public class ItemFactory extends AbstractFactory<Item, ItemFactory.ItemData, Ite
         JsonNode rootNode = mapper.readTree(inputStream);
         for(JsonNode itemNode: rootNode){
             mapper.treeToValue(itemNode, new TypeReference<Map<String, List<ItemData>>>(){})
-                    .values().forEach(itemData -> {
-                        itemData.forEach(data -> {
-                            dataRegistry.put(data.itemId, data);
-                            ResourceManager.getInstance().registerItemImage(data.itemId, data.resourceId);
-                        });
-                    });
+                    .values().forEach(itemData -> itemData.forEach(data -> {
+                        dataRegistry.put(data.itemId, data);
+                        ResourceManager.getInstance().registerItemImage(data.itemId, data.resourceId);
+                    }));
         }
     }
 
@@ -97,6 +95,13 @@ public class ItemFactory extends AbstractFactory<Item, ItemFactory.ItemData, Ite
                                     isStorable, isConsumable,
                                     StateType.fromString((String) parameters.get(ABILITY_TYPE)),
                                     GameNumber.of((int) parameters.get(ABILITY_VALUE)));
+            case AUXILIARY_ITEM ->
+                    (itemId, itemName, itemDescription, itemPrice, itemCount,
+                     isStorable, isConsumable, parameters) ->
+                            new AuxiliaryItem(itemId, itemName, itemDescription,
+                                    itemPrice, itemCount,
+                                    isStorable, isConsumable,
+                                    AuxiliaryType.fromString((String) parameters.get(AUXILIARY_TYPE)));
             case GENERIC_ITEM ->
                     (itemId, itemName, itemDescription, itemPrice, itemCount,
                      isStorable, isConsumable, parameters) ->

@@ -19,6 +19,9 @@ public class ItemConfigConstants {
     public static final String ABILITY_TYPE = "abilityType";
     public static final String ABILITY_VALUE = "abilityValue";
 
+    public static final String AUXILIARY_ITEM = "AuxiliaryItem";
+    public static final String AUXILIARY_TYPE = "auxiliaryType";
+
     public static final String GENERIC_ITEM = "GenericItem";
     public static final String GENERIC_ITEM_CLASS_NAME = "className";
     public static final String GENERIC_ITEM_CLASS_PATH = "com.demo.mota.engine.Item.GenericItem.GenericItem";
