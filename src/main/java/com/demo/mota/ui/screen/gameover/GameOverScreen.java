@@ -61,20 +61,19 @@ public class GameOverScreen implements Screen {
     }
 
     @Override
-    public boolean handleKey(KeyCode code) {
+    public void handleKey(KeyCode code) {
         MenuCommand command = toCommand(code);
-        if (command == null) return false;
+        if (command == null) return;
 
         String chosen = options.handle(command);
         if (chosen == null) {
             render();
-            return true;
+            return;
         }
         if (TITLE.equals(chosen)) {
             // 这一局的引擎状态原样留着，下次「开始游戏」时由 startNewGame 整套重建
             flow.to(GamePhase.TITLE);
         }
-        return true;
     }
 
     /** 结束框是左右排布的，左右键与 W/S 一样能切换选项 */

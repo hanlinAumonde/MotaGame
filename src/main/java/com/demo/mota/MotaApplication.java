@@ -26,6 +26,8 @@ public class MotaApplication extends Application {
         // 获取 controller 并绑定键盘事件
         MotaController controller = fxmlLoader.getController();
         scene.setOnKeyPressed(controller::handleKeyPress);
+        // 松键用于组合快捷键（按住 D / W 再按数字）
+        scene.setOnKeyReleased(controller::handleKeyRelease);
 
         stage.setTitle("魔塔");
         stage.setResizable(false);

@@ -24,12 +24,13 @@ public class GameFlow {
         TRANSITIONS.put(GamePhase.LOADING, EnumSet.of(GamePhase.TITLE));
         TRANSITIONS.put(GamePhase.TITLE, EnumSet.of(GamePhase.PLAYING));
         TRANSITIONS.put(GamePhase.PLAYING, EnumSet.of(GamePhase.GAME_MENU, GamePhase.EQUIPMENT,
-                GamePhase.SKILL_SETUP, GamePhase.INVENTORY, GamePhase.GAME_OVER));
+                GamePhase.SKILL_SETUP, GamePhase.INVENTORY, GamePhase.EQUIPMENT_SETS, GamePhase.GAME_OVER));
         TRANSITIONS.put(GamePhase.GAME_MENU, EnumSet.of(GamePhase.PLAYING, GamePhase.INVENTORY,
-                GamePhase.EQUIPMENT, GamePhase.SKILL_SETUP));
+                GamePhase.EQUIPMENT, GamePhase.SKILL_SETUP, GamePhase.EQUIPMENT_SETS));
         TRANSITIONS.put(GamePhase.INVENTORY, EnumSet.of(GamePhase.PLAYING));
         TRANSITIONS.put(GamePhase.EQUIPMENT, EnumSet.of(GamePhase.PLAYING));
         TRANSITIONS.put(GamePhase.SKILL_SETUP, EnumSet.of(GamePhase.PLAYING));
+        TRANSITIONS.put(GamePhase.EQUIPMENT_SETS, EnumSet.of(GamePhase.PLAYING));
         TRANSITIONS.put(GamePhase.GAME_OVER, EnumSet.of(GamePhase.TITLE));
     }
 

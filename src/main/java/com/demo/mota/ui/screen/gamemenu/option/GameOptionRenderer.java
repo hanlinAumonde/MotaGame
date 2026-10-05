@@ -46,6 +46,7 @@ public class GameOptionRenderer {
             case ITEMS -> "查看持有的钥匙、辅助道具与通用道具";
             case EQUIPMENT -> "打开装备界面（快捷键 Q）";
             case SKILLS -> "打开技能设置界面（快捷键 D）";
+            case EQUIPMENT_SETS -> "一键切换已保存的装备套装（快捷键 A）";
         };
     }
 

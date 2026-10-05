@@ -2,8 +2,8 @@ package com.demo.mota.ui.screen.game.side;
 
 import com.demo.mota.engine.Item.Equipment;
 import com.demo.mota.engine.skill.Skill;
-import com.demo.mota.engine.skill.SkillCast;
 import com.demo.mota.engine.skill.book.OwnedSkill;
+import com.demo.mota.engine.skill.preset.PresetSlotView;
 import com.demo.mota.engine.skill.preset.SkillPreset;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.ui.PanelStyle;
@@ -21,7 +21,7 @@ import java.util.function.BiConsumer;
  * <table border="1">
  *   <caption>内置分区</caption>
  *   <tr><th>id</th><th>内容</th></tr>
- *   <tr><td>{@code skillCombo}</td><td>就绪预设里实际会释放的主动技能（角标为释放回合），没有就绪预设时显示「未就绪」</td></tr>
+ *   <tr><td>{@code skillCombo}</td><td>激活预设里排的技能（角标为释放回合；暂不生效的画灰），没有激活预设时显示「未激活」</td></tr>
  *   <tr><td>{@code passiveSkills}</td><td>全部被动技能，关闭的画暗</td></tr>
  *   <tr><td>{@code equipment}</td><td>装备槽，空槽画虚线框</td></tr>
  * </table>
@@ -54,18 +54,13 @@ public final class BuiltinSidePanelSections {
 
     private static final class SkillComboSection implements SidePanelSection {
 
-        /** 只取主动技能：与战斗实际结算的是同一批（已剔除失效 / 超出次数的格子） */
-        private static List<SkillCast> activeCasts(PlayerStateManager player) {
-            return player.getBattleSkillCasts().stream().filter(cast -> !cast.isPassive()).toList();
-        }
-
         @Override
         public double height(SidePanelContext ctx, double width) {
             if (ctx.player().getPresetBook().getArmed() == null) {
                 return TITLE_HEIGHT + LINE_HEIGHT;
             }
-            List<SkillCast> casts = activeCasts(ctx.player());
-            return TITLE_HEIGHT + LINE_HEIGHT + (casts.isEmpty() ? LINE_HEIGHT : gridHeight(casts.size()));
+            List<PresetSlotView> slots = ctx.player().getArmedPresetSlots();
+            return TITLE_HEIGHT + LINE_HEIGHT + (slots.isEmpty() ? LINE_HEIGHT : gridHeight(slots.size()));
         }
 
         @Override
@@ -81,18 +76,19 @@ public final class BuiltinSidePanelSections {
             }
             ctx.painter().drawCenteredShadowText(gc, "● " + armed.getName(), x + width / 2, lineY, ARMED_COLOR);
 
-            List<SkillCast> casts = activeCasts(ctx.player());
+            // 预设里排的每一格都画出来；暂时不生效的（装备卸下了 / 超出次数）盖一层灰，而不是直接隐藏
+            List<PresetSlotView> slots = ctx.player().getArmedPresetSlots();
             double gridTop = y + TITLE_HEIGHT + LINE_HEIGHT;
-            if (casts.isEmpty()) {
+            if (slots.isEmpty()) {
                 gc.setFont(Font.font("SimHei", FontWeight.BOLD, 20));
                 ctx.painter().drawCenteredShadowText(gc, "全程普攻", x + width / 2, gridTop + 22, PanelStyle.DISABLED_COLOR);
                 return;
             }
-            for (int i = 0; i < casts.size(); i++) {
-                SkillCast cast = casts.get(i);
+            for (int i = 0; i < slots.size(); i++) {
+                PresetSlotView slot = slots.get(i);
                 double[] cell = cell(x, gridTop, width, i);
-                ctx.icons().drawSkillIcon(gc, cast.skill(), cell[0], cell[1], ICON_SIZE, ICON_SIZE);
-                drawBadge(gc, ctx.painter(), cast.castRound() == 0 ? "前" : String.valueOf(cast.castRound()),
+                ctx.icons().drawSkillIcon(gc, slot.skill(), cell[0], cell[1], ICON_SIZE, ICON_SIZE, !slot.effective());
+                drawBadge(gc, ctx.painter(), slot.round() == 0 ? "前" : String.valueOf(slot.round()),
                         cell[0], cell[1]);
             }
         }

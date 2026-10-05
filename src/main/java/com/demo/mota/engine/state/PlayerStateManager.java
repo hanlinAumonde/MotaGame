@@ -16,8 +16,13 @@ import com.demo.mota.engine.skill.book.OwnedSkill;
 import com.demo.mota.engine.skill.book.SkillBook;
 import com.demo.mota.engine.skill.book.SkillSource;
 import com.demo.mota.engine.skill.preset.PresetEditResult;
+import com.demo.mota.engine.skill.preset.PresetSlotView;
 import com.demo.mota.engine.skill.preset.SkillPreset;
 import com.demo.mota.engine.skill.preset.SkillPresetBook;
+import com.demo.mota.engine.state.equipset.EquipSetResult;
+import com.demo.mota.engine.state.equipset.EquipmentSet;
+import com.demo.mota.engine.state.equipset.EquipmentSetBook;
+import com.demo.mota.engine.state.equipset.EquipmentSwap;
 import com.demo.mota.engine.state.level.LevelBonus;
 import com.demo.mota.engine.state.level.LevelManager;
 import com.demo.mota.engine.state.level.LevelUpResult;
@@ -37,6 +42,8 @@ public class PlayerStateManager extends AbstractCharacterState {
     /** 槽位 → 装备，下标即槽位号，空槽为 null；长度由规则配置决定 */
     private final Equipment[] equipmentsEquipped;
     private EquipSlotRule equipSlotRule = EquipSlotRule.ALLOW_ALL;
+    /** 保存下来的装备套装（装备界面 W+数字键保存，套装界面一键换上） */
+    private final EquipmentSetBook equipmentSetBook;
 
     /** 玩家的技能书（来源 + 开关）；怪物不用它，仍由基类直接持有技能列表 */
     private final SkillBook skillBook;
@@ -65,6 +72,7 @@ public class PlayerStateManager extends AbstractCharacterState {
         this.currentGoldAmount = 0;
         this.equipmentsOwned = new ArrayList<>();
         this.equipmentsEquipped = new Equipment[rules.equipment().slotCount()];
+        this.equipmentSetBook = new EquipmentSetBook(rules.equipment().setCount(), equipmentsEquipped.length);
         this.skillBook = new SkillBook();
 
         GameRules.SkillRules skillRules = rules.skill();
@@ -221,6 +229,48 @@ public class PlayerStateManager extends AbstractCharacterState {
             }
         }
         return casts;
+    }
+
+    /**
+     * 展示用：激活预设里排了技能的每一格，并标出它这场战斗是否真的会放。
+     * 判定与 {@link #getBattleSkillCasts()} 同一套（不在手上 / 不是主动 / 超出每场次数 → 不生效），
+     * 区别只在于不生效的格子也列出来，界面画灰而不是隐藏。技能表里都查不到的 id 忽略。
+     */
+    public List<PresetSlotView> getArmedPresetSlots() {
+        SkillPreset armed = presetBook.getArmed();
+        if (armed == null) {
+            return List.of();
+        }
+        List<PresetSlotView> views = new ArrayList<>();
+        Map<String, Integer> scheduled = new HashMap<>();
+        for (int round = 0; round < armed.slotCount(); round++) {
+            String skillId = armed.getSlot(round);
+            if (skillId == null) continue;
+            OwnedSkill owned = skillBook.get(skillId);
+            if (owned == null) {
+                Skill missing = lookupSkill(skillId);
+                if (missing != null) {
+                    views.add(new PresetSlotView(missing, round, false));
+                }
+                continue;
+            }
+            Skill skill = owned.skill();
+            int used = scheduled.getOrDefault(skillId, 0);
+            boolean effective = skill.isActive() && skill.canCastAgain(used);
+            if (effective) {
+                scheduled.put(skillId, used + 1);
+            }
+            views.add(new PresetSlotView(skill, round, effective));
+        }
+        return views;
+    }
+
+    private static Skill lookupSkill(String skillId) {
+        try {
+            return SkillFactory.getInstance().createById(skillId);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     public SkillBook getSkillBook() {
@@ -393,6 +443,51 @@ public class PlayerStateManager extends AbstractCharacterState {
             this.updateState(StateType.HP, maxHP);
         }
         return removed;
+    }
+
+    // ==================== 装备套装 ====================
+
+    public EquipmentSetBook getEquipmentSetBook() {
+        return equipmentSetBook;
+    }
+
+    /** 把当前穿戴存为第 setIndex 套（覆盖原有）；越界时返回 false */
+    public boolean saveEquipmentSet(int setIndex) {
+        return equipmentSetBook.save(setIndex, equipmentsEquipped);
+    }
+
+    /** 当前穿戴与该套装逐槽完全一致 */
+    public boolean isWearingSet(int setIndex) {
+        return setIndex >= 0 && setIndex < equipmentSetBook.setCount()
+                && equipmentSetBook.get(setIndex).matches(equipmentsEquipped);
+    }
+
+    /**
+     * 换上第 setIndex 套装备：按差异换装（见 {@link EquipmentSwap}），不在背包 / 不满足槽位规则的件跳过。
+     * 换下的装备撤销附带技能、新穿上的授予，只换槽位的不动；全部换完后生命值只钳一次到新上限。
+     * 调用方随后需要重算伤害。
+     */
+    public EquipSetResult applyEquipmentSet(int setIndex) {
+        if (setIndex < 0 || setIndex >= equipmentSetBook.setCount()) {
+            return EquipSetResult.OUT_OF_RANGE;
+        }
+        EquipmentSet set = equipmentSetBook.get(setIndex);
+        if (!set.isSaved()) {
+            return EquipSetResult.NOT_SAVED;
+        }
+        EquipmentSwap swap = EquipmentSwap.plan(equipmentsEquipped, set.slots().toArray(Equipment[]::new),
+                equipmentsOwned::contains, equipSlotRule::canEquip);
+        System.arraycopy(swap.result(), 0, equipmentsEquipped, 0, equipmentsEquipped.length);
+        swap.removed().forEach(equipment -> skillBook.revoke(new SkillSource.FromEquipment(equipment)));
+        swap.added().forEach(equipment -> {
+            SkillSource source = new SkillSource.FromEquipment(equipment);
+            equipment.getSkills().forEach(skill -> skillBook.grant(skill, source));
+        });
+        GameNumber maxHP = getMaxHP();
+        if (getCurrentHP().compareTo(maxHP) > 0) {
+            this.updateState(StateType.HP, maxHP);
+        }
+        return EquipSetResult.ok(swap.skipped());
     }
 
     public long getCurrentGoldAmount() {

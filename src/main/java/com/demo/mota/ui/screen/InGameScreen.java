@@ -26,10 +26,10 @@ public abstract class InGameScreen implements Screen {
     }
 
     @Override
-    public final boolean handleKey(KeyCode code) {
+    public final void handleKey(KeyCode code) {
         if (code == CLOSE_KEY) {
             flow.to(GamePhase.PLAYING);
-            return true;
+            return;
         }
         GamePhase next = handleScreenKey(code);
         if (next != null) {
@@ -37,7 +37,6 @@ public abstract class InGameScreen implements Screen {
         } else {
             render();
         }
-        return true;
     }
 
     /**
@@ -46,6 +45,22 @@ public abstract class InGameScreen implements Screen {
      * @return 处理完要迁往的阶段；{@code null} 表示留在本界面（随后自动重绘）
      */
     protected abstract GamePhase handleScreenKey(KeyCode code);
+
+    @Override
+    public final void handleKeyRelease(KeyCode code) {
+        if (handleScreenKeyRelease(code)) {
+            render();
+        }
+    }
+
+    /**
+     * 处理松键（组合快捷键用）。
+     *
+     * @return 界面是否有变化需要重绘
+     */
+    protected boolean handleScreenKeyRelease(KeyCode code) {
+        return false;
+    }
 
     @Override
     public final void render() {

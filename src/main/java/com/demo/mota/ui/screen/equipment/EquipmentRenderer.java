@@ -68,7 +68,7 @@ public class EquipmentRenderer {
         painter.drawShadowText(gc, "装备", x + 18, y + 38, PanelStyle.SECTION_COLOR);
 
         double listTop = y + 56;
-        double listBottom = y + h - 110;
+        double listBottom = y + h - 136;
         if (equipments.isEmpty()) {
             gc.setFont(Font.font("SimHei", FontWeight.BOLD, 20));
             painter.drawShadowText(gc, "还没有任何装备", x + 18, listTop + 36, PanelStyle.DISABLED_COLOR);
@@ -100,8 +100,12 @@ public class EquipmentRenderer {
                 : new String[]{"方向键 选槽位   Enter " + (menu.getPending() != null ? "装备到此槽" : "卸下"),
                                "Esc 返回装备列表", "X 返回游戏"};
         for (int i = 0; i < hints.length; i++) {
-            painter.drawShadowText(gc, hints[i], x + 18, y + h - 78 + i * 26, PanelStyle.HINT_COLOR);
+            painter.drawShadowText(gc, hints[i], x + 18, y + h - 104 + i * 26, PanelStyle.HINT_COLOR);
         }
+        // 套装保存提示（img_4）：按下 W 等数字键期间高亮
+        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 18));
+        painter.drawShadowText(gc, menu.isSaveArmed() ? "W+数字键 保存套装（请按数字键）" : "W+数字键 保存套装",
+                x + 18, y + h - 22, menu.isSaveArmed() ? PanelStyle.NOTICE_COLOR : PanelStyle.SECTION_COLOR);
     }
 
     // ==================== 中上：槽位 ====================
@@ -128,7 +132,8 @@ public class EquipmentRenderer {
 
         for (int i = 0; i < count; i++) {
             double cx = x + 18 + (i % cols) * cellW;
-            double cy = gridTop + ((double) i / cols) * cellH;
+            // 行号必须是整除：写成 (double) i / cols 会让同一行的第 2、3 格各自往下错开 1/3、2/3 行
+            double cy = gridTop + ((int) (i / cols)) * cellH;
             if (focused && i == menu.getSelectedSlot()) {
                 PanelStyle.drawSelection(gc, cx + 4, cy + 2, cellW - 8, cellH - 6, true);
             }

@@ -25,6 +25,7 @@ module com.demo.mota {
     exports com.demo.mota.engine.Item.GenericItem;
     exports com.demo.mota.engine.state;
     exports com.demo.mota.engine.state.monster;
+    exports com.demo.mota.engine.state.equipset;
     exports com.demo.mota.engine.skill;
     exports com.demo.mota.engine.skill.effect;
     exports com.demo.mota.engine.skill.effect.builtin;
@@ -51,5 +52,6 @@ module com.demo.mota {
     exports com.demo.mota.ui.screen.gamemenu.option;
     exports com.demo.mota.ui.screen.inventory;
     exports com.demo.mota.ui.screen.equipment;
+    exports com.demo.mota.ui.screen.equipset;
     exports com.demo.mota.ui.screen.skill;
 }

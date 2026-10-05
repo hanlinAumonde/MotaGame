@@ -6,9 +6,9 @@ package com.demo.mota.engine.app;
  * <pre>
  *   LOADING ──▶ TITLE ──开始游戏──▶ PLAYING ──生命归零──▶ GAME_OVER ──返回标题──▶ TITLE
  *                                   │  ▲
- *               X / D / Q ──────────┘  └────────── X / Esc 返回
+ *             X / D / Q / A ────────┘  └────────── X / Esc 返回
  *                 ▼
- *   GAME_MENU ──游戏选项──▶ INVENTORY / EQUIPMENT / SKILL_SETUP
+ *   GAME_MENU ──游戏选项──▶ INVENTORY / EQUIPMENT / SKILL_SETUP / EQUIPMENT_SETS
  * </pre>
  *
  * 允许的迁移见 {@link GameFlow}。各阶段两两互斥：同一时刻只有一个界面在接收按键。
@@ -28,6 +28,8 @@ public enum GamePhase {
     EQUIPMENT(true),
     /** 技能设置（D） */
     SKILL_SETUP(true),
+    /** 装备套装（A）：选一套一键换上 */
+    EQUIPMENT_SETS(true),
     /** 玩家生命归零，游戏画面保留，底部弹出提示框 */
     GAME_OVER(true);
 

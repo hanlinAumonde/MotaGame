@@ -48,7 +48,7 @@ public record GameRules(SkillRules skill, EquipmentRules equipment, SidePanelRul
      * @param presetEditable 玩家能否编辑预设；为 false 时技能界面只读，预设取自 {@code fixedPresets}
      * @param fixedPresets   塔作者预先写好的预设，按顺序覆盖前几套
      * @param hotkeys        激活预设的按键（JavaFX {@code KeyCode} 名），第 i 个对应第 i 套预设；
-     *                       游戏中按下即激活该套，技能设置界面中按下即切到该套编辑（同时激活）
+     *                       按住 D 再按：游戏中激活 / 停用该套，技能设置界面中切到该套编辑（同时激活）
      */
     public record SkillRules(Integer maxRound, Integer presetCount, Boolean presetEditable,
                              List<PresetData> fixedPresets, List<String> hotkeys) {
@@ -76,13 +76,20 @@ public record GameRules(SkillRules skill, EquipmentRules equipment, SidePanelRul
     /** @param slots 每回合的技能 id，下标 = 回合（0 为战前），空串 / null 为普攻 */
     public record PresetData(String name, List<String> slots) {}
 
-    /** @param slotCount 装备槽数量 */
-    public record EquipmentRules(Integer slotCount) {
+    /**
+     * @param slotCount  装备槽数量
+     * @param setCount   装备套装数量
+     * @param setHotkeys 套装对应的按键（JavaFX {@code KeyCode} 名），第 i 个对应第 i 套；
+     *                   按住 W 再按：游戏中换上该套，装备界面中把当前穿戴存为该套
+     */
+    public record EquipmentRules(Integer slotCount, Integer setCount, List<String> setHotkeys) {
 
-        public static final EquipmentRules DEFAULT = new EquipmentRules(null);
+        public static final EquipmentRules DEFAULT = new EquipmentRules(null, null, null);
 
         public EquipmentRules {
             slotCount = slotCount == null || slotCount < 1 ? 6 : slotCount;
+            setCount = setCount == null || setCount < 1 ? 10 : setCount;
+            setHotkeys = setHotkeys == null ? SkillRules.DEFAULT_HOTKEYS : List.copyOf(setHotkeys);
         }
     }
 

@@ -26,8 +26,11 @@ import com.demo.mota.engine.state.monster.Monster;
 import com.demo.mota.ui.DamagePalette;
 import com.demo.mota.ui.TextPainter;
 import com.demo.mota.ui.ValueFormatter;
+import com.demo.mota.engine.state.equipset.EquipSetResult;
+import com.demo.mota.ui.screen.ChordKey;
 import com.demo.mota.ui.screen.PresetHotkeys;
 import com.demo.mota.ui.screen.Screen;
+import com.demo.mota.ui.screen.equipset.EquipmentSetState;
 import com.demo.mota.ui.screen.game.side.SidePanelRenderer;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -45,7 +48,8 @@ import static com.demo.mota.engine.configs.MapConfigConstants.MAP_SIDE_LENGTH;
  * 对局界面（{@link GamePhase#PLAYING}）：左侧状态面板 + 中间地图 + 右侧技能装备栏（{@code side} 子包）。
  *
  * <p>负责移动分发、状态面板绘制、地图绘制（精灵图优先 + 纯色 fallback）、伤害数字；
- * 按 X / D / Q 迁往游戏菜单 / 技能设置 / 装备界面（{@link #SCREEN_KEYS}），那些界面各自是独立的 Screen。
+ * 按 X / D / Q / A 迁往游戏菜单 / 技能设置 / 装备 / 套装界面，那些界面各自是独立的 Screen。
+ * 组合快捷键：按住 D 再按数字键切换技能组、按住 W 再按数字键换上套装（{@link ChordKey}）。
  *
  * <p>每次回到本界面都重算一次当前层伤害：其他界面里穿脱装备、改预设都可能影响战斗推演，
  * 统一在这里补算，那些界面就不必各自汇报「改没改」。当前层怪物只有几十只，开销可以忽略。
@@ -63,11 +67,14 @@ public class GameScreen implements Screen {
     /** 兜底字号下限：仅在超出末级单位等极端情况下才会触发收缩 */
     private static final double DAMAGE_FONT_MIN_RATIO = 0.17;
 
-    /** 对局中呼出其他界面的快捷键（物品栏暂无快捷键，只能经游戏菜单进入） */
+    /**
+     * 对局中呼出其他界面的快捷键（物品栏暂无快捷键，只能经游戏菜单进入）。
+     * 技能设置（D）不在这里：D 同时是技能组快捷键的修饰键，只有「单按」松开时才打开，见 {@link #handleKeyRelease}
+     */
     private static final Map<KeyCode, GamePhase> SCREEN_KEYS = Map.of(
             KeyCode.X, GamePhase.GAME_MENU,
-            KeyCode.D, GamePhase.SKILL_SETUP,
-            KeyCode.Q, GamePhase.EQUIPMENT);
+            KeyCode.Q, GamePhase.EQUIPMENT,
+            KeyCode.A, GamePhase.EQUIPMENT_SETS);
 
     private final GameEngine engine;
     private final ResourceManager resourceManager;
@@ -78,8 +85,14 @@ public class GameScreen implements Screen {
     private final Canvas sideCanvas;
     private final SidePanelRenderer sidePanelRenderer;
 
-    /** 切换就绪预设的按键 → 预设下标，取自塔规则 {@code skill.hotkeys} */
+    /** 按住 D 再按数字键：激活 / 停用技能组；单按 D：打开技能设置 */
+    private final ChordKey presetChord = new ChordKey(PresetHotkeys.SKILL_CHORD);
+    /** 按住 W 再按数字键：换上对应套装 */
+    private final ChordKey setChord = new ChordKey(PresetHotkeys.EQUIPMENT_SET_CHORD);
+    /** 数字键 → 预设下标，取自塔规则 {@code skill.hotkeys} */
     private final Map<KeyCode, Integer> presetHotkeys = PresetHotkeys.fromRules();
+    /** 数字键 → 套装下标，取自塔规则 {@code equipment.setHotkeys} */
+    private final Map<KeyCode, Integer> setHotkeys = PresetHotkeys.equipmentSetsFromRules();
 
     /** 文本测量与绘制工具（阴影描边、自适应字号、折行） */
     private final TextPainter painter = new TextPainter();
@@ -105,41 +118,54 @@ public class GameScreen implements Screen {
         this.currentMessage = "";
     }
 
+    /** 其他界面带回来的一句提示（如「已切换到第1号套装」），显示在状态栏消息处 */
+    public void showMessage(String message) {
+        this.currentMessage = message == null ? "" : message;
+    }
+
     /** 回到对局（新开一局或从其他界面返回）：补算当前层伤害，见类注释 */
     @Override
     public void onEnter() {
+        // 松键可能落在了别的界面里，回来时不能让「按住」状态残留
+        presetChord.reset();
+        setChord.reset();
         engine.recalculateCurrentFloorDamage();
     }
 
     // ==================== 输入 ====================
 
     @Override
-    public boolean handleKey(KeyCode code) {
+    public void handleKey(KeyCode code) {
+        if (code == presetChord.key()) {
+            presetChord.press(code);
+            return;
+        }
+        if (code == setChord.key()) {
+            setChord.press(code);
+            return;
+        }
+        // 按住 D 期间按了任何别的键（数字、方向……），松开 D 时都不再算「单按」，不会再弹出技能设置
+        presetChord.markUsed();
+        setChord.markUsed();
+        if (handleChordDigit(code)) {
+            return;
+        }
+
         GamePhase screen = SCREEN_KEYS.get(code);
         if (screen != null) {
             flow.to(screen);
-            return true;
+            return;
         }
 
-        Integer preset = presetHotkeys.get(code);
-        if (preset != null) {
-            if (togglePreset(preset)) {
-                engine.recalculateCurrentFloorDamage();
-            }
-            render();
-            return true;
-        }
-
-        return switch (code) {
+        switch (code) {
             case Z -> {
                 this.engine.handleDirectionChange();
                 //当前玩家站立的tile必定为可通过地形
                 renderTileAndPlayerAt(mapCanvas.getGraphicsContext2D(), this.engine.getMapManager().getPlayerPosition());
-                yield true;
             }
             default -> {
                 Direction direction = toDirection(code);
-                if (direction == null) yield false;
+                if (direction == null) break;
 
                 MoveResult result = engine.handlePlayerMove(direction);
                 handleMoveResult(result);
@@ -149,9 +175,49 @@ public class GameScreen implements Screen {
                 if (engine.getPlayerStateManager().isDead()) {
                     flow.to(GamePhase.GAME_OVER);
                 }
-                yield true;
             }
-        };
+        }
+    }
+
+    /** 单按 D（按住期间没有组合数字键）松开时才打开技能设置 */
+    @Override
+    public void handleKeyRelease(KeyCode code) {
+        if (presetChord.release(code)) {
+            flow.to(GamePhase.SKILL_SETUP);
+        }
+        setChord.release(code);
+    }
+
+    /**
+     * 数字键：按住 D 时切换技能组，按住 W 时换上套装，都没按住时不做任何事。
+     *
+     * @return 是否是数字键（已消费）
+     */
+    private boolean handleChordDigit(KeyCode code) {
+        Integer preset = presetHotkeys.get(code);
+        Integer set = setHotkeys.get(code);
+        if (preset == null && set == null) {
+            return false;
+        }
+        boolean changed = false;
+        if (presetChord.isHeld() && preset != null) {
+            changed = togglePreset(preset);
+        } else if (setChord.isHeld() && set != null) {
+            changed = applyEquipmentSet(set);
+        }
+        if (changed) {
+            engine.recalculateCurrentFloorDamage();
+        }
+        render();
+        return true;
+    }
+
+    /** 对局中 W+数字键换上套装，结果写进状态栏消息 */
+    private boolean applyEquipmentSet(int setIndex) {
+        PlayerStateManager player = engine.getPlayerStateManager();
+        EquipSetResult result = player.applyEquipmentSet(setIndex);
+        currentMessage = EquipmentSetState.describe(player, setIndex, result);
+        return result.isOk();
     }
 
     private static Direction toDirection(KeyCode code) {
@@ -165,7 +231,7 @@ public class GameScreen implements Screen {
     }
 
     /**
-     * 游戏中按数字键：激活对应预设；对已激活的那套再按一次则停用（全程普攻）。结果写进状态栏消息。
+     * 游戏中按 D+数字键：激活对应预设；对已激活的那套再按一次则停用（全程普攻）。结果写进状态栏消息。
      *
      * @return 是否真的切换了（下标超出预设套数时不动）
      */

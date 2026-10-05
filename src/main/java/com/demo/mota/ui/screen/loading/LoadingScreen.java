@@ -45,9 +45,8 @@ public class LoadingScreen implements Screen {
     }
 
     @Override
-    public boolean handleKey(KeyCode code) {
+    public void handleKey(KeyCode code) {
         // 加载期间吞掉所有按键，避免抢先进入尚未就绪的对局
-        return true;
     }
 
     @Override

@@ -17,6 +17,10 @@ import java.util.List;
  *       没有待穿装备时卸下此槽装备；返回 = 回到装备列表。</li>
  * </ul>
  * 带着装备进入网格时，光标落在它当前所在的槽，没穿上的落在第一个空槽（都没有则第一格）。
+ *
+ * <p><b>保存套装</b>（按住 W 再按数字键）：按下 W 时 {@link #armSave()} 给出提示，
+ * 数字键 {@link #saveSet(int)} 把当前穿戴存进对应套装，松开 W 时 {@link #cancelSave()} 撤掉未用上的提示。
+ * 「是否按住」由界面层的 {@code ChordKey} 判断，本类只管提示与保存。
  */
 public class EquipmentState {
 
@@ -33,6 +37,8 @@ public class EquipmentState {
     private int slotIndex;
     /** 从列表选中、等着挑槽位的装备；为 null 表示在槽位网格里只是浏览 / 卸下 */
     private Equipment pending;
+    /** 按住了 W、还没按数字键（界面据此高亮保存提示） */
+    private boolean saveArmed;
     private String notice = "";
 
     public EquipmentState(PlayerStateManager player) {
@@ -45,12 +51,14 @@ public class EquipmentState {
         this.listIndex = 0;
         this.slotIndex = 0;
         this.pending = null;
+        this.saveArmed = false;
         this.notice = "";
     }
 
     public void close() {
         this.open = false;
         this.pending = null;
+        this.saveArmed = false;
     }
 
     public boolean isOpen() {
@@ -63,6 +71,7 @@ public class EquipmentState {
             return;
         }
         notice = "";
+        saveArmed = false;
         if (focus == Focus.LIST) {
             handleList(command);
         } else {
@@ -139,6 +148,36 @@ public class EquipmentState {
         notice = player.equip(equipment, slot)
                 ? "装备了 " + equipment.getItemName()
                 : equipment.getItemName() + " 不能装备在这个槽位";
+    }
+
+    // ==================== 保存套装 ====================
+
+    /** 刚按下 W：提示玩家接着按数字键 */
+    public void armSave() {
+        if (!open) return;
+        saveArmed = true;
+        notice = "按数字键选择要保存到的套装";
+    }
+
+    public boolean isSaveArmed() {
+        return saveArmed;
+    }
+
+    /** W+数字键：把当前穿戴存进第 setIndex 套（覆盖原有） */
+    public void saveSet(int setIndex) {
+        if (!open) return;
+        saveArmed = false;
+        notice = player.saveEquipmentSet(setIndex)
+                ? "已保存为" + player.getEquipmentSetBook().get(setIndex).getName()
+                : "没有这一套套装";
+    }
+
+    /** 松开 W 而没有保存：撤掉提示 */
+    public void cancelSave() {
+        if (saveArmed) {
+            saveArmed = false;
+            notice = "";
+        }
     }
 
     private static int wrap(int index, int size) {

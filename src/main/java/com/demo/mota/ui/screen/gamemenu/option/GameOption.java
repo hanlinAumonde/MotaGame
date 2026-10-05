@@ -11,7 +11,8 @@ import com.demo.mota.engine.app.GamePhase;
 public enum GameOption {
     ITEMS("物品栏", GamePhase.INVENTORY),
     EQUIPMENT("角色装备", GamePhase.EQUIPMENT),
-    SKILLS("角色技能", GamePhase.SKILL_SETUP);
+    SKILLS("角色技能", GamePhase.SKILL_SETUP),
+    EQUIPMENT_SETS("套装设定", GamePhase.EQUIPMENT_SETS);
 
     private final String displayName;
     private final GamePhase handoff;

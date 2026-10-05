@@ -4,6 +4,7 @@ import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.app.GameFlow;
 import com.demo.mota.engine.app.GamePhase;
 import com.demo.mota.ui.MenuCommand;
+import com.demo.mota.ui.screen.ChordKey;
 import com.demo.mota.ui.screen.InGameScreen;
 import com.demo.mota.ui.screen.PresetHotkeys;
 import javafx.scene.canvas.Canvas;
@@ -15,13 +16,14 @@ import java.util.Map;
 /**
  * 技能设置（{@link GamePhase#SKILL_SETUP}，对局中按 D）：{@link SkillSetupState} + {@link SkillSetupRenderer}。
  *
- * <p>数字键（规则 {@code skill.hotkeys}）切换正在编辑的预设并激活，不做停用。
+ * <p>按住 D 再按数字键（规则 {@code skill.hotkeys}）切换正在编辑的预设并激活，不做停用；与对局中同一按法。
  * 预设改动造成的伤害变化由对局界面在回到游戏时统一重算。
  */
 public class SkillSetupScreen extends InGameScreen {
 
     private final GameEngine engine;
     private final SkillSetupRenderer renderer;
+    private final ChordKey presetChord = new ChordKey(PresetHotkeys.SKILL_CHORD);
     private final Map<KeyCode, Integer> presetHotkeys = PresetHotkeys.fromRules();
     private SkillSetupState state;
 
@@ -38,18 +40,33 @@ public class SkillSetupScreen extends InGameScreen {
 
     @Override
     public void onEnter() {
+        presetChord.reset();
         state.open();
     }
 
     @Override
     protected GamePhase handleScreenKey(KeyCode code) {
+        if (code == presetChord.key()) {
+            presetChord.press(code);
+            return null;
+        }
         Integer preset = presetHotkeys.get(code);
         if (preset != null) {
-            state.selectPreset(preset);
-        } else {
-            state.handle(toCommand(code));
+            // 与对局中相同：按住 D 再按数字键才切换
+            if (presetChord.isHeld()) {
+                presetChord.markUsed();
+                state.selectPreset(preset);
+            }
+            return null;
         }
+        state.handle(toCommand(code));
         return state.isOpen() ? null : GamePhase.PLAYING;
+    }
+
+    @Override
+    protected boolean handleScreenKeyRelease(KeyCode code) {
+        presetChord.release(code);
+        return false;
     }
 
     @Override

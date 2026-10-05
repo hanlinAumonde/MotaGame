@@ -196,8 +196,8 @@ public class SkillSetupRenderer {
 
         gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 16));
         String hint = player.isPresetEditable()
-                ? "↑↓ 选技能   ←→ 选回合   Enter 放入   Delete 卸下   数字键 切换技能组   X 返回游戏"
-                : "↑↓ 查看技能   ←→ 查看回合   数字键 切换技能组   X 返回游戏";
+                ? "↑↓ 选技能   ←→ 选回合   Enter 放入   Delete 卸下   D+数字键 切换技能组   X 返回游戏"
+                : "↑↓ 查看技能   ←→ 查看回合   D+数字键 切换技能组   X 返回游戏";
         painter.drawShadowText(gc, hint, x + 20, y + h - 18, PanelStyle.HINT_COLOR);
     }
 

@@ -18,10 +18,11 @@ public interface Screen {
 
     /**
      * 处理一次按键。
-     *
-     * @return 是否消费了该按键；返回 false 表示这个键与本界面无关
      */
-    boolean handleKey(KeyCode code);
+    void handleKey(KeyCode code);
+
+    /** 处理一次松键。只有用到组合快捷键（{@link ChordKey}）的界面才需要关心 */
+    default void handleKeyRelease(KeyCode code) {}
 
     /** 每次切入本界面时调用，用于重置光标等界面内状态 */
     default void onEnter() {}

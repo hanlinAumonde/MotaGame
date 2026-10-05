@@ -56,14 +56,14 @@ public class TitleScreen implements Screen {
     }
 
     @Override
-    public boolean handleKey(KeyCode code) {
+    public void handleKey(KeyCode code) {
         MenuCommand command = toCommand(code);
-        if (command == null) return false;
+        if (command == null) return;
 
         String chosen = options.handle(command);
         if (chosen == null) {
             render();
-            return true;
+            return;
         }
         switch (chosen) {
             // startNewGame 内部会把阶段推进到 PLAYING，界面切换由 Controller 订阅阶段变更完成
@@ -71,7 +71,6 @@ public class TitleScreen implements Screen {
             case QUIT -> Platform.exit();
             default -> render();
         }
-        return true;
     }
 
     private static MenuCommand toCommand(KeyCode code) {

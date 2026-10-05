@@ -17,13 +17,13 @@ import java.util.List;
  * <p><b>有激活的预设时，界面上显示、编辑的就是它</b>；游戏中停用了技能组（全程普攻）时，
  * 显示上次编辑的那套并标明「当前未激活」，往里放技能即重新激活它：
  * <ul>
- *   <li>{@link #selectPreset}（数字键）：切到对应预设，同时激活它（这里不做停用——界面是用来编辑的）；</li>
+ *   <li>{@link #selectPreset}（D+数字键）：切到对应预设，同时激活它（这里不做停用——界面是用来编辑的）；</li>
  *   <li>{@link MenuCommand#CONFIRM}：把选中的主动技能排进当前回合格，光标右移一格便于连续编排；
  *       技能在本预设中已排满每场可释放次数时拒绝；</li>
  *   <li>{@link MenuCommand#CLEAR}：当前回合格清回普攻（卸下该技能）；</li>
  *   <li>{@link MenuCommand#BACK} / {@link MenuCommand#CLOSE}：关闭。</li>
  * </ul>
- * 塔规则不允许编辑预设时，确认与清除不生效，界面只供查看（仍可用数字键切换）。
+ * 塔规则不允许编辑预设时，确认与清除不生效，界面只供查看（仍可用 D+数字键切换）。
  */
 public class SkillSetupState {
     private final PlayerStateManager player;

@@ -7,6 +7,8 @@ import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.ui.screen.Screen;
 import com.demo.mota.ui.screen.equipment.EquipmentRenderer;
 import com.demo.mota.ui.screen.equipment.EquipmentScreen;
+import com.demo.mota.ui.screen.equipset.EquipmentSetRenderer;
+import com.demo.mota.ui.screen.equipset.EquipmentSetScreen;
 import com.demo.mota.ui.screen.game.GameScreen;
 import com.demo.mota.ui.screen.gamemenu.GameMenuRenderer;
 import com.demo.mota.ui.screen.gamemenu.GameMenuScreen;
@@ -76,6 +78,8 @@ public class MotaController {
                 new EquipmentScreen(engine, flow, screenCanvas, new EquipmentRenderer(resources)));
         screens.put(GamePhase.SKILL_SETUP,
                 new SkillSetupScreen(engine, flow, screenCanvas, new SkillSetupRenderer(resources)));
+        screens.put(GamePhase.EQUIPMENT_SETS, new EquipmentSetScreen(engine, flow, screenCanvas,
+                new EquipmentSetRenderer(resources), gameScreen::showMessage));
         screens.put(GamePhase.GAME_OVER, new GameOverScreen(screenCanvas, flow));
 
         flow.addNewGameListener(() -> screens.values().forEach(Screen::onNewGame));
@@ -111,6 +115,12 @@ public class MotaController {
     public void handleKeyPress(KeyEvent event) {
         if (currentScreen != null) {
             currentScreen.handleKey(event.getCode());
+        }
+    }
+
+    public void handleKeyRelease(KeyEvent event) {
+        if (currentScreen != null) {
+            currentScreen.handleKeyRelease(event.getCode());
         }
     }
 }

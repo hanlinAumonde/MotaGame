@@ -8,7 +8,10 @@
                 "DIGIT6", "DIGIT7", "DIGIT8", "DIGIT9", "DIGIT0"]
   },
   "equipment": {
-    "slotCount": 6
+    "slotCount": 6,
+    "setCount": 10,
+    "setHotkeys": ["DIGIT1", "DIGIT2", "DIGIT3", "DIGIT4", "DIGIT5",
+                   "DIGIT6", "DIGIT7", "DIGIT8", "DIGIT9", "DIGIT0"]
   },
   "sidePanel": {
     "sections": ["skillCombo", "passiveSkills", "equipment"]
