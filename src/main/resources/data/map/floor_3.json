@@ -1,5 +1,6 @@
 {
   "floorNumber": 3,
+  "regionId": "region-1",
   "tiles": [
     [
       {
@@ -911,32 +912,38 @@
     {
       "monsterId": "monster-sample-none",
       "x": 1,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-sample-low",
       "x": 3,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-sample-medium",
       "x": 5,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-sample-high",
       "x": 7,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-sample-death",
       "x": 9,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-iron-001",
       "x": 11,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-slime-green-001",

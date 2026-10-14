@@ -72,6 +72,21 @@
         { "stat": "attack", "type": "percentage", "value": 10 },
         { "stat": "defense", "type": "percentage", "value": 10 }
       ]
+    },
+    {
+      "levelNumber": 11,
+      "levelName": "等级11",
+      "maxExperience": 1500
+    },
+    {
+      "levelNumber": 12,
+      "levelName": "等级12",
+      "maxExperience": 2000
+    },
+    {
+      "levelNumber": 13,
+      "levelName": "等级13",
+      "maxExperience": 3000
     }
   ]
 }

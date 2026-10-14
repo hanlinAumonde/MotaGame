@@ -1,5 +1,6 @@
 {
   "floorNumber": 5,
+  "regionId": "region-1",
   "tiles": [
     [
       {
@@ -263,8 +264,9 @@
         "bgResourceId": "bg_default"
       },
       {
-        "type": "BACKGROUND",
-        "bgResourceId": "bg_default"
+        "type": "REGION_GATE",
+        "bgResourceId": "bg_default",
+        "gateResourceId": "region_gate"
       },
       {
         "type": "FLOOR_SWITCHER",
@@ -329,8 +331,10 @@
         "bgResourceId": "bg_default"
       },
       {
-        "type": "BACKGROUND",
-        "bgResourceId": "bg_default"
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
       },
       {
         "type": "WALL",
@@ -918,37 +922,44 @@
     {
       "monsterId": "monster-digit-6",
       "x": 1,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-digit-7",
       "x": 2,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-digit-8",
       "x": 3,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-digit-9",
       "x": 4,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-digit-11",
       "x": 5,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-digit-15",
       "x": 6,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-iron-001",
       "x": 11,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-reaper-001",

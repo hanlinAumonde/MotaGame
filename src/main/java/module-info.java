@@ -8,6 +8,7 @@ module com.demo.mota {
     opens com.demo.mota.engine to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.state to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.map to com.fasterxml.jackson.databind;
+    opens com.demo.mota.engine.map.region to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.factory.item to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.factory.monster to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.factory.skill to com.fasterxml.jackson.databind;
@@ -21,6 +22,7 @@ module com.demo.mota {
     exports com.demo.mota.engine.event;
     exports com.demo.mota.engine.map;
     exports com.demo.mota.engine.map.tile;
+    exports com.demo.mota.engine.map.region;
     exports com.demo.mota.engine.Item;
     exports com.demo.mota.engine.Item.GenericItem;
     exports com.demo.mota.engine.state;

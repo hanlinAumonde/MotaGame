@@ -1,29 +1,53 @@
 package com.demo.mota.engine.map;
 
+import com.demo.mota.engine.Item.AbilityGem;
 import com.demo.mota.engine.Item.Item;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.enums.TileType;
 import com.demo.mota.engine.enums.WallType;
 import com.demo.mota.engine.factory.item.ItemFactory;
 import com.demo.mota.engine.factory.monster.MonsterFactory;
+import com.demo.mota.engine.map.region.*;
 import com.demo.mota.engine.map.tile.*;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.state.monster.Monster;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.demo.mota.engine.configs.MapConfigConstants.MAP_FLOOR_PATH_PREFIX;
 import static com.demo.mota.engine.configs.MapConfigConstants.MAP_SIDE_LENGTH;
 
+/**
+ * 地图管理器：以**区域**为单位载入 / 卸载地图（区域划分见 {@link RegionCatalog}）。
+ *
+ * <p>任一时刻只持有当前区域的全部楼层；跨区由 {@link #enterRegion} 完成（卸载当前、载入新区域），
+ * 区域单向推进，已通过的区域卸载后不再回来。区域结束检查（{@link #checkRegionClear}）
+ * 与出口兜底（{@link #isRegionExitUnlocked}）也在这里，供移动分发与将来的检查界面调用。
+ */
 public class MapManager {
+    private final RegionCatalog regionCatalog;
+
     private GameMap currentMap;
     private Position playerPosition;
 
-    // 已加载过的地图缓存，支持楼层切换时快速恢复
-    private final Map<Integer, GameMap> mapCache = new HashMap<>();
+    private RegionInfo currentRegion;
+    // 当前区域的全部楼层；楼层号 → 地图
+    private final Map<Integer, GameMap> regionMaps = new HashMap<>();
+    // 当前区域各楼层文件里写的 playerSpawn（只有新开一局的那一层会用到）
+    private final Map<Integer, Position> regionSpawns = new HashMap<>();
+
+    public MapManager() {
+        this(RegionCatalog.get());
+    }
+
+    public MapManager(RegionCatalog regionCatalog) {
+        this.regionCatalog = regionCatalog;
+    }
 
     public GameMap getCurrentMap() {
         return currentMap;
@@ -37,16 +61,29 @@ public class MapManager {
         this.playerPosition = playerPosition;
     }
 
+    /** 当前所在区域（尚未载入任何楼层时为 null） */
+    public RegionInfo getCurrentRegion() {
+        return currentRegion;
+    }
+
     /**
-     * 加载指定楼层的地图。优先从缓存获取，否则从文件加载。
+     * 切到指定楼层。楼层必须属于当前区域；尚未进入任何区域时（新开一局）自动进入该层所在区域，
+     * 并以该层文件里的 {@code playerSpawn} 作为玩家位置。
+     *
+     * @throws IllegalStateException 楼层属于别的区域——跨区必须经 {@link #enterRegion}，以免绕过区域检查
      */
     public void loadFloor(int floorNumber) {
-        if (mapCache.containsKey(floorNumber)) {
-            this.currentMap = mapCache.get(floorNumber);
-            return;
+        if (currentRegion == null) {
+            enterRegion(regionCatalog.regionOf(floorNumber).regionId());
+            if (playerPosition == null) {
+                playerPosition = regionSpawns.get(floorNumber);
+            }
         }
-        GameMap map = loadMapFromFile(floorNumber);
-        mapCache.put(floorNumber, map);
+        GameMap map = regionMaps.get(floorNumber);
+        if (map == null) {
+            throw new IllegalStateException("第 " + floorNumber + " 层不在当前区域 "
+                    + currentRegion.regionId() + " 内，跨区请使用 enterRegion");
+        }
         this.currentMap = map;
     }
 
@@ -56,6 +93,89 @@ public class MapManager {
     public void switchFloor(int floorNumber, Position spawnPosition) {
         loadFloor(floorNumber);
         this.playerPosition = spawnPosition;
+    }
+
+    // ── 区域 ────────────────────────────────────────────────
+
+    /**
+     * 一次读入区域的全部楼层，替换掉当前持有的地图。
+     * 楼层文件里的 {@code regionId} 与区域清单不一致时抛异常（打包错误）。
+     */
+    public void loadRegion(String regionId) {
+        RegionInfo region = regionCatalog.byId(regionId);
+        Map<Integer, GameMap> maps = new HashMap<>();
+        Map<Integer, Position> spawns = new HashMap<>();
+        for (int floor : region.floors()) {
+            Map<String, Object> mapData = readFloorFile(floor);
+            Object declared = mapData.get("regionId");
+            if (!region.regionId().equals(declared)) {
+                throw new IllegalStateException("第 " + floor + " 层的 regionId 为 " + declared
+                        + "，但区域清单把它划入 " + region.regionId());
+            }
+            maps.put(floor, parseMapData(mapData, floor));
+            Position spawn = parseSpawn(mapData);
+            if (spawn != null) spawns.put(floor, spawn);
+        }
+        unloadRegion();
+        regionMaps.putAll(maps);
+        regionSpawns.putAll(spawns);
+        currentRegion = region;
+    }
+
+    /** 卸载当前区域的全部地图（已通过的区域此时早已不在内存，因此只有当前区域可卸） */
+    public void unloadRegion() {
+        regionMaps.clear();
+        regionSpawns.clear();
+        currentRegion = null;
+        currentMap = null;
+    }
+
+    /**
+     * 进入另一个区域：卸载当前区域并载入新区域。调用方随后用 {@link #switchFloor} 落到目标楼层。
+     * 区域切换的动画 / 提示尚未实现，返回值留作将来 UI 层的取数口。
+     */
+    public RegionTransition enterRegion(String regionId) {
+        RegionInfo from = currentRegion;
+        loadRegion(regionId);
+        return new RegionTransition(from, currentRegion);
+    }
+
+    /** 目标楼层相对当前区域的位置 */
+    public RegionRelation relationTo(int floorNumber) {
+        return regionCatalog.relation(currentRegion, floorNumber);
+    }
+
+    /** 楼层所属区域 */
+    public RegionInfo regionOf(int floorNumber) {
+        return regionCatalog.regionOf(floorNumber);
+    }
+
+    /**
+     * 区域结束检查：当前区域里还剩多少怪物没杀、多少能力宝石没拾取（标了 {@code clearExempt} 的不计）。
+     * 由区域检测格调用；将来的检查详情界面直接用这份报告。
+     */
+    public RegionClearReport checkRegionClear() {
+        Map<Integer, Integer> monsters = new HashMap<>();
+        Map<Integer, Integer> gems = new HashMap<>();
+        regionMaps.forEach((floor, map) -> {
+            int monsterCount = (int) map.getMonsters().keySet().stream()
+                    .filter(map::isNotClearExempt)
+                    .count();
+            int gemCount = (int) map.getItems().entrySet().stream()
+                    .filter(e -> e.getValue() instanceof AbilityGem && map.isNotClearExempt(e.getKey()))
+                    .count();
+            monsters.put(floor, monsterCount);
+            gems.put(floor, gemCount);
+        });
+        return new RegionClearReport(currentRegion.regionId(), monsters, gems);
+    }
+
+    /**
+     * 出口兜底：当前区域的检测格是否都已开启（没有检测格的区域视为放行）。
+     * 只看检测格本身——检查的实质内容已经由检测格把过关了。
+     */
+    public boolean isRegionExitUnlocked() {
+        return regionMaps.values().stream().allMatch(map -> map.getAllRegionGates().isEmpty());
     }
 
     /**
@@ -68,14 +188,12 @@ public class MapManager {
     }
 
     /**
-     * 从 JSON 文件加载地图数据
+     * 读取楼层 JSON
      * 文件路径格式: data/map/floor_{floorNumber}.json
      */
-    private GameMap loadMapFromFile(int floorNumber) {
+    private Map<String, Object> readFloorFile(int floorNumber) {
         String filePath = MAP_FLOOR_PATH_PREFIX + floorNumber + ".json";
-        Map<String, Object> mapData = ResourceManager.getInstance()
-                .loadJsonResource(filePath, new TypeReference<>() {});
-        return parseMapData(mapData, floorNumber);
+        return ResourceManager.getInstance().loadJsonResource(filePath, new TypeReference<>() {});
     }
 
     /**
@@ -84,6 +202,7 @@ public class MapManager {
      * JSON 格式:
      * {
      *   "floorNumber": 1,
+     *   "regionId": "region-1",
      *   "tiles": [
      *     [{"type": "BACKGROUND", "bgResourceId": "floor_1"}, ...],
      *     ...
@@ -94,6 +213,7 @@ public class MapManager {
      *   ],
      *   "monsters": [
      *     {"monsterId": "slime_1", "x": 7, "y": 8},
+     *     {"monsterId": "slime_2", "x": 9, "y": 8, "clearExempt": true},   // 不计入区域检查
      *     ...
      *   ],
      *   "playerSpawn": {"x": 12, "y": 24}
@@ -101,6 +221,7 @@ public class MapManager {
      */
     @SuppressWarnings("unchecked")
     private GameMap parseMapData(Map<String, Object> mapData, int floorNumber) {
+        Set<Position> clearExempt = new HashSet<>();
         // 解析 tiles
         Tile[][] tiles = new Tile[MAP_SIDE_LENGTH][MAP_SIDE_LENGTH];
         List<List<Map<String, Object>>> tileRows = (List<List<Map<String, Object>>>) mapData.get("tiles");
@@ -123,6 +244,7 @@ public class MapManager {
                 Position pos = new Position(((Number) itemData.get("x")).shortValue(),
                         ((Number) itemData.get("y")).shortValue());
                 items.put(pos, ItemFactory.getInstance().createById(itemId));
+                if (Boolean.TRUE.equals(itemData.get("clearExempt"))) clearExempt.add(pos);
             }
         }
 
@@ -135,19 +257,22 @@ public class MapManager {
                 Position pos = new Position(((Number) monsterData.get("x")).shortValue(),
                         ((Number) monsterData.get("y")).shortValue());
                 monsters.put(pos, MonsterFactory.getInstance().createById(monsterId));
+                if (Boolean.TRUE.equals(monsterData.get("clearExempt"))) clearExempt.add(pos);
             }
         }
 
-        // 解析玩家出生点
-        Map<String, Object> spawnData = (Map<String, Object>) mapData.get("playerSpawn");
-        if (spawnData != null && playerPosition == null) {
-            this.playerPosition = new Position(
-                    ((Number) spawnData.get("x")).shortValue(),
-                    ((Number) spawnData.get("y")).shortValue()
-            );
-        }
+        return new GameMap(tiles, floorNumber, items, monsters, clearExempt);
+    }
 
-        return new GameMap(tiles, floorNumber, items, monsters);
+    /** 楼层文件里的玩家出生点；只对新开一局的那一层生效，其余楼层的落点由来源楼梯的 targetSpawn 决定 */
+    @SuppressWarnings("unchecked")
+    private Position parseSpawn(Map<String, Object> mapData) {
+        Map<String, Object> spawnData = (Map<String, Object>) mapData.get("playerSpawn");
+        if (spawnData == null) return null;
+        return new Position(
+                ((Number) spawnData.get("x")).shortValue(),
+                ((Number) spawnData.get("y")).shortValue()
+        );
     }
 
     @SuppressWarnings("unchecked")
@@ -183,6 +308,8 @@ public class MapManager {
                 String trickyResourceId = (String) tileData.get("trickyResourceId");
                 yield new TrickyTile(pos, bgResourceId, boundMonsterIds, trickyResourceId);
             }
+
+            case REGION_GATE -> new RegionGateTile(pos, bgResourceId, (String) tileData.get("gateResourceId"));
         };
     }
 }

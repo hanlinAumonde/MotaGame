@@ -10,7 +10,7 @@ import com.demo.mota.engine.map.Position;
  * 漏改的分支在编译期暴露，而不是运行时悄悄走进兜底分支。
  */
 public abstract sealed class Tile
-        permits BackGroundTile, WallTile, DoorTile, FloorSwitcherTile, TrickyTile {
+        permits BackGroundTile, WallTile, DoorTile, FloorSwitcherTile, TrickyTile, RegionGateTile {
     private final Position position;
     private boolean isPassable;
     private final boolean isChangeable;

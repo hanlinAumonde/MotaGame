@@ -1,5 +1,6 @@
 {
   "floorNumber": 6,
+  "regionId": "region-2",
   "tiles": [
     [
       {
@@ -775,8 +776,12 @@
         "bgResourceId": "bg_default"
       },
       {
-        "type": "BACKGROUND",
-        "bgResourceId": "bg_default"
+        "type": "FLOOR_SWITCHER",
+        "bgResourceId": "bg_default",
+        "aimedFloorId": "7",
+        "switcherResourceId": "stair_up",
+        "targetSpawnX": 10,
+        "targetSpawnY": 11
       },
       {
         "type": "WALL",
@@ -897,27 +902,32 @@
     {
       "monsterId": "monster-skill-plain",
       "x": 2,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-skill-first-strike",
       "x": 4,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-skill-burst",
       "x": 6,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-skill-pressure",
       "x": 8,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-skill-synergy",
       "x": 10,
-      "y": 1
+      "y": 1,
+      "clearExempt": true
     },
     {
       "monsterId": "monster-undead-remains",

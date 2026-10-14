@@ -16,6 +16,7 @@ import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.map.Position;
+import com.demo.mota.engine.map.region.RegionInfo;
 import com.demo.mota.engine.map.tile.*;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.skill.preset.SkillPreset;
@@ -268,6 +269,11 @@ public class GameScreen implements Screen {
             case DOOR_OPENED -> detail + "已打开";
             case DARK_WALL_REVEALED -> "发现了暗墙！";
             case FLOOR_SWITCHED -> "前往" + detail;
+            case REGION_GATE_OPENED -> "区域检查通过，通路已开启";
+            case REGION_GATE_LOCKED -> "区域检查未通过：" + detail;
+            case REGION_EXIT_LOCKED -> "需先通过本区域的检查";
+            case REGION_BACKWARD_BLOCKED -> "已通过的区域无法返回";
+            case REGION_ENTERED -> "进入区域：" + detail;
             case BLOCKED, NO_MOVE, MOVED -> "";
         };
     }
@@ -375,6 +381,11 @@ public class GameScreen implements Screen {
     }
 
     private void drawFloorInfo(GraphicsContext gc, GameMap map, double h) {
+        RegionInfo region = engine.getMapManager().getCurrentRegion();
+        if (region != null) {
+            gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 16));
+            painter.drawShadowText(gc, region.name(), 14, h - 58);
+        }
         gc.setFont(Font.font("SimHei", FontWeight.BOLD, 26));
         String floorText = "第 " + map.getFloorNumber() + " 层";
         painter.drawShadowText(gc, floorText, 14, h - 25);
@@ -462,9 +473,13 @@ public class GameScreen implements Screen {
                 fgImage = resourceManager.getTileImage(trickyTile.getTrickyResourceId());
                 fallbackColor = Color.web("#4a4a4a");
             }
+            case RegionGateTile gateTile -> {
+                fgImage = resourceManager.getTileImage(gateTile.getGateResourceId());
+                fallbackColor = Color.web("#8a2be2");
+            }
         }
 
-        // 走到这里的四种格子都已给出兜底色，无需再判空
+        // 走到这里的五种格子都已给出兜底色，无需再判空
         if (fgImage != null) {
             gc.drawImage(fgImage, px, py, cellSize, cellSize);
         } else {

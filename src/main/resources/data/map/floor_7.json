@@ -1,0 +1,974 @@
+{
+  "floorNumber": 7,
+  "regionId": "region-2",
+  "tiles": [
+    [
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      }
+    ],
+    [
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "FLOOR_SWITCHER",
+        "bgResourceId": "bg_default",
+        "aimedFloorId": "8",
+        "switcherResourceId": "stair_up",
+        "targetSpawnX": 6,
+        "targetSpawnY": 11
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      }
+    ],
+    [
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      }
+    ],
+    [
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "DOOR",
+        "bgResourceId": "bg_default",
+        "keyColor": "yellow",
+        "doorResourceId": "door_yellow"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "DOOR",
+        "bgResourceId": "bg_default",
+        "keyColor": "yellow",
+        "doorResourceId": "door_yellow"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      }
+    ],
+    [
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "DOOR",
+        "bgResourceId": "bg_default",
+        "keyColor": "yellow",
+        "doorResourceId": "door_yellow"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "DOOR",
+        "bgResourceId": "bg_default",
+        "keyColor": "blue",
+        "doorResourceId": "door_blue"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      }
+    ],
+    [
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      }
+    ],
+    [
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      }
+    ],
+    [
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "DOOR",
+        "bgResourceId": "bg_default",
+        "keyColor": "yellow",
+        "doorResourceId": "door_yellow"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      }
+    ],
+    [
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      }
+    ],
+    [
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      }
+    ],
+    [
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      }
+    ],
+    [
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "FLOOR_SWITCHER",
+        "bgResourceId": "bg_default",
+        "aimedFloorId": "6",
+        "switcherResourceId": "stair_down",
+        "targetSpawnX": 11,
+        "targetSpawnY": 11
+      },
+      {
+        "type": "BACKGROUND",
+        "bgResourceId": "bg_default"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      }
+    ],
+    [
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      },
+      {
+        "type": "WALL",
+        "bgResourceId": "bg_default",
+        "wallType": "NORMAL",
+        "wallResourceId": "wall_normal"
+      }
+    ]
+  ],
+  "items": [
+    {
+      "itemId": "ability-gem-001",
+      "x": 1,
+      "y": 1
+    },
+    {
+      "itemId": "ability-gem-002",
+      "x": 11,
+      "y": 1
+    },
+    {
+      "itemId": "key-001-yellow",
+      "x": 2,
+      "y": 5
+    },
+    {
+      "itemId": "key-001-blue",
+      "x": 10,
+      "y": 5
+    },
+    {
+      "itemId": "potion-001",
+      "x": 7,
+      "y": 6
+    },
+    {
+      "itemId": "key-001-yellow",
+      "x": 1,
+      "y": 8
+    },
+    {
+      "itemId": "key-001-yellow",
+      "x": 11,
+      "y": 8
+    },
+    {
+      "itemId": "key-001-yellow",
+      "x": 4,
+      "y": 10
+    },
+    {
+      "itemId": "key-001-blue",
+      "x": 8,
+      "y": 10
+    },
+    {
+      "itemId": "potion-002",
+      "x": 6,
+      "y": 11
+    }
+  ],
+  "monsters": [
+    {
+      "monsterId": "monster-skeleton-elite-001",
+      "x": 3,
+      "y": 1
+    },
+    {
+      "monsterId": "monster-skeleton-elite-001",
+      "x": 9,
+      "y": 1
+    },
+    {
+      "monsterId": "monster-shadow-knight-001",
+      "x": 2,
+      "y": 2
+    },
+    {
+      "monsterId": "monster-shadow-knight-001",
+      "x": 10,
+      "y": 2
+    },
+    {
+      "monsterId": "monster-skeleton-elite-001",
+      "x": 6,
+      "y": 5
+    },
+    {
+      "monsterId": "monster-shadow-knight-001",
+      "x": 2,
+      "y": 6
+    },
+    {
+      "monsterId": "monster-shadow-knight-001",
+      "x": 10,
+      "y": 6
+    },
+    {
+      "monsterId": "monster-skeleton-elite-001",
+      "x": 2,
+      "y": 9
+    },
+    {
+      "monsterId": "monster-exp-wisp-001",
+      "x": 6,
+      "y": 9
+    },
+    {
+      "monsterId": "monster-skeleton-elite-001",
+      "x": 10,
+      "y": 9
+    }
+  ]
+}

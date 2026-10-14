@@ -3,6 +3,7 @@ package com.demo.mota.engine.boot;
 import com.demo.mota.engine.factory.item.ItemFactory;
 import com.demo.mota.engine.factory.monster.MonsterFactory;
 import com.demo.mota.engine.factory.skill.SkillFactory;
+import com.demo.mota.engine.map.region.RegionCatalog;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.resource.sprite.SheetSlicerRegistry;
 import com.demo.mota.engine.rules.GameRules;
@@ -58,6 +59,8 @@ public final class GameBootstrap {
                 () -> {var _ = SheetSlicerRegistry.getInstance();}));
         tasks.add(new LoadingTask("载入规则配置", 3,
                 () -> {var _ = GameRules.get();}));
+        tasks.add(new LoadingTask("载入区域表", 2,
+                () -> {var _ = RegionCatalog.get();}));
         tasks.add(new LoadingTask("注册技能效果", 5,
                 () -> {
                     var _ = SkillEffectRegistry.getInstance();

@@ -1,0 +1,6 @@
+{
+  "regions": [
+    { "regionId": "region-1", "name": "试炼之塔·下层", "floors": [1, 2, 3, 4, 5] },
+    { "regionId": "region-2", "name": "试炼之塔·上层", "floors": [6, 7, 8, 9, 10] }
+  ]
+}

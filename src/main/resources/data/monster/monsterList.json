@@ -358,5 +358,61 @@
     "gold": 0,
     "experience": 0,
     "resourceId": "037-04.png"
+  },
+  {
+    "id": "monster-shadow-knight-001",
+    "name": "暗影骑士",
+    "tags": ["undead"],
+    "health": 300,
+    "attack": 85,
+    "defense": 30,
+    "gold": 15,
+    "experience": 25,
+    "resourceId": "036-04.png"
+  },
+  {
+    "id": "monster-skeleton-elite-001",
+    "name": "高级骷髅",
+    "tags": ["undead"],
+    "health": 250,
+    "attack": 75,
+    "defense": 35,
+    "gold": 10,
+    "experience": 20,
+    "resourceId": "033-02.png"
+  },
+  {
+    "id": "monster-gargoyle-001",
+    "name": "石像鬼",
+    "tags": ["construct"],
+    "health": 450,
+    "attack": 100,
+    "defense": 25,
+    "gold": 20,
+    "experience": 30,
+    "resourceId": "034-01.png"
+  },
+  {
+    "id": "monster-watcher-001",
+    "name": "守望者",
+    "tags": ["spirit"],
+    "health": 3000,
+    "attack": 999,
+    "defense": 200,
+    "gold": 0,
+    "experience": 0,
+    "resourceId": "038-03.png"
+  },
+  {
+    "id": "monster-abyss-lord-001",
+    "name": "深渊领主",
+    "tags": ["demon"],
+    "health": 1200,
+    "attack": 160,
+    "defense": 40,
+    "gold": 0,
+    "experience": 500,
+    "resourceId": "032-01.png",
+    "skills": ["skill-swift-wing"]
   }
 ]

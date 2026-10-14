@@ -14,6 +14,7 @@
     "door_green":    { "col": 3, "row": 30 },
     "stair_up":      { "col": 1, "row": 31 },
     "stair_down":    { "col": 0, "row": 31 },
-    "tricky_wall":   { "col": 3, "row": 30 }
+    "tricky_wall":   { "col": 3, "row": 30 },
+    "region_gate":   { "col": 6, "row": 23 }
   }
 }

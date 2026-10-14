@@ -9,6 +9,7 @@ import com.demo.mota.engine.enums.WallType;
 import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.map.MapManager;
 import com.demo.mota.engine.map.Position;
+import com.demo.mota.engine.map.region.RegionClearReport;
 import com.demo.mota.engine.map.tile.*;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.engine.state.monster.Monster;
@@ -44,6 +45,7 @@ public class MoveHandler {
             case DoorTile doorTile -> handleDoorTile(doorTile, targetPos);
             case FloorSwitcherTile switcherTile -> handleFloorSwitcher(switcherTile);
             case TrickyTile _ -> MoveResult.of(MoveResult.Type.BLOCKED);
+            case RegionGateTile _ -> handleRegionGate(targetPos);
             // 地图数据有空洞时 getTileAt 会返回 null，与改造前一样按「走不过去」处理
             case null -> MoveResult.of(MoveResult.Type.BLOCKED);
         };
@@ -102,12 +104,45 @@ public class MoveHandler {
         return MoveResult.of(MoveResult.Type.BLOCKED);
     }
 
+    /**
+     * 楼梯：同区域照常切层；通往下一区域时先做出口兜底（检测格都已开启才放行），
+     * 放行则卸载当前区域、载入新区域；通往已通过的区域一律挡住（区域单向推进）。
+     */
     private MoveResult handleFloorSwitcher(FloorSwitcherTile switcherTile) {
         int targetFloor = Integer.parseInt(switcherTile.getAimedFloorId());
-        mapManager.loadFloor(targetFloor);
-        mapManager.setPlayerPosition(switcherTile.getTargetSpawn());
+        String floorText = "第" + targetFloor + "层";
+        return switch (mapManager.relationTo(targetFloor)) {
+            case SAME -> {
+                arriveAt(targetFloor, switcherTile);
+                yield MoveResult.of(MoveResult.Type.FLOOR_SWITCHED, floorText);
+            }
+            case FORWARD -> {
+                if (!mapManager.isRegionExitUnlocked()) {
+                    yield MoveResult.of(MoveResult.Type.REGION_EXIT_LOCKED);
+                }
+                mapManager.enterRegion(mapManager.regionOf(targetFloor).regionId());
+                arriveAt(targetFloor, switcherTile);
+                yield MoveResult.of(MoveResult.Type.REGION_ENTERED,
+                        mapManager.getCurrentRegion().name() + " · " + floorText);
+            }
+            case BACKWARD -> MoveResult.of(MoveResult.Type.REGION_BACKWARD_BLOCKED);
+        };
+    }
+
+    private void arriveAt(int targetFloor, FloorSwitcherTile switcherTile) {
+        mapManager.switchFloor(targetFloor, switcherTile.getTargetSpawn());
         battleHandler.recalculateAllDamage(player, mapManager.getCurrentMap());
-        return MoveResult.of(MoveResult.Type.FLOOR_SWITCHED, "第" + targetFloor + "层");
+    }
+
+    /** 区域检测格：做区域结束检查，通过则开启（换成背景），否则挡住并带回剩余数量 */
+    private MoveResult handleRegionGate(Position targetPos) {
+        RegionClearReport report = mapManager.checkRegionClear();
+        if (report.isClear()) {
+            mapManager.replaceTileWithBackground(targetPos);
+            return MoveResult.of(MoveResult.Type.REGION_GATE_OPENED);
+        }
+        return MoveResult.of(MoveResult.Type.REGION_GATE_LOCKED,
+                "剩余怪物 " + report.totalMonsters() + " 只、能力宝石 " + report.totalGems() + " 颗");
     }
 
     private void checkTrickyTiles(GameMap map, Position defeatedMonsterPos) {

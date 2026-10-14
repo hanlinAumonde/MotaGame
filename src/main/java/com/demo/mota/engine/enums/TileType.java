@@ -5,7 +5,8 @@ public enum TileType {
     WALL("wall"),
     DOOR("door"),
     FLOOR_SWITCHER("floor_switcher"),
-    TRICKY("tricky");
+    TRICKY("tricky"),
+    REGION_GATE("region_gate");
 
     private final String value;
 
@@ -24,6 +25,7 @@ public enum TileType {
             case "DOOR" -> DOOR;
             case "FLOOR_SWITCHER" -> FLOOR_SWITCHER;
             case "TRICKY" -> TRICKY;
+            case "REGION_GATE" -> REGION_GATE;
             default -> throw new IllegalArgumentException("Invalid tile type: " + type);
         };
     }
