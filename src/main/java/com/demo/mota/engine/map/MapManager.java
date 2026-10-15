@@ -10,9 +10,12 @@ import com.demo.mota.engine.factory.monster.MonsterFactory;
 import com.demo.mota.engine.map.region.*;
 import com.demo.mota.engine.map.tile.*;
 import com.demo.mota.engine.resource.ResourceManager;
+import com.demo.mota.engine.snapshot.FloorState;
+import com.demo.mota.engine.snapshot.WorldSnapshot;
 import com.demo.mota.engine.state.monster.Monster;
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -182,9 +185,37 @@ public class MapManager {
      * 将指定位置的 Tile 替换为背景 Tile（用于开门、暗墙消失、机关开启等）
      */
     public void replaceTileWithBackground(Position position) {
-        Tile original = currentMap.getTileAt(position);
-        BackGroundTile bg = new BackGroundTile(position, original.getBgResourceId());
-        currentMap.setTileAt(position, bg);
+        currentMap.openTile(position);
+    }
+
+    // ── 快照 ────────────────────────────────────────────────
+
+    /** 导出当前区域各层的变化 + 当前楼层与玩家位置 */
+    public WorldSnapshot toSnapshot() {
+        List<FloorState> floors = regionMaps.values().stream()
+                .sorted(Comparator.comparingInt(GameMap::getFloorNumber))
+                .map(GameMap::toFloorState)
+                .toList();
+        return new WorldSnapshot(currentRegion.regionId(), currentMap.getFloorNumber(),
+                playerPosition.getX_index(), playerPosition.getY_index(), floors);
+    }
+
+    /**
+     * 按快照恢复：重新解析快照所在区域的全部楼层，把各层记下的变化施加上去，再落到当时的楼层与位置。
+     * 快照里有、当前区域清单里已没有的楼层直接忽略。
+     *
+     * @throws IllegalArgumentException 区域 id 已不在区域清单中
+     */
+    public void restore(WorldSnapshot snapshot) {
+        loadRegion(snapshot.regionId());
+        for (FloorState floor : snapshot.floors()) {
+            GameMap map = regionMaps.get(floor.floor());
+            if (map != null) {
+                map.applyFloorState(floor);
+            }
+        }
+        loadFloor(snapshot.currentFloor());
+        this.playerPosition = new Position((short) snapshot.playerX(), (short) snapshot.playerY());
     }
 
     /**

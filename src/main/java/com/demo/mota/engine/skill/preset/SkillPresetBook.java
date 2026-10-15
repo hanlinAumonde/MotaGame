@@ -83,6 +83,15 @@ public final class SkillPresetBook {
         }
     }
 
+    /**
+     * 整体恢复（读档 / 撤销用）：按顺序覆盖各套预设并设置激活下标。
+     * 套数与当前规则不一致时多余的丢弃、不足的保持原样；激活下标越界视为未激活。
+     */
+    public void restore(List<SkillPreset> saved, int armedIndex) {
+        load(saved);
+        this.armedIndex = armedIndex >= 0 && armedIndex < presets.size() ? armedIndex : NONE;
+    }
+
     public void disarm() {
         armedIndex = NONE;
     }

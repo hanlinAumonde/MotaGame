@@ -8,9 +8,15 @@ import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.MapManager;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.state.PlayerStateManager;
+import com.demo.mota.engine.rules.GameRules;
+import com.demo.mota.engine.snapshot.GameSnapshot;
+import com.demo.mota.engine.snapshot.UndoHistory;
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.demo.mota.engine.configs.GameContextConfigConstants.*;
 
@@ -32,6 +38,13 @@ public class GameEngine {
     private PlayerStateManager playerStateManager;
     private MapManager mapManager;
     private MoveHandler moveHandler;
+    /** 撤销历史：新开一局时按规则重建（同时也就清空了）；撤销本身不动它 */
+    private UndoHistory undoHistory = new UndoHistory(0);
+
+    /** 会产生撤销点的行动 */
+    private static final Set<MoveResult.Type> UNDO_POINTS = EnumSet.of(
+            MoveResult.Type.DOOR_OPENED, MoveResult.Type.BATTLE_WON,
+            MoveResult.Type.BATTLE_LOST, MoveResult.Type.ITEM_PICKED);
 
     private GameEngine() {
         // 只保证 provider 链就位；精灵图与各配置表由 GameBootstrap 在加载阶段统一加载
@@ -57,8 +70,51 @@ public class GameEngine {
         return mapManager;
     }
 
+    /**
+     * 玩家朝某方向行动一步。开门 / 战斗（含致死）/ 拾取之前的状态记为一个撤销点；
+     * 进入新区域时清空撤销历史（区域单向，已卸载的区域不再回来）。
+     */
     public MoveResult handlePlayerMove(Direction direction) {
-        return moveHandler.handleMove(direction);
+        GameSnapshot before = undoHistory.isEnabled() ? captureSnapshot() : null;
+        MoveResult result = moveHandler.handleMove(direction);
+        if (result.getType() == MoveResult.Type.REGION_ENTERED) {
+            undoHistory.clear();
+        } else if (before != null && UNDO_POINTS.contains(result.getType())) {
+            undoHistory.push(before, undoLabel(result));
+        }
+        return result;
+    }
+
+    private static String undoLabel(MoveResult result) {
+        return switch (result.getType()) {
+            case DOOR_OPENED -> "打开" + result.getDetail();
+            case BATTLE_WON, BATTLE_LOST -> "与" + result.getDetail() + "的战斗";
+            case ITEM_PICKED -> "拾取" + result.getDetail();
+            default -> result.getType().name();
+        };
+    }
+
+    /** 是否还有可撤销的行动 */
+    public boolean canUndo() {
+        return !undoHistory.isEmpty();
+    }
+
+    public UndoHistory getUndoHistory() {
+        return undoHistory;
+    }
+
+    /**
+     * 撤销最近一次有意义的行动：恢复到它之前的快照（经 {@link #restoreSnapshot}，阶段回到 {@code PLAYING}）。
+     *
+     * @return 被撤销的行动描述，没有可撤销的行动时为 null
+     */
+    public String undoLastAction() {
+        UndoHistory.Entry entry = undoHistory.pop();
+        if (entry == null) {
+            return null;
+        }
+        restoreSnapshot(entry.snapshot());
+        return entry.label();
     }
 
     public void handleDirectionChange() { this.playerStateManager.playerDirectionChange(); }
@@ -81,21 +137,55 @@ public class GameEngine {
     /**
      * 开始全新的一局：整套重建玩家状态 / 地图 / 移动分发，随后载入初始楼层并预计算伤害，
      * 最后经 {@code GameFlow.startNewGame} 广播「新开一局」并把阶段推进到 {@code PLAYING}。
-     *
-     * <p>装配顺序不能调：{@code MonsterFactory} 在创建怪物时会回头取
-     * {@code GameEngine.getPlayerStateManager()} 做首次战斗预计算，
-     * 因此玩家状态必须先于 {@code loadFloor} 就位。
      * 地图缓存随 {@code MapManager} 一起丢弃，上一局开过的门不会带到新局。
      */
     public void startNewGame(int initialFloor) {
-        this.playerStateManager = loadInitialPlayerState();
-        this.mapManager = new MapManager();
-        this.moveHandler = new MoveHandler(mapManager, playerStateManager);
-
-        mapManager.loadFloor(initialFloor);
-        moveHandler.getBattleHandler().recalculateAllDamage(playerStateManager, mapManager.getCurrentMap());
-
+        installSession(loadInitialPlayerState(), maps -> maps.loadFloor(initialFloor));
+        this.undoHistory = new UndoHistory(GameRules.get().undo().maxSteps());
         gameFlow.startNewGame();
+    }
+
+    /** 把当前这局拍成快照（撤销与存档共用） */
+    public GameSnapshot captureSnapshot() {
+        return new GameSnapshot(playerStateManager.toSnapshot(), mapManager.toSnapshot());
+    }
+
+    /**
+     * 按快照整套重建一局（撤销 / 读档），随后经 {@code GameFlow.resumeSession} 让各界面重建本局状态并回到 {@code PLAYING}。
+     * 玩家先按初始状态构造、再施加快照；地图重新解析快照所在区域后施加各层变化。
+     *
+     * <p>重建中途失败（快照引用的区域已不存在等）时恢复到调用前的这一局并把异常抛给调用方。
+     */
+    public void restoreSnapshot(GameSnapshot snapshot) {
+        PlayerStateManager player = loadInitialPlayerState();
+        player.applySnapshot(snapshot.player());
+        installSession(player, maps -> maps.restore(snapshot.world()));
+        gameFlow.resumeSession();
+    }
+
+    /**
+     * 装配一局：玩家 → 地图 → 移动分发 → 载入地图 → 预计算伤害。
+     *
+     * <p>装配顺序不能调：{@code MonsterFactory} 在创建怪物时会回头取
+     * {@code GameEngine.getPlayerStateManager()} 做首次战斗预计算，
+     * 因此玩家状态必须先于载入地图就位。中途抛异常时退回原来的三者。
+     */
+    private void installSession(PlayerStateManager player, Consumer<MapManager> mapLoader) {
+        PlayerStateManager previousPlayer = this.playerStateManager;
+        MapManager previousMaps = this.mapManager;
+        MoveHandler previousMoveHandler = this.moveHandler;
+        try {
+            this.playerStateManager = player;
+            this.mapManager = new MapManager();
+            this.moveHandler = new MoveHandler(mapManager, playerStateManager);
+            mapLoader.accept(mapManager);
+            moveHandler.getBattleHandler().recalculateAllDamage(playerStateManager, mapManager.getCurrentMap());
+        } catch (RuntimeException e) {
+            this.playerStateManager = previousPlayer;
+            this.mapManager = previousMaps;
+            this.moveHandler = previousMoveHandler;
+            throw e;
+        }
     }
 
     private PlayerStateManager loadInitialPlayerState() {

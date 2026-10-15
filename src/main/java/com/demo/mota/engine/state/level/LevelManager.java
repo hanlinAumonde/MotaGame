@@ -65,6 +65,24 @@ public class LevelManager {
         return currentExperience;
     }
 
+    /**
+     * 直接置为某个等级与经验（读档 / 撤销用），不触发任何升级加成——那些加成早已体现在快照的属性里。
+     * 等级表里已没有该等级时落到最接近的一级。
+     */
+    public void restore(int levelNumber, GameNumber experience) {
+        LevelData target = loadedConfig.levels.get(loadedConfig.levels.size() - 1);
+        for (LevelData level : loadedConfig.levels) {
+            if (level.levelNumber >= levelNumber) {
+                target = level;
+                break;
+            }
+        }
+        this.levelName = target.levelName;
+        this.levelNumber = target.levelNumber;
+        this.maxExperienceForCurrentLevel = target.maxExperience;
+        this.currentExperience = experience;
+    }
+
     public LevelUpResult cumulateExperience(GameNumber experience) {
         int previousLevel = this.levelNumber;
         List<LevelBonus> allBonuses = new ArrayList<>();

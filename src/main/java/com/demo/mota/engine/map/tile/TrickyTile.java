@@ -33,6 +33,12 @@ public final class TrickyTile extends Tile {
         return boundMonsterIds.isEmpty();
     }
 
+    /** 读档 / 撤销时恢复绑定列表（快照里记下的是当时还剩哪些怪物没打） */
+    public void resetBoundMonsters(List<String> monsterIds) {
+        boundMonsterIds.clear();
+        boundMonsterIds.addAll(monsterIds);
+    }
+
     public String getTrickyResourceId() {
         return trickyResourceId;
     }

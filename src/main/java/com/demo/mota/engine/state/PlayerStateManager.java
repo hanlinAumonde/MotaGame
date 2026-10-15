@@ -19,6 +19,7 @@ import com.demo.mota.engine.skill.preset.PresetEditResult;
 import com.demo.mota.engine.skill.preset.PresetSlotView;
 import com.demo.mota.engine.skill.preset.SkillPreset;
 import com.demo.mota.engine.skill.preset.SkillPresetBook;
+import com.demo.mota.engine.snapshot.PlayerSnapshot;
 import com.demo.mota.engine.state.equipset.EquipSetResult;
 import com.demo.mota.engine.state.equipset.EquipmentSet;
 import com.demo.mota.engine.state.equipset.EquipmentSetBook;
@@ -27,7 +28,9 @@ import com.demo.mota.engine.state.level.LevelBonus;
 import com.demo.mota.engine.state.level.LevelManager;
 import com.demo.mota.engine.state.level.LevelUpResult;
 
+import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.demo.mota.engine.configs.ItemConfigConstants.INITIAL_KEY_SET;
@@ -96,7 +99,7 @@ public class PlayerStateManager extends AbstractCharacterState {
 
     private void addAncientKey() {
         if (this.ancientKeys == null) {
-            this.ancientKeys = List.of();
+            this.ancientKeys = new ArrayList<>();
         }
         if(this.yellow_Key != null) this.ancientKeys.add(this.yellow_Key);
         if(this.red_Key != null) this.ancientKeys.add(this.red_Key);
@@ -582,5 +585,155 @@ public class PlayerStateManager extends AbstractCharacterState {
 
     public void playerDirectionChange() {
         this.setCurrentDirection(this.getCurrentDirection().getNextDirection());
+    }
+
+    // ==================== 快照 ====================
+
+    /** 导出玩家状态（装备以在 {@code equipmentsOwned} 中的下标作为实例句柄，见 {@link PlayerSnapshot}） */
+    public PlayerSnapshot toSnapshot() {
+        Map<StateType, String> baseStats = new EnumMap<>(StateType.class);
+        for (StateType type : StateType.values()) {
+            GameNumber value = getStateValue(type);
+            if (value != null) baseStats.put(type, value.toString());
+        }
+        Map<KeyColor, Integer> keyCounts = new EnumMap<>(KeyColor.class);
+        getCurrentKeys().forEach(key -> keyCounts.put(key.getKeyColor(), key.getItemCount()));
+
+        List<PlayerSnapshot.EquipmentSetSnapshot> sets = equipmentSetBook.sets().stream()
+                .map(set -> new PlayerSnapshot.EquipmentSetSnapshot(set.isSaved(), indicesOf(set.slots())))
+                .toList();
+        List<PlayerSnapshot.OwnedSkillSnapshot> skills = skillBook.entries().stream()
+                .map(owned -> new PlayerSnapshot.OwnedSkillSnapshot(
+                        owned.skill().skillId(),
+                        owned.sources().contains(SkillSource.Learned.INSTANCE),
+                        owned.sources().stream()
+                                .filter(source -> source instanceof SkillSource.FromEquipment)
+                                .map(source -> indexOfOwned(((SkillSource.FromEquipment) source).equipment()))
+                                .filter(index -> index >= 0)
+                                .toList(),
+                        owned.isEnabled()))
+                .toList();
+        List<PlayerSnapshot.PresetSnapshot> presets = presetBook.presets().stream()
+                .map(preset -> new PlayerSnapshot.PresetSnapshot(preset.getName(), preset.slots()))
+                .toList();
+
+        return new PlayerSnapshot(
+                baseStats,
+                getCurrentDirection(),
+                levelManager.getLevelNumber(),
+                levelManager.getCurrentExperience().toString(),
+                currentGoldAmount,
+                keyCounts,
+                equipmentsOwned.stream().map(Item::getItemId).toList(),
+                indicesOf(Arrays.asList(equipmentsEquipped)),
+                sets,
+                skills,
+                presets,
+                presetBook.getArmedIndex(),
+                genericItemsOwned.stream()
+                        .map(item -> new PlayerSnapshot.ItemStack(item.getItemId(), item.getItemCount()))
+                        .toList(),
+                auxiliaryItemsOwned.stream().map(Item::getItemId).toList());
+    }
+
+    /**
+     * 把快照施加到一个<b>刚按初始状态构造出来</b>的玩家身上（读档 / 撤销用）。
+     *
+     * <p>不走 {@code equip} / {@code updateLevel} 等正常入口：它们会再次授予技能、发放升级加成，
+     * 而这些效果都已经体现在快照里了，这里只把各项原样摆回去。
+     * 快照里引用的道具 / 技能在当前配置表中已不存在时跳过该条（记一条警告），不让整个快照恢复失败。
+     */
+    public void applySnapshot(PlayerSnapshot snapshot) {
+        snapshot.baseStats().forEach((type, value) -> updateState(type, parseNumber(value)));
+        if (snapshot.direction() != null) {
+            setCurrentDirection(snapshot.direction());
+        }
+        levelManager.restore(snapshot.levelNumber(), parseNumber(snapshot.experience()));
+        this.currentGoldAmount = snapshot.gold();
+        for (Key key : getCurrentKeys()) {
+            int target = snapshot.keyCounts().getOrDefault(key.getKeyColor(), 0);
+            key.updateItemCount(target - key.getItemCount());
+        }
+
+        // 装备：按下标重建实例；查不到的 id 在下标表里留 null，保证其余下标不错位
+        List<Equipment> byIndex = new ArrayList<>();
+        for (String itemId : snapshot.equipmentsOwned()) {
+            Equipment equipment = createOrNull(itemId, Equipment.class);
+            byIndex.add(equipment);
+            if (equipment != null) equipmentsOwned.add(equipment);
+        }
+        Function<Integer, Equipment> resolve = index ->
+                index != null && index >= 0 && index < byIndex.size() ? byIndex.get(index) : null;
+        for (int slot = 0; slot < Math.min(equipmentsEquipped.length, snapshot.equipped().size()); slot++) {
+            equipmentsEquipped[slot] = resolve.apply(snapshot.equipped().get(slot));
+        }
+        for (int i = 0; i < snapshot.equipmentSets().size(); i++) {
+            PlayerSnapshot.EquipmentSetSnapshot set = snapshot.equipmentSets().get(i);
+            Equipment[] slots = set.slots().stream().map(resolve).toArray(Equipment[]::new);
+            equipmentSetBook.restore(i, slots, set.saved());
+        }
+
+        // 技能书：按获得顺序逐条授予，来源原样还原（装备来源指回上面重建的实例）
+        for (PlayerSnapshot.OwnedSkillSnapshot owned : snapshot.skills()) {
+            Skill skill = lookupSkill(owned.skillId());
+            if (skill == null) {
+                warnMissing("技能", owned.skillId());
+                continue;
+            }
+            if (owned.learned()) {
+                skillBook.grant(skill, SkillSource.Learned.INSTANCE);
+            }
+            owned.equipmentSources().stream().map(resolve).filter(Objects::nonNull)
+                    .forEach(equipment -> skillBook.grant(skill, new SkillSource.FromEquipment(equipment)));
+            skillBook.setPassiveEnabled(skill.skillId(), owned.enabled());
+        }
+
+        presetBook.restore(snapshot.presets().stream()
+                .map(preset -> SkillPreset.of(preset.name(), presetBook.slotCount(), preset.slots()))
+                .toList(), snapshot.armedIndex());
+
+        for (PlayerSnapshot.ItemStack stack : snapshot.genericItems()) {
+            GenericItem item = createOrNull(stack.itemId(), GenericItem.class);
+            if (item == null) continue;
+            item.updateItemCount(stack.count() - item.getItemCount());
+            genericItemsOwned.add(item);
+        }
+        for (String itemId : snapshot.auxiliaryItems()) {
+            AuxiliaryItem item = createOrNull(itemId, AuxiliaryItem.class);
+            if (item != null) auxiliaryItemsOwned.add(item);
+        }
+    }
+
+    /** 各元素在 {@code equipmentsOwned} 中的下标（按对象同一性），null 记为空槽 */
+    private List<Integer> indicesOf(List<Equipment> equipments) {
+        return equipments.stream()
+                .map(equipment -> equipment == null ? PlayerSnapshot.EMPTY_SLOT : indexOfOwned(equipment))
+                .toList();
+    }
+
+    private int indexOfOwned(Equipment equipment) {
+        for (int i = 0; i < equipmentsOwned.size(); i++) {
+            if (equipmentsOwned.get(i) == equipment) return i;
+        }
+        return PlayerSnapshot.EMPTY_SLOT;
+    }
+
+    private static GameNumber parseNumber(String value) {
+        return value == null ? GameNumber.ZERO : GameNumber.fromBigInteger(new BigInteger(value));
+    }
+
+    private static <T extends Item> T createOrNull(String itemId, Class<T> type) {
+        try {
+            Item item = ItemFactory.getInstance().createById(itemId);
+            if (type.isInstance(item)) return type.cast(item);
+        } catch (IllegalArgumentException ignored) {
+            // 落到下面的警告
+        }
+        warnMissing("道具", itemId);
+        return null;
+    }
+
+    private static void warnMissing(String kind, String id) {
+        System.err.println("[Snapshot] 配置表中找不到" + kind + " \"" + id + "\"，已跳过");
     }
 }

@@ -14,6 +14,7 @@ import java.util.function.Consumer;
  * <p>只认「阶段」这一件事，不认识画布、按键与引擎——UI 层订阅变更后自行切换界面。
  * 另有一个「新开一局」事件（{@link #startNewGame()}），供各界面重建本局的状态：
  * 回到 {@link GamePhase#PLAYING} 并不一定是新的一局（从装备界面返回也会进来），两件事必须分开。
+ * 撤销 / 读档按快照整套重建一局（{@link #resumeSession()}），对各界面而言与新开一局无异，复用同一个事件。
  */
 public class GameFlow {
 
@@ -31,7 +32,8 @@ public class GameFlow {
         TRANSITIONS.put(GamePhase.EQUIPMENT, EnumSet.of(GamePhase.PLAYING));
         TRANSITIONS.put(GamePhase.SKILL_SETUP, EnumSet.of(GamePhase.PLAYING));
         TRANSITIONS.put(GamePhase.EQUIPMENT_SETS, EnumSet.of(GamePhase.PLAYING));
-        TRANSITIONS.put(GamePhase.GAME_OVER, EnumSet.of(GamePhase.TITLE));
+        // GAME_OVER → PLAYING：撤销致死的那一战
+        TRANSITIONS.put(GamePhase.GAME_OVER, EnumSet.of(GamePhase.TITLE, GamePhase.PLAYING));
     }
 
     private GamePhase phase = GamePhase.LOADING;
@@ -54,7 +56,7 @@ public class GameFlow {
         }
     }
 
-    /** 订阅「新开一局」：在迁入 {@code PLAYING} 之前触发，监听者据此重建本局状态 */
+    /** 订阅「新开一局」（含按快照重建一局）：在迁入 {@code PLAYING} 之前触发，监听者据此重建本局状态 */
     public void addNewGameListener(Runnable listener) {
         if (listener != null) {
             newGameListeners.add(listener);
@@ -90,5 +92,13 @@ public class GameFlow {
             listener.run();
         }
         to(GamePhase.PLAYING);
+    }
+
+    /**
+     * 按快照重建的一局已装配完毕（撤销 / 读档）：同样先广播「新开一局」让各界面按新的玩家与地图重建，再迁入 {@code PLAYING}。
+     * 已在 {@code PLAYING} 时迁移是空操作，调用方自行重绘。
+     */
+    public void resumeSession() {
+        startNewGame();
     }
 }

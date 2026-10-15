@@ -16,14 +16,15 @@ import static com.demo.mota.engine.configs.GameContextConfigConstants.GAME_RULES
  *
  * <p>任何字段缺省都回退到 {@link #DEFAULT} 中的对应值，因此配置文件可以只写想改的部分。
  */
-public record GameRules(SkillRules skill, EquipmentRules equipment, SidePanelRules sidePanel) {
+public record GameRules(SkillRules skill, EquipmentRules equipment, SidePanelRules sidePanel, UndoRules undo) {
 
-    public static final GameRules DEFAULT = new GameRules(null, null, null);
+    public static final GameRules DEFAULT = new GameRules(null, null, null, null);
 
     public GameRules {
         skill = skill == null ? SkillRules.DEFAULT : skill;
         equipment = equipment == null ? EquipmentRules.DEFAULT : equipment;
         sidePanel = sidePanel == null ? SidePanelRules.DEFAULT : sidePanel;
+        undo = undo == null ? UndoRules.DEFAULT : undo;
     }
 
     private static class Holder {
@@ -100,6 +101,18 @@ public record GameRules(SkillRules skill, EquipmentRules equipment, SidePanelRul
 
         public SidePanelRules {
             sections = sections == null ? List.of("skillCombo", "passiveSkills", "equipment") : List.copyOf(sections);
+        }
+    }
+
+    /**
+     * @param maxSteps 撤销（Backspace）最多能回退几步有意义的行动；0 = 本塔不允许撤销
+     */
+    public record UndoRules(Integer maxSteps) {
+
+        public static final UndoRules DEFAULT = new UndoRules(null);
+
+        public UndoRules {
+            maxSteps = maxSteps == null || maxSteps < 0 ? 20 : maxSteps;
         }
     }
 }

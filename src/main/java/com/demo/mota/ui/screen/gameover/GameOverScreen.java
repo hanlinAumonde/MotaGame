@@ -14,6 +14,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 /**
  * 游戏结束提示框：贴在屏幕底部的一条横幅，读档 / 返回标题。
@@ -21,6 +22,8 @@ import java.util.List;
  * <p>与标题、加载两个界面不同，它<b>不铺满整屏</b>——玩家倒在哪儿、被谁打死的，
  * 画面上要看得见，所以只在底部画一条框，上方的游戏画面照常透出来。
  * 「读档」在存档系统落地前是禁用占位项。
+ *
+ * <p>还有撤销点时按 Backspace 撤回致死的那一战（回到战前、迁回对局），横幅上相应地多一行提示。
  */
 public class GameOverScreen implements Screen {
 
@@ -39,14 +42,21 @@ public class GameOverScreen implements Screen {
     private final GameFlow flow;
     private final TextPainter painter = new TextPainter();
 
+    /** 是否还有可撤销的行动 */
+    private final BooleanSupplier canUndo;
+    /** 撤销（即 {@code GameScreen.undoLastAction}：恢复快照、迁回对局并写状态栏提示） */
+    private final Runnable undo;
+
     private final OptionMenu options = new OptionMenu(List.of(
             OptionMenu.Option.disabled(LOAD, "读取存档"),
             OptionMenu.Option.of(TITLE, "返回标题")
     ));
 
-    public GameOverScreen(Canvas canvas, GameFlow flow) {
+    public GameOverScreen(Canvas canvas, GameFlow flow, BooleanSupplier canUndo, Runnable undo) {
         this.canvas = canvas;
         this.flow = flow;
+        this.canUndo = canUndo;
+        this.undo = undo;
     }
 
     /** 只画底部一条横幅，上方的游戏画面要透出来 */
@@ -62,6 +72,12 @@ public class GameOverScreen implements Screen {
 
     @Override
     public void handleKey(KeyCode code) {
+        if (code == KeyCode.BACK_SPACE) {
+            if (canUndo.getAsBoolean()) {
+                undo.run();
+            }
+            return;
+        }
         MenuCommand command = toCommand(code);
         if (command == null) return;
 
@@ -104,6 +120,10 @@ public class GameOverScreen implements Screen {
 
         gc.setFont(Font.font("SimHei", FontWeight.BOLD, 30));
         painter.drawCenteredShadowText(gc, "你死了", w / 2, panelY + 50, Color.web("#ff7a7a"));
+        if (canUndo.getAsBoolean()) {
+            gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 16));
+            painter.drawCenteredShadowText(gc, "按 Backspace 撤销这一战", w / 2, panelY + 74, NORMAL);
+        }
 
         List<OptionMenu.Option> list = options.getOptions();
         double slotWidth = w / (list.size() + 1);

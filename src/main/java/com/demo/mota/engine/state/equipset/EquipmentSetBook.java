@@ -45,6 +45,13 @@ public final class EquipmentSetBook {
         return Collections.unmodifiableList(sets);
     }
 
+    /** 恢复某一套（读档 / 撤销用）；越界时忽略 */
+    public void restore(int index, Equipment[] slots, boolean saved) {
+        if (index >= 0 && index < sets.size()) {
+            sets.get(index).restore(slots, saved);
+        }
+    }
+
     /** @return 越界时返回 false，不保存 */
     public boolean save(int index, Equipment[] equipped) {
         if (index < 0 || index >= sets.size()) return false;

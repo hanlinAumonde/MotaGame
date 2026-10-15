@@ -15,5 +15,8 @@
   },
   "sidePanel": {
     "sections": ["skillCombo", "passiveSkills", "equipment"]
+  },
+  "undo": {
+    "maxSteps": 20
   }
 }

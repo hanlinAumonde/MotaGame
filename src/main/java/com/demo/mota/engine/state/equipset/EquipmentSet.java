@@ -42,6 +42,12 @@ public final class EquipmentSet {
         saved = true;
     }
 
+    /** 恢复为给定内容与保存状态（读档 / 撤销用） */
+    void restore(Equipment[] equipped, boolean saved) {
+        snapshot(equipped);
+        this.saved = saved;
+    }
+
     /** @return 该槽位存的装备，空槽 / 越界时为 null */
     public Equipment getSlot(int slotIndex) {
         return slotIndex >= 0 && slotIndex < slots.length ? slots[slotIndex] : null;

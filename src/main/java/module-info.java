@@ -41,6 +41,7 @@ module com.demo.mota {
     exports com.demo.mota.engine.resource.sprite;
     exports com.demo.mota.engine.resource.sprite.builtin;
     exports com.demo.mota.engine.state.level;
+    exports com.demo.mota.engine.snapshot;
     exports com.demo.mota.engine.boot;
     exports com.demo.mota.engine.app;
     exports com.demo.mota.ui;

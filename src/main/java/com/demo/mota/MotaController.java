@@ -80,7 +80,8 @@ public class MotaController {
                 new SkillSetupScreen(engine, flow, screenCanvas, new SkillSetupRenderer(resources)));
         screens.put(GamePhase.EQUIPMENT_SETS, new EquipmentSetScreen(engine, flow, screenCanvas,
                 new EquipmentSetRenderer(resources), gameScreen::showMessage));
-        screens.put(GamePhase.GAME_OVER, new GameOverScreen(screenCanvas, flow));
+        screens.put(GamePhase.GAME_OVER, new GameOverScreen(screenCanvas, flow,
+                engine::canUndo, gameScreen::undoLastAction));
 
         flow.addNewGameListener(() -> screens.values().forEach(Screen::onNewGame));
         flow.addListener(this::applyPhase);

@@ -51,6 +51,7 @@ import static com.demo.mota.engine.configs.MapConfigConstants.MAP_SIDE_LENGTH;
  * <p>负责移动分发、状态面板绘制、地图绘制（精灵图优先 + 纯色 fallback）、伤害数字；
  * 按 X / D / Q / A 迁往游戏菜单 / 技能设置 / 装备 / 套装界面，那些界面各自是独立的 Screen。
  * 组合快捷键：按住 D 再按数字键切换技能组、按住 W 再按数字键换上套装（{@link ChordKey}）。
+ * Backspace 撤销最近一次开门 / 战斗 / 拾取（{@link #undoLastAction()}，游戏结束框里同样可用）。
  *
  * <p>每次回到本界面都重算一次当前层伤害：其他界面里穿脱装备、改预设都可能影响战斗推演，
  * 统一在这里补算，那些界面就不必各自汇报「改没改」。当前层怪物只有几十只，开销可以忽略。
@@ -159,6 +160,7 @@ public class GameScreen implements Screen {
         }
 
         switch (code) {
+            case BACK_SPACE -> undoLastAction();
             case Z -> {
                 this.engine.handleDirectionChange();
                 //当前玩家站立的tile必定为可通过地形
@@ -178,6 +180,16 @@ public class GameScreen implements Screen {
                 }
             }
         }
+    }
+
+    /**
+     * 撤销最近一次有意义的行动（Backspace）。引擎按快照重建这一局后各界面随之重建（状态栏消息也被清掉），
+     * 因此提示在恢复之后再写、再重绘。游戏结束框里按 Backspace 也走这里：恢复时阶段已迁回 {@code PLAYING}。
+     */
+    public void undoLastAction() {
+        String undone = engine.undoLastAction();
+        currentMessage = undone == null ? "没有可撤销的行动" : "已撤销：" + undone;
+        render();
     }
 
     /** 单按 D（按住期间没有组合数字键）松开时才打开技能设置 */
