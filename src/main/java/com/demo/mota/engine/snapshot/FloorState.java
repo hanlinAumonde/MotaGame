@@ -17,9 +17,19 @@ public record FloorState(int floor,
                          List<Cell> openedTiles,
                          List<TrickyBinding> trickyBindings) {
 
+    public FloorState {
+        defeatedMonsters = PlayerSnapshot.orEmpty(defeatedMonsters);
+        takenItems = PlayerSnapshot.orEmpty(takenItems);
+        openedTiles = PlayerSnapshot.orEmpty(openedTiles);
+        trickyBindings = PlayerSnapshot.orEmpty(trickyBindings);
+    }
+
     public record Cell(int x, int y) {
     }
 
     public record TrickyBinding(int x, int y, List<String> boundMonsterIds) {
+        public TrickyBinding {
+            boundMonsterIds = PlayerSnapshot.orEmpty(boundMonsterIds);
+        }
     }
 }

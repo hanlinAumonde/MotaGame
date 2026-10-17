@@ -18,5 +18,8 @@
   },
   "undo": {
     "maxSteps": 20
+  },
+  "save": {
+    "slotCount": 10
   }
 }

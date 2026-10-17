@@ -19,6 +19,8 @@ import com.demo.mota.ui.screen.loading.LoadingScreen;
 import com.demo.mota.ui.screen.skill.SkillSetupRenderer;
 import com.demo.mota.ui.screen.skill.SkillSetupScreen;
 import com.demo.mota.ui.screen.title.TitleScreen;
+import com.demo.mota.ui.screen.saveload.SaveLoadRenderer;
+import com.demo.mota.ui.screen.saveload.SaveLoadScreen;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyEvent;
@@ -66,12 +68,15 @@ public class MotaController {
 
         loadingScreen = new LoadingScreen(screenCanvas);
         gameScreen = new GameScreen(engine, resources, flow, statusCanvas, mapCanvas, sideCanvas);
+        SaveLoadScreen saveLoadScreen = new SaveLoadScreen(engine, flow, screenCanvas, new SaveLoadRenderer(),
+                gameScreen::showMessageNow);
 
         screens.put(GamePhase.LOADING, loadingScreen);
-        screens.put(GamePhase.TITLE, new TitleScreen(screenCanvas, engine));
+        screens.put(GamePhase.TITLE, new TitleScreen(screenCanvas, engine, saveLoadScreen::prepare));
         screens.put(GamePhase.PLAYING, gameScreen);
         screens.put(GamePhase.GAME_MENU,
-                new GameMenuScreen(engine, flow, screenCanvas, new GameMenuRenderer(resources)));
+                new GameMenuScreen(engine, flow, screenCanvas, new GameMenuRenderer(resources),
+                        saveLoadScreen::prepare));
         screens.put(GamePhase.INVENTORY,
                 new InventoryScreen(engine, flow, screenCanvas, new InventoryRenderer(resources)));
         screens.put(GamePhase.EQUIPMENT,
@@ -81,7 +86,9 @@ public class MotaController {
         screens.put(GamePhase.EQUIPMENT_SETS, new EquipmentSetScreen(engine, flow, screenCanvas,
                 new EquipmentSetRenderer(resources), gameScreen::showMessage));
         screens.put(GamePhase.GAME_OVER, new GameOverScreen(screenCanvas, flow,
-                engine::canUndo, gameScreen::undoLastAction));
+                engine::canUndo, gameScreen::undoLastAction,
+                () -> engine.getSaveRepository().hasAnySave(), saveLoadScreen::prepare));
+        screens.put(GamePhase.SAVE_LOAD, saveLoadScreen);
 
         flow.addNewGameListener(() -> screens.values().forEach(Screen::onNewGame));
         flow.addListener(this::applyPhase);

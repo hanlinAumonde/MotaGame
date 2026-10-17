@@ -9,6 +9,7 @@ import com.demo.mota.engine.state.monster.Monster;
 import com.demo.mota.ui.MenuCommand;
 import com.demo.mota.engine.app.GamePhase;
 import com.demo.mota.ui.screen.gamemenu.option.GameOptionPopup;
+import com.demo.mota.ui.screen.saveload.SaveLoadMode;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,7 +24,8 @@ import java.util.Map;
  * 渲染由 UI 层按这些状态读取。层级关系见 {@link MenuPage}：
  * <pre>
  *   ROOT ─┬─(敌物资料)─▶ MONSTER_LIST ──确认（该怪物有技能时）──▶ MONSTER_SKILL
- *         └─(游戏选项)─▶ OPTIONS ──(物品栏 / 角色装备 / 角色技能)──▶ 关闭菜单并请求改开对应界面（{@link #takeHandoff}）
+ *         ├─(游戏选项)─▶ OPTIONS ──(物品栏 / 角色装备 / 角色技能)──▶ 关闭菜单并请求改开对应界面（{@link #takeHandoff}）
+ *         └─(存档 / 读档)──▶ 关闭菜单并请求打开存读档界面（{@link #takeSaveLoadRequest}）
  * </pre>
  *
  * <p>敌物列表在每次打开菜单时按当前楼层重新采样：同一种怪物只保留一条，
@@ -52,6 +54,8 @@ public class GameMenuState {
 
     /** 选中某个游戏选项后要迁往的阶段，由 {@link GameMenuScreen} 取走 */
     private GamePhase pendingHandoff;
+    /** 选中「存档」/「读档」后要打开的存读档界面用途，由 {@link GameMenuScreen} 取走 */
+    private SaveLoadMode pendingSaveLoad;
 
     public GameMenuState(MapManager mapManager, PlayerStateManager player) {
         this.mapManager = mapManager;
@@ -69,6 +73,7 @@ public class GameMenuState {
         this.optionPopup.reset();
         this.notice = null;
         this.pendingHandoff = null;
+        this.pendingSaveLoad = null;
         refreshMonsters();
     }
 
@@ -89,6 +94,13 @@ public class GameMenuState {
         GamePhase handoff = pendingHandoff;
         pendingHandoff = null;
         return handoff;
+    }
+
+    /** 取走并清除待打开的存读档界面用途；没有选「存档」/「读档」时为 {@code null} */
+    public SaveLoadMode takeSaveLoadRequest() {
+        SaveLoadMode request = pendingSaveLoad;
+        pendingSaveLoad = null;
+        return request;
     }
 
     // ==================== 输入处理 ====================
@@ -156,6 +168,14 @@ public class GameMenuState {
             case GAME_OPTIONS -> {
                 page = MenuPage.OPTIONS;
                 optionPopup.reset();
+            }
+            case SAVE_GAME -> {
+                pendingSaveLoad = SaveLoadMode.SAVE;
+                close();
+            }
+            case LOAD_GAME -> {
+                pendingSaveLoad = SaveLoadMode.LOAD;
+                close();
             }
         }
     }

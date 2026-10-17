@@ -9,4 +9,8 @@ import java.util.List;
  * 再把变化逐条施加上去。这样塔的数据后续有改动（比如加了一只怪）时，旧存档依然能读，新内容照常出现。
  */
 public record WorldSnapshot(String regionId, int currentFloor, int playerX, int playerY, List<FloorState> floors) {
+
+    public WorldSnapshot {
+        floors = PlayerSnapshot.orEmpty(floors);
+    }
 }

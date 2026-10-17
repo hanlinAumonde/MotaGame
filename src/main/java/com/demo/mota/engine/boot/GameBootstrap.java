@@ -7,6 +7,7 @@ import com.demo.mota.engine.map.region.RegionCatalog;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.resource.sprite.SheetSlicerRegistry;
 import com.demo.mota.engine.rules.GameRules;
+import com.demo.mota.engine.save.SaveRepository;
 import com.demo.mota.engine.skill.cost.SkillCostRegistry;
 import com.demo.mota.engine.skill.effect.SkillEffectRegistry;
 import com.demo.mota.engine.state.level.LevelManager;
@@ -74,6 +75,8 @@ public final class GameBootstrap {
                 () -> {var _ = MonsterFactory.getInstance();}));
         tasks.add(new LoadingTask("载入等级表", 10,
                 LevelManager::preload));
+        tasks.add(new LoadingTask("扫描存档", 3,
+                () -> SaveRepository.get().refresh()));
         return tasks;
     }
 

@@ -16,15 +16,17 @@ import static com.demo.mota.engine.configs.GameContextConfigConstants.GAME_RULES
  *
  * <p>任何字段缺省都回退到 {@link #DEFAULT} 中的对应值，因此配置文件可以只写想改的部分。
  */
-public record GameRules(SkillRules skill, EquipmentRules equipment, SidePanelRules sidePanel, UndoRules undo) {
+public record GameRules(SkillRules skill, EquipmentRules equipment, SidePanelRules sidePanel, UndoRules undo,
+                        SaveRules save) {
 
-    public static final GameRules DEFAULT = new GameRules(null, null, null, null);
+    public static final GameRules DEFAULT = new GameRules(null, null, null, null, null);
 
     public GameRules {
         skill = skill == null ? SkillRules.DEFAULT : skill;
         equipment = equipment == null ? EquipmentRules.DEFAULT : equipment;
         sidePanel = sidePanel == null ? SidePanelRules.DEFAULT : sidePanel;
         undo = undo == null ? UndoRules.DEFAULT : undo;
+        save = save == null ? SaveRules.DEFAULT : save;
     }
 
     private static class Holder {
@@ -113,6 +115,16 @@ public record GameRules(SkillRules skill, EquipmentRules equipment, SidePanelRul
 
         public UndoRules {
             maxSteps = maxSteps == null || maxSteps < 0 ? 20 : maxSteps;
+        }
+    }
+
+    /** @param slotCount 手动存档的档位数（另有一个自动存档） */
+    public record SaveRules(Integer slotCount) {
+
+        public static final SaveRules DEFAULT = new SaveRules(null);
+
+        public SaveRules {
+            slotCount = slotCount == null || slotCount < 1 ? 10 : slotCount;
         }
     }
 }

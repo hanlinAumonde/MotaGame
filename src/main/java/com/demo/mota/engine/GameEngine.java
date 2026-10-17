@@ -9,10 +9,18 @@ import com.demo.mota.engine.map.MapManager;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.engine.rules.GameRules;
+import com.demo.mota.engine.save.SaveException;
+import com.demo.mota.engine.save.SaveFile;
+import com.demo.mota.engine.save.SaveMeta;
+import com.demo.mota.engine.save.SaveRepository;
+import com.demo.mota.engine.save.SaveSlotInfo;
 import com.demo.mota.engine.snapshot.GameSnapshot;
 import com.demo.mota.engine.snapshot.UndoHistory;
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
@@ -143,6 +151,56 @@ public class GameEngine {
         installSession(loadInitialPlayerState(), maps -> maps.loadFloor(initialFloor));
         this.undoHistory = new UndoHistory(GameRules.get().undo().maxSteps());
         gameFlow.startNewGame();
+    }
+
+    // ==================== 存档 ====================
+
+    private static final DateTimeFormatter SAVE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+    public SaveRepository getSaveRepository() {
+        return SaveRepository.get();
+    }
+
+    /** 把当前这局写入指定档位（覆盖原有） */
+    public void saveGame(String slotId) throws IOException {
+        getSaveRepository().write(slotId, describeCurrentGame(), captureSnapshot());
+    }
+
+    /** 写自动存档（切换楼层 / 进入新区域之后）；失败只打印原因并返回 false，不打断游戏 */
+    public boolean autoSave() {
+        try {
+            saveGame(SaveRepository.AUTO_SLOT);
+            return true;
+        } catch (IOException | RuntimeException e) {
+            System.err.println("[Save] 自动存档失败：" + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 读档：按存档里的快照重建一局（经 {@link #restoreSnapshot}，阶段迁到 {@code PLAYING}），撤销历史随之清空。
+     *
+     * @throws SaveException 档位为空 / 损坏 / 版本不兼容，或快照与当前塔的数据对不上（区域已不存在等）；
+     *                       此时当前这一局（若有）原样保留
+     */
+    public void loadGame(String slotId) throws SaveException {
+        SaveFile save = getSaveRepository().read(slotId);
+        UndoHistory previous = undoHistory;
+        this.undoHistory = new UndoHistory(GameRules.get().undo().maxSteps());
+        try {
+            restoreSnapshot(save.snapshot());
+        } catch (RuntimeException e) {
+            this.undoHistory = previous;
+            throw new SaveException(SaveSlotInfo.Status.CORRUPTED, "存档与当前塔的数据对不上：" + e.getMessage(), e);
+        }
+    }
+
+    private SaveMeta describeCurrentGame() {
+        return new SaveMeta(LocalDateTime.now().format(SAVE_TIME_FORMAT),
+                mapManager.getCurrentRegion().name(),
+                mapManager.getCurrentMap().getFloorNumber(),
+                playerStateManager.getLevelNumber(),
+                playerStateManager.getCurrentHP().toString());
     }
 
     /** 把当前这局拍成快照（撤销与存档共用） */

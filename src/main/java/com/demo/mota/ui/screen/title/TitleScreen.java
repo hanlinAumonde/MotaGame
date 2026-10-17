@@ -2,6 +2,8 @@ package com.demo.mota.ui.screen.title;
 
 import com.demo.mota.ui.screen.Screen;
 import com.demo.mota.engine.GameEngine;
+import com.demo.mota.engine.app.GamePhase;
+import com.demo.mota.ui.screen.saveload.SaveLoadMode;
 import com.demo.mota.ui.MenuCommand;
 import com.demo.mota.ui.OptionMenu;
 import com.demo.mota.ui.TextPainter;
@@ -14,12 +16,13 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * 标题界面：游戏标题 + 开始游戏 / 继续游戏 / 退出游戏。
  *
- * <p>「继续游戏」在存档系统落地前是禁用占位项（画灰、光标跳过），
- * 待 {@code SaveManager} 就位后把它的 {@code enabled} 改成「是否存在存档」即可。
+ * <p>「继续游戏」只在有能读取的存档时可选（否则画灰、光标跳过），选中后进入读档界面挑一个档位。
+ * 选项在每次进入标题时按存档索引重建。
  */
 public class TitleScreen implements Screen {
 
@@ -39,20 +42,28 @@ public class TitleScreen implements Screen {
     private final GameEngine engine;
     private final TextPainter painter = new TextPainter();
 
-    private final OptionMenu options = new OptionMenu(List.of(
-            OptionMenu.Option.of(START, "开始游戏"),
-            OptionMenu.Option.disabled(CONTINUE, "继续游戏"),
-            OptionMenu.Option.of(QUIT, "退出游戏")
-    ));
+    /** 进入存读档界面前交代用途（即 {@code SaveLoadScreen.prepare}） */
+    private final Consumer<SaveLoadMode> saveLoad;
 
-    public TitleScreen(Canvas canvas, GameEngine engine) {
+    private OptionMenu options = buildOptions(false);
+
+    public TitleScreen(Canvas canvas, GameEngine engine, Consumer<SaveLoadMode> saveLoad) {
         this.canvas = canvas;
         this.engine = engine;
+        this.saveLoad = saveLoad;
+    }
+
+    private static OptionMenu buildOptions(boolean hasSave) {
+        return new OptionMenu(List.of(
+                OptionMenu.Option.of(START, "开始游戏"),
+                new OptionMenu.Option(CONTINUE, "继续游戏", hasSave),
+                OptionMenu.Option.of(QUIT, "退出游戏")
+        ));
     }
 
     @Override
     public void onEnter() {
-        options.reset();
+        options = buildOptions(engine.getSaveRepository().hasAnySave());
     }
 
     @Override
@@ -68,6 +79,10 @@ public class TitleScreen implements Screen {
         switch (chosen) {
             // startNewGame 内部会把阶段推进到 PLAYING，界面切换由 Controller 订阅阶段变更完成
             case START -> engine.startNewGame(INITIAL_FLOOR);
+            case CONTINUE -> {
+                saveLoad.accept(SaveLoadMode.LOAD);
+                engine.getGameFlow().to(GamePhase.SAVE_LOAD);
+            }
             case QUIT -> Platform.exit();
             default -> render();
         }

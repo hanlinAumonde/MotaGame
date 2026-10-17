@@ -6,6 +6,7 @@ import com.demo.mota.engine.app.GamePhase;
 import com.demo.mota.ui.MenuCommand;
 import com.demo.mota.ui.OptionMenu;
 import com.demo.mota.ui.TextPainter;
+import com.demo.mota.ui.screen.saveload.SaveLoadMode;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
@@ -15,13 +16,14 @@ import javafx.scene.text.FontWeight;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 /**
  * 游戏结束提示框：贴在屏幕底部的一条横幅，读档 / 返回标题。
  *
  * <p>与标题、加载两个界面不同，它<b>不铺满整屏</b>——玩家倒在哪儿、被谁打死的，
  * 画面上要看得见，所以只在底部画一条框，上方的游戏画面照常透出来。
- * 「读档」在存档系统落地前是禁用占位项。
+ * 「读取存档」只在有能读取的存档时可选，进入读档界面挑一个档位（Esc 回到这里）。
  *
  * <p>还有撤销点时按 Backspace 撤回致死的那一战（回到战前、迁回对局），横幅上相应地多一行提示。
  */
@@ -47,16 +49,28 @@ public class GameOverScreen implements Screen {
     /** 撤销（即 {@code GameScreen.undoLastAction}：恢复快照、迁回对局并写状态栏提示） */
     private final Runnable undo;
 
-    private final OptionMenu options = new OptionMenu(List.of(
-            OptionMenu.Option.disabled(LOAD, "读取存档"),
-            OptionMenu.Option.of(TITLE, "返回标题")
-    ));
+    /** 是否有能读取的存档 */
+    private final BooleanSupplier hasSave;
+    /** 进入存读档界面前交代用途（即 {@code SaveLoadScreen.prepare}） */
+    private final Consumer<SaveLoadMode> saveLoad;
 
-    public GameOverScreen(Canvas canvas, GameFlow flow, BooleanSupplier canUndo, Runnable undo) {
+    private OptionMenu options = buildOptions(false);
+
+    public GameOverScreen(Canvas canvas, GameFlow flow, BooleanSupplier canUndo, Runnable undo,
+                          BooleanSupplier hasSave, Consumer<SaveLoadMode> saveLoad) {
         this.canvas = canvas;
         this.flow = flow;
         this.canUndo = canUndo;
         this.undo = undo;
+        this.hasSave = hasSave;
+        this.saveLoad = saveLoad;
+    }
+
+    private static OptionMenu buildOptions(boolean hasSave) {
+        return new OptionMenu(List.of(
+                new OptionMenu.Option(LOAD, "读取存档", hasSave),
+                OptionMenu.Option.of(TITLE, "返回标题")
+        ));
     }
 
     /** 只画底部一条横幅，上方的游戏画面要透出来 */
@@ -67,7 +81,7 @@ public class GameOverScreen implements Screen {
 
     @Override
     public void onEnter() {
-        options.reset();
+        options = buildOptions(hasSave.getAsBoolean());
     }
 
     @Override
@@ -89,6 +103,9 @@ public class GameOverScreen implements Screen {
         if (TITLE.equals(chosen)) {
             // 这一局的引擎状态原样留着，下次「开始游戏」时由 startNewGame 整套重建
             flow.to(GamePhase.TITLE);
+        } else if (LOAD.equals(chosen)) {
+            saveLoad.accept(SaveLoadMode.LOAD);
+            flow.to(GamePhase.SAVE_LOAD);
         }
     }
 

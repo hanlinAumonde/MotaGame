@@ -172,6 +172,7 @@ public class GameScreen implements Screen {
 
                 MoveResult result = engine.handlePlayerMove(direction);
                 handleMoveResult(result);
+                autoSaveAfter(result);
                 render();
 
                 // 行动之后统一判死：战斗、以及将来的岩浆 / 毒 / 陷阱都汇到这一处
@@ -189,6 +190,24 @@ public class GameScreen implements Screen {
     public void undoLastAction() {
         String undone = engine.undoLastAction();
         currentMessage = undone == null ? "没有可撤销的行动" : "已撤销：" + undone;
+        render();
+    }
+
+    /** 切换楼层 / 进入新区域之后写自动存档；失败只在状态栏消息后补一句 */
+    private void autoSaveAfter(MoveResult result) {
+        switch (result.getType()) {
+            case FLOOR_SWITCHED, REGION_ENTERED -> {
+                if (!engine.autoSave()) {
+                    currentMessage = currentMessage + "（自动存档失败）";
+                }
+            }
+            default -> { }
+        }
+    }
+
+    /** 显示一句状态栏提示并立即重绘（读档后由存读档界面调用：此时阶段已迁到对局、界面已画过一遍） */
+    public void showMessageNow(String message) {
+        showMessage(message);
         render();
     }
 

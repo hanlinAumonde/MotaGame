@@ -15,6 +15,8 @@ module com.demo.mota {
     opens com.demo.mota.engine.resource to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.state.level to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.rules to com.fasterxml.jackson.databind;
+    opens com.demo.mota.engine.snapshot to com.fasterxml.jackson.databind;
+    opens com.demo.mota.engine.save to com.fasterxml.jackson.databind;
 
     exports com.demo.mota;
     exports com.demo.mota.engine;
@@ -42,6 +44,7 @@ module com.demo.mota {
     exports com.demo.mota.engine.resource.sprite.builtin;
     exports com.demo.mota.engine.state.level;
     exports com.demo.mota.engine.snapshot;
+    exports com.demo.mota.engine.save;
     exports com.demo.mota.engine.boot;
     exports com.demo.mota.engine.app;
     exports com.demo.mota.ui;
@@ -57,4 +60,5 @@ module com.demo.mota {
     exports com.demo.mota.ui.screen.equipment;
     exports com.demo.mota.ui.screen.equipset;
     exports com.demo.mota.ui.screen.skill;
+    exports com.demo.mota.ui.screen.saveload;
 }

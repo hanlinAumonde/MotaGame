@@ -11,6 +11,7 @@ import java.util.Map;
  * 玩家状态快照。
  *
  * <p>数值一律存成十进制字符串（{@code GameNumber} 底层是 {@code BigInteger}，转 long 会截断）。
+ * 集合字段缺省（旧版本存档里没有）时按空处理，见紧凑构造。
  *
  * <p><b>装备的身份</b>：装备没有实例 id，两件同名装备只靠对象同一性区分（技能来源 / 套装 / 槽位都是这个口径）。
  * 快照里以「在 {@link #equipmentsOwned} 中的下标」作为实例句柄：{@link #equipped}、{@link EquipmentSetSnapshot#slots()}、
@@ -46,8 +47,27 @@ public record PlayerSnapshot(
     /** 「空槽」在下标数组里的写法 */
     public static final int EMPTY_SLOT = -1;
 
+    public PlayerSnapshot {
+        baseStats = baseStats == null ? Map.of() : baseStats;
+        keyCounts = keyCounts == null ? Map.of() : keyCounts;
+        equipmentsOwned = orEmpty(equipmentsOwned);
+        equipped = orEmpty(equipped);
+        equipmentSets = orEmpty(equipmentSets);
+        skills = orEmpty(skills);
+        presets = orEmpty(presets);
+        genericItems = orEmpty(genericItems);
+        auxiliaryItems = orEmpty(auxiliaryItems);
+    }
+
+    static <T> List<T> orEmpty(List<T> list) {
+        return list == null ? List.of() : list;
+    }
+
     /** 一套装备套装：是否保存过 + 各槽装备下标（空槽 -1） */
     public record EquipmentSetSnapshot(boolean saved, List<Integer> slots) {
+        public EquipmentSetSnapshot {
+            slots = orEmpty(slots);
+        }
     }
 
     /**
@@ -58,10 +78,16 @@ public record PlayerSnapshot(
      * @param enabled          被动开关
      */
     public record OwnedSkillSnapshot(String skillId, boolean learned, List<Integer> equipmentSources, boolean enabled) {
+        public OwnedSkillSnapshot {
+            equipmentSources = orEmpty(equipmentSources);
+        }
     }
 
     /** 一套技能预设：名称 + 各回合格的技能 id（普攻为 null） */
     public record PresetSnapshot(String name, List<String> slots) {
+        public PresetSnapshot {
+            slots = orEmpty(slots);
+        }
     }
 
     /** 一个道具实例：id + 数量 */

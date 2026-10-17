@@ -23,17 +23,20 @@ public class GameFlow {
 
     static {
         TRANSITIONS.put(GamePhase.LOADING, EnumSet.of(GamePhase.TITLE));
-        TRANSITIONS.put(GamePhase.TITLE, EnumSet.of(GamePhase.PLAYING));
+        TRANSITIONS.put(GamePhase.TITLE, EnumSet.of(GamePhase.PLAYING, GamePhase.SAVE_LOAD));
         TRANSITIONS.put(GamePhase.PLAYING, EnumSet.of(GamePhase.GAME_MENU, GamePhase.EQUIPMENT,
                 GamePhase.SKILL_SETUP, GamePhase.INVENTORY, GamePhase.EQUIPMENT_SETS, GamePhase.GAME_OVER));
         TRANSITIONS.put(GamePhase.GAME_MENU, EnumSet.of(GamePhase.PLAYING, GamePhase.INVENTORY,
-                GamePhase.EQUIPMENT, GamePhase.SKILL_SETUP, GamePhase.EQUIPMENT_SETS));
+                GamePhase.EQUIPMENT, GamePhase.SKILL_SETUP, GamePhase.EQUIPMENT_SETS, GamePhase.SAVE_LOAD));
         TRANSITIONS.put(GamePhase.INVENTORY, EnumSet.of(GamePhase.PLAYING));
         TRANSITIONS.put(GamePhase.EQUIPMENT, EnumSet.of(GamePhase.PLAYING));
         TRANSITIONS.put(GamePhase.SKILL_SETUP, EnumSet.of(GamePhase.PLAYING));
         TRANSITIONS.put(GamePhase.EQUIPMENT_SETS, EnumSet.of(GamePhase.PLAYING));
         // GAME_OVER → PLAYING：撤销致死的那一战
-        TRANSITIONS.put(GamePhase.GAME_OVER, EnumSet.of(GamePhase.TITLE, GamePhase.PLAYING));
+        TRANSITIONS.put(GamePhase.GAME_OVER, EnumSet.of(GamePhase.TITLE, GamePhase.PLAYING, GamePhase.SAVE_LOAD));
+        // 存读档界面：返回来源阶段，读档成功则进入对局
+        TRANSITIONS.put(GamePhase.SAVE_LOAD, EnumSet.of(GamePhase.TITLE, GamePhase.GAME_OVER,
+                GamePhase.GAME_MENU, GamePhase.PLAYING));
     }
 
     private GamePhase phase = GamePhase.LOADING;

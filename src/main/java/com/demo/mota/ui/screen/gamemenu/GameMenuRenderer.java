@@ -87,6 +87,10 @@ public class GameMenuRenderer {
                     }
                     case GAME_OPTIONS -> optionRenderer.drawPreview(gc, menu.getOptionPopup(),
                             RIGHT_X, PADDING, width - RIGHT_X - PADDING);
+                    case SAVE_GAME -> drawMessagePanel(gc, "存档",
+                            "把当前进度写入一个档位；切换楼层时还会自动写入「自动存档」", width);
+                    case LOAD_GAME -> drawMessagePanel(gc, "读档",
+                            "从档位读取进度，当前这一局未保存的进度会丢失", width);
                 }
                 if (menu.getPage() == MenuPage.OPTIONS) {
                     // 弹窗贴在左侧「游戏选项」一项的右下方（参照 img_5）
