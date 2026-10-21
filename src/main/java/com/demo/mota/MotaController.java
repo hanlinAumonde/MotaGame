@@ -21,33 +21,47 @@ import com.demo.mota.ui.screen.skill.SkillSetupScreen;
 import com.demo.mota.ui.screen.title.TitleScreen;
 import com.demo.mota.ui.screen.saveload.SaveLoadRenderer;
 import com.demo.mota.ui.screen.saveload.SaveLoadScreen;
-import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 
 import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * FXML Controller，只做两件事：<b>按阶段路由</b>与<b>画布可见性</b>。
+ * 界面总控，只做两件事：<b>按阶段路由</b>与<b>画布可见性</b>。
  *
  * <p>每个 {@link GamePhase} 对应一个 {@link Screen}，具体画什么、怎么响应按键都交给它。
  * 阶段迁移由 {@link GameFlow} 广播，本类订阅后切换当前界面、调 {@code onEnter} 并重绘——
  * 因此任何界面推进阶段后都不必回头通知 Controller，也不必自己处理「回到游戏要重画」。
  * 「新开一局」事件同样转发给全部界面（{@link Screen#onNewGame()}）。
  *
- * <p>画布两层（见 {@code mota-view.fxml}）：游戏画面 {@code gameBox} 之上是整屏的 {@code screenCanvas}。
+ * <p>画布两层（{@link #buildLayout()}）：游戏画面 {@code gameBox} 之上是整屏的 {@code screenCanvas}。
  * {@code PLAYING} 只显示前者；其余界面画在 {@code screenCanvas} 上——铺满整屏的直接盖住，
  * {@link Screen#overlaysGame()} 为 true 的（游戏结束提示框）则先画一遍游戏画面再叠上去。
+ *
+ * <p>布局由本类用代码搭好、经 {@link #getRoot()} 交给宿主（{@code MotaApplication} 把它挂进 FXGL 的游戏场景），
+ * 本类不认识 FXGL；按键同样由宿主转发进来。
  */
 public class MotaController {
 
-    @FXML private HBox gameBox;
-    @FXML private Canvas mapCanvas;
-    @FXML private Canvas statusCanvas;
-    @FXML private Canvas sideCanvas;
-    @FXML private Canvas screenCanvas;
+    /** 窗口尺寸：左状态栏 208 + 中地图 832 + 右技能装备栏 256；高 840（地图 832 + 底部留白） */
+    public static final int WIDTH = 1296;
+    public static final int HEIGHT = 840;
+
+    private static final int STATUS_WIDTH = 208;
+    private static final int MAP_SIZE = 832;
+    private static final int SIDE_WIDTH = 256;
+
+    private final HBox gameBox;
+    private final Canvas mapCanvas = new Canvas(MAP_SIZE, MAP_SIZE);
+    private final Canvas statusCanvas = new Canvas(STATUS_WIDTH, MAP_SIZE);
+    private final Canvas sideCanvas = new Canvas(SIDE_WIDTH, MAP_SIZE);
+    private final Canvas screenCanvas = new Canvas(WIDTH, HEIGHT);
+    private final StackPane root;
 
     private GameEngine engine;
     private GameFlow flow;
@@ -60,8 +74,10 @@ public class MotaController {
     /** 加载界面单独留一个引用：进度要从加载线程推进来 */
     private LoadingScreen loadingScreen;
 
-    @FXML
-    public void initialize() {
+    public MotaController() {
+        gameBox = new HBox(0, statusCanvas, mapCanvas, sideCanvas);
+        root = buildLayout();
+
         engine = GameEngine.getGameEngine();
         flow = engine.getGameFlow();
         ResourceManager resources = ResourceManager.getInstance();
@@ -93,6 +109,23 @@ public class MotaController {
         flow.addNewGameListener(() -> screens.values().forEach(Screen::onNewGame));
         flow.addListener(this::applyPhase);
         applyPhase(flow.getPhase());
+    }
+
+    /**
+     * 自下而上两层：游戏画面 → 其余全部界面（加载 / 标题 / 游戏菜单 / 物品栏 / 装备 / 技能设置 / 结束）。
+     * 最外层界面多数铺满整屏；游戏结束只画底部提示框、其余部分透出游戏画面（{@link Screen#overlaysGame()}）
+     */
+    private StackPane buildLayout() {
+        StackPane pane = new StackPane(gameBox, screenCanvas);
+        pane.setAlignment(Pos.TOP_LEFT);
+        pane.setPrefSize(WIDTH, HEIGHT);
+        pane.setStyle("-fx-background-color: #2a2a2a;");
+        return pane;
+    }
+
+    /** 整个界面的根节点，由宿主挂到场景上 */
+    public Parent getRoot() {
+        return root;
     }
 
     /** 供 {@code MotaApplication} 的加载任务推送进度 */

@@ -1,42 +1,74 @@
 package com.demo.mota;
 
+import com.almasb.fxgl.app.ApplicationMode;
+import com.almasb.fxgl.app.GameApplication;
+import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.app.scene.LoadingScene;
+import com.almasb.fxgl.app.scene.SceneFactory;
+import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.input.Input;
 import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.app.GamePhase;
 import com.demo.mota.engine.boot.GameBootstrap;
-import com.demo.mota.engine.resource.ResourceManager;
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import javafx.scene.input.KeyEvent;
 
-import java.io.IOException;
+/**
+ * 应用入口：由 FXGL 托管窗口、场景与主循环。
+ *
+ * <p>FXGL 自带的主菜单 / 游戏菜单 / 开场动画全部关掉，生命周期仍由自己的 {@code GameFlow} 掌管；
+ * 整套界面（{@link MotaController} 搭的画布）作为一个 UI 节点挂进 FXGL 的游戏场景，按键经 FXGL 的 {@link Input} 转发。
+ * FXGL 自己的加载阶段（{@code initGame}）这里不用——资源加载仍走 {@code GameBootstrap}，进度画在我们的加载界面上。
+ */
+public class MotaApplication extends GameApplication {
 
-public class MotaApplication extends Application {
+    private MotaController controller;
 
     @Override
-    public void start(Stage stage) throws IOException {
-        // FXML 也统一走 ResourceManager，保证外部资源目录同样可以覆盖界面布局。
-        // 此时 ResourceManager 只搭好 provider 链，精灵图与各配置表留给下面的加载任务。
-        FXMLLoader fxmlLoader = new FXMLLoader(
-                ResourceManager.getInstance().getResourceUrl("/com/demo/mota/mota-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 1296, 840);
+    protected void initSettings(GameSettings settings) {
+        settings.setTitle("魔塔");
+        settings.setVersion("");
+        settings.setWidth(MotaController.WIDTH);
+        settings.setHeight(MotaController.HEIGHT);
+        settings.setManualResizeEnabled(false);
+        settings.setIntroEnabled(false);
+        settings.setMainMenuEnabled(false);
+        // 关掉后 FXGL 不再占用 Esc（menuKey），存读档等界面的 Esc 返回照常可用
+        settings.setGameMenuEnabled(false);
+        settings.setDeveloperMenuEnabled(false);
+        settings.setProfilingEnabled(false);
+        settings.setCloseConfirmation(false);
+        settings.setUserProfileEnabled(false);
+        // 不让 FXGL 在运行目录写 system / logs 等文件；存档走自己的 SaveRepository，不受影响
+        settings.setFileSystemWriteAllowed(false);
+        settings.setApplicationMode(ApplicationMode.RELEASE);
+        settings.setSceneFactory(new SceneFactory() {
+            @Override
+            public LoadingScene newLoadingScene() {
+                // initGame 是空的，FXGL 的加载场景只会一闪而过；换成空白场景，免得闪出它默认的进度条
+                return new LoadingScene() { };
+            }
+        });
+    }
 
-        // 获取 controller 并绑定键盘事件
-        MotaController controller = fxmlLoader.getController();
-        scene.setOnKeyPressed(controller::handleKeyPress);
-        // 松键用于组合快捷键（按住 D / W 再按数字）
-        scene.setOnKeyReleased(controller::handleKeyRelease);
+    @Override
+    protected void initInput() {
+        // 不注册 UserAction，按键原样交给当前界面（按住 / 松开的组合键判定由 ChordKey 自己做）
+        Input input = FXGL.getInput();
+        // initInput 早于 initUI，界面搭好之前的按键直接丢掉
+        input.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+            if (controller != null) controller.handleKeyPress(e);
+        });
+        input.addEventHandler(KeyEvent.KEY_RELEASED, e -> {
+            if (controller != null) controller.handleKeyRelease(e);
+        });
+    }
 
-        stage.setTitle("魔塔");
-        stage.setResizable(false);
-        stage.setScene(scene);
-        stage.show();
-
-        // 让画布获得焦点以接收键盘事件
-        scene.getRoot().requestFocus();
-
+    @Override
+    protected void initUI() {
+        controller = new MotaController();
+        FXGL.getGameScene().addUINode(controller.getRoot());
         startLoading(controller);
     }
 
@@ -75,6 +107,6 @@ public class MotaApplication extends Application {
     }
 
     static void main(String[] args) {
-        launch();
+        launch(MotaApplication.class, args);
     }
 }

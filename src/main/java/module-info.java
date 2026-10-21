@@ -1,10 +1,9 @@
 module com.demo.mota {
     requires javafx.controls;
-    requires javafx.fxml;
+    requires com.almasb.fxgl.all;
 
     requires com.fasterxml.jackson.databind;
 
-    opens com.demo.mota to javafx.fxml;
     opens com.demo.mota.engine to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.state to com.fasterxml.jackson.databind;
     opens com.demo.mota.engine.map to com.fasterxml.jackson.databind;
