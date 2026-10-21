@@ -10,15 +10,22 @@ import com.almasb.fxgl.input.Input;
 import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.app.GamePhase;
 import com.demo.mota.engine.boot.GameBootstrap;
+import com.demo.mota.engine.resource.ResourceManager;
+import com.demo.mota.ui.screen.game.map.EntityMapView;
+import com.demo.mota.ui.screen.game.map.MapCellPainter;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.paint.Color;
+
+import static com.demo.mota.engine.configs.MapConfigConstants.MAP_SIDE_LENGTH;
 
 /**
  * 应用入口：由 FXGL 托管窗口、场景与主循环。
  *
  * <p>FXGL 自带的主菜单 / 游戏菜单 / 开场动画全部关掉，生命周期仍由自己的 {@code GameFlow} 掌管；
- * 整套界面（{@link MotaController} 搭的画布）作为一个 UI 节点挂进 FXGL 的游戏场景，按键经 FXGL 的 {@link Input} 转发。
+ * 整套界面（{@link MotaController} 搭的画布）作为一个 UI 节点挂进 FXGL 的游戏场景，按键经 FXGL 的 {@link Input} 转发；
+ * 中间的地图则是世界层里的实体（{@link EntityMapView}），从界面层留出的透明占位处透出来。
  * FXGL 自己的加载阶段（{@code initGame}）这里不用——资源加载仍走 {@code GameBootstrap}，进度画在我们的加载界面上。
  */
 public class MotaApplication extends GameApplication {
@@ -67,7 +74,15 @@ public class MotaApplication extends GameApplication {
 
     @Override
     protected void initUI() {
-        controller = new MotaController();
+        // 界面层不设底色（地图要透上来），原先根节点的底色挪到场景背景上
+        FXGL.getGameScene().setBackgroundColor(Color.web("#2a2a2a"));
+
+        MapCellPainter cellPainter = new MapCellPainter(ResourceManager.getInstance(),
+                (double) MotaController.MAP_SIZE / MAP_SIDE_LENGTH);
+        EntityMapView mapView = new EntityMapView(GameEngine.getGameEngine(), cellPainter,
+                MotaController.MAP_X, MotaController.MAP_Y);
+
+        controller = new MotaController(mapView);
         FXGL.getGameScene().addUINode(controller.getRoot());
         startLoading(controller);
     }

@@ -10,6 +10,7 @@ import com.demo.mota.ui.screen.equipment.EquipmentScreen;
 import com.demo.mota.ui.screen.equipset.EquipmentSetRenderer;
 import com.demo.mota.ui.screen.equipset.EquipmentSetScreen;
 import com.demo.mota.ui.screen.game.GameScreen;
+import com.demo.mota.ui.screen.game.map.MapView;
 import com.demo.mota.ui.screen.gamemenu.GameMenuRenderer;
 import com.demo.mota.ui.screen.gamemenu.GameMenuScreen;
 import com.demo.mota.ui.screen.gameover.GameOverScreen;
@@ -26,6 +27,7 @@ import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 
 import java.util.EnumMap;
@@ -45,6 +47,9 @@ import java.util.Map;
  *
  * <p>布局由本类用代码搭好、经 {@link #getRoot()} 交给宿主（{@code MotaApplication} 把它挂进 FXGL 的游戏场景），
  * 本类不认识 FXGL；按键同样由宿主转发进来。
+ *
+ * <p>中间的地图不是画布：{@code gameBox} 在那里只留一块透明占位，地图由宿主注入的 {@link MapView}
+ * 显示在界面层之下（FXGL 的世界层），从占位处透出来；它的显隐随 {@code gameBox} 一起切换。
  */
 public class MotaController {
 
@@ -53,11 +58,15 @@ public class MotaController {
     public static final int HEIGHT = 840;
 
     private static final int STATUS_WIDTH = 208;
-    private static final int MAP_SIZE = 832;
     private static final int SIDE_WIDTH = 256;
 
+    /** 地图区域：左上角在窗口中的位置与边长，宿主据此摆放 {@link MapView} */
+    public static final int MAP_X = STATUS_WIDTH;
+    public static final int MAP_Y = 0;
+    public static final int MAP_SIZE = 832;
+
     private final HBox gameBox;
-    private final Canvas mapCanvas = new Canvas(MAP_SIZE, MAP_SIZE);
+    private final MapView mapView;
     private final Canvas statusCanvas = new Canvas(STATUS_WIDTH, MAP_SIZE);
     private final Canvas sideCanvas = new Canvas(SIDE_WIDTH, MAP_SIZE);
     private final Canvas screenCanvas = new Canvas(WIDTH, HEIGHT);
@@ -74,8 +83,9 @@ public class MotaController {
     /** 加载界面单独留一个引用：进度要从加载线程推进来 */
     private LoadingScreen loadingScreen;
 
-    public MotaController() {
-        gameBox = new HBox(0, statusCanvas, mapCanvas, sideCanvas);
+    public MotaController(MapView mapView) {
+        this.mapView = mapView;
+        gameBox = new HBox(0, statusCanvas, mapSlot(), sideCanvas);
         root = buildLayout();
 
         engine = GameEngine.getGameEngine();
@@ -83,7 +93,7 @@ public class MotaController {
         ResourceManager resources = ResourceManager.getInstance();
 
         loadingScreen = new LoadingScreen(screenCanvas);
-        gameScreen = new GameScreen(engine, resources, flow, statusCanvas, mapCanvas, sideCanvas);
+        gameScreen = new GameScreen(engine, resources, flow, statusCanvas, mapView, sideCanvas);
         SaveLoadScreen saveLoadScreen = new SaveLoadScreen(engine, flow, screenCanvas, new SaveLoadRenderer(),
                 gameScreen::showMessageNow);
 
@@ -119,8 +129,17 @@ public class MotaController {
         StackPane pane = new StackPane(gameBox, screenCanvas);
         pane.setAlignment(Pos.TOP_LEFT);
         pane.setPrefSize(WIDTH, HEIGHT);
-        pane.setStyle("-fx-background-color: #2a2a2a;");
+        // 不设底色：地图要从下面的世界层透上来，底色改由宿主设在场景背景上
         return pane;
+    }
+
+    /** 地图位置的透明占位：只撑开尺寸，让两侧画布落在原位 */
+    private static Region mapSlot() {
+        Region slot = new Region();
+        slot.setMinSize(MAP_SIZE, MAP_SIZE);
+        slot.setPrefSize(MAP_SIZE, MAP_SIZE);
+        slot.setMaxSize(MAP_SIZE, MAP_SIZE);
+        return slot;
     }
 
     /** 整个界面的根节点，由宿主挂到场景上 */
@@ -141,6 +160,7 @@ public class MotaController {
         boolean showGame = playing || currentScreen.overlaysGame();
 
         gameBox.setVisible(showGame);
+        mapView.setVisible(showGame);
         screenCanvas.setVisible(!playing);
 
         currentScreen.onEnter();

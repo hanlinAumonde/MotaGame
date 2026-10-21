@@ -2,29 +2,17 @@ package com.demo.mota.ui.screen.game;
 
 import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.GameNumber;
-import com.demo.mota.engine.Item.AbilityGem;
-import com.demo.mota.engine.Item.AuxiliaryItem;
-import com.demo.mota.engine.Item.Equipment;
-import com.demo.mota.engine.Item.GenericItem.GenericItem;
-import com.demo.mota.engine.Item.Item;
-import com.demo.mota.engine.Item.Key;
-import com.demo.mota.engine.Item.Portion;
 import com.demo.mota.engine.app.GameFlow;
 import com.demo.mota.engine.app.GamePhase;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.GameMap;
-import com.demo.mota.engine.map.Position;
 import com.demo.mota.engine.map.region.RegionInfo;
-import com.demo.mota.engine.map.tile.*;
 import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.skill.preset.SkillPreset;
 import com.demo.mota.engine.skill.preset.SkillPresetBook;
 import com.demo.mota.engine.state.PlayerStateManager;
-import com.demo.mota.engine.state.monster.DamageRange;
-import com.demo.mota.engine.state.monster.Monster;
-import com.demo.mota.ui.DamagePalette;
 import com.demo.mota.ui.TextPainter;
 import com.demo.mota.ui.ValueFormatter;
 import com.demo.mota.engine.state.equipset.EquipSetResult;
@@ -32,6 +20,7 @@ import com.demo.mota.ui.screen.ChordKey;
 import com.demo.mota.ui.screen.PresetHotkeys;
 import com.demo.mota.ui.screen.Screen;
 import com.demo.mota.ui.screen.equipset.EquipmentSetState;
+import com.demo.mota.ui.screen.game.map.MapView;
 import com.demo.mota.ui.screen.game.side.SidePanelRenderer;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -43,12 +32,11 @@ import javafx.scene.text.FontWeight;
 
 import java.util.Map;
 
-import static com.demo.mota.engine.configs.MapConfigConstants.MAP_SIDE_LENGTH;
 
 /**
  * 对局界面（{@link GamePhase#PLAYING}）：左侧状态面板 + 中间地图 + 右侧技能装备栏（{@code side} 子包）。
  *
- * <p>负责移动分发、状态面板绘制、地图绘制（精灵图优先 + 纯色 fallback）、伤害数字；
+ * <p>负责移动分发、状态面板绘制；地图（含伤害数字）交给注入的 {@link MapView}（{@code map} 子包），每次重绘时同步一次；
  * 按 X / D / Q / A 迁往游戏菜单 / 技能设置 / 装备 / 套装界面，那些界面各自是独立的 Screen。
  * 组合快捷键：按住 D 再按数字键切换技能组、按住 W 再按数字键换上套装（{@link ChordKey}）。
  * Backspace 撤销最近一次开门 / 战斗 / 拾取（{@link #undoLastAction()}，游戏结束框里同样可用）。
@@ -61,14 +49,6 @@ import static com.demo.mota.engine.configs.MapConfigConstants.MAP_SIDE_LENGTH;
  * 是为了让将来的岩浆、毒、陷阱等一切掉血途径都走同一个口子。
  */
 public class GameScreen implements Screen {
-    /**
-     * 伤害数字字号（相对格宽）。收缩记法已把长度硬约束在 6 个字符内，
-     * 故直接取能整格容纳该上限的最大字号并全图统一，避免同层怪物因位数不同而字号参差。
-     */
-    private static final double DAMAGE_FONT_RATIO = 0.26;
-    /** 兜底字号下限：仅在超出末级单位等极端情况下才会触发收缩 */
-    private static final double DAMAGE_FONT_MIN_RATIO = 0.17;
-
     /**
      * 对局中呼出其他界面的快捷键（物品栏暂无快捷键，只能经游戏菜单进入）。
      * 技能设置（D）不在这里：D 同时是技能组快捷键的修饰键，只有「单按」松开时才打开，见 {@link #handleKeyRelease}
@@ -83,7 +63,7 @@ public class GameScreen implements Screen {
     private final GameFlow flow;
 
     private final Canvas statusCanvas;
-    private final Canvas mapCanvas;
+    private final MapView mapView;
     private final Canvas sideCanvas;
     private final SidePanelRenderer sidePanelRenderer;
 
@@ -99,19 +79,17 @@ public class GameScreen implements Screen {
     /** 文本测量与绘制工具（阴影描边、自适应字号、折行） */
     private final TextPainter painter = new TextPainter();
 
-    private final double cellSize;
     private String currentMessage = "";
 
     public GameScreen(GameEngine engine, ResourceManager resourceManager, GameFlow flow,
-                      Canvas statusCanvas, Canvas mapCanvas, Canvas sideCanvas) {
+                      Canvas statusCanvas, MapView mapView, Canvas sideCanvas) {
         this.engine = engine;
         this.resourceManager = resourceManager;
         this.flow = flow;
         this.statusCanvas = statusCanvas;
-        this.mapCanvas = mapCanvas;
+        this.mapView = mapView;
         this.sideCanvas = sideCanvas;
         this.sidePanelRenderer = new SidePanelRenderer(resourceManager);
-        this.cellSize = mapCanvas.getWidth() / MAP_SIDE_LENGTH;
     }
 
     /** 新的一局：清掉上一局残留的消息 */
@@ -163,8 +141,8 @@ public class GameScreen implements Screen {
             case BACK_SPACE -> undoLastAction();
             case Z -> {
                 this.engine.handleDirectionChange();
-                //当前玩家站立的tile必定为可通过地形
-                renderTileAndPlayerAt(mapCanvas.getGraphicsContext2D(), this.engine.getMapManager().getPlayerPosition());
+                // 只有朝向变了，同步时只会重画玩家实体
+                mapView.sync();
             }
             default -> {
                 Direction direction = toDirection(code);
@@ -286,7 +264,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void render() {
-        renderMap();
+        mapView.sync();
         renderStatusPanel();
         sidePanelRenderer.render(sideCanvas, engine.getPlayerStateManager());
     }
@@ -432,236 +410,5 @@ public class GameScreen implements Screen {
         gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 15));
         gc.setFill(Color.web("#ff6b6b"));
         gc.fillText(currentMessage, 12, msgY + 20);
-    }
-
-    // ==================== 地图渲染 ====================
-
-    private void renderMap() {
-        GraphicsContext gc = mapCanvas.getGraphicsContext2D();
-        GameMap map = engine.getMapManager().getCurrentMap();
-        Position playerPos = engine.getMapManager().getPlayerPosition();
-
-        gc.setFill(Color.BLACK);
-        gc.fillRect(0, 0, mapCanvas.getWidth(), mapCanvas.getHeight());
-
-        for (int y = 0; y < MAP_SIDE_LENGTH; y++) {
-            for (int x = 0; x < MAP_SIDE_LENGTH; x++) {
-                double px = x * cellSize;
-                double py = y * cellSize;
-                Position pos = new Position((short) x, (short) y);
-                Tile tile = map.getTileAt(pos);
-
-                renderTile(gc, tile, px, py);
-
-                Item item = map.getItemAt(pos);
-                if (item != null) {
-                    renderItem(gc, item, px, py);
-                }
-
-                Monster monster = map.getMonsterAt(pos);
-                if (monster != null) {
-                    renderMonster(gc, monster, px, py);
-                }
-            }
-        }
-
-        renderPlayer(gc, playerPos);
-    }
-
-    private void renderTile(GraphicsContext gc, Tile tile, double px, double py) {
-        Image bgImage = resourceManager.getTileImage(tile.getBgResourceId());
-        if (bgImage != null) {
-            gc.drawImage(bgImage, px, py, cellSize, cellSize);
-        } else {
-            gc.setFill(Color.web("#f5f5dc"));
-            gc.fillRect(px, py, cellSize, cellSize);
-        }
-
-        // 背景格没有前景层，上面那层底图就是全部；其余格子各取前景图，缺图时用纯色兜底。
-        // Tile 同为封闭类型，这里也是穷尽匹配
-        Image fgImage;
-        Color fallbackColor;
-        switch (tile) {
-            case BackGroundTile _ -> {
-                return;
-            }
-            case WallTile wallTile -> {
-                fgImage = resourceManager.getTileImage(wallTile.getWallResourceId());
-                fallbackColor = switch (wallTile.getWallType()) {
-                    case NORMAL, DARK -> Color.web("#4a4a4a");
-                    case MAGMA -> Color.web("#ff4500");
-                };
-            }
-            case DoorTile doorTile -> {
-                fgImage = resourceManager.getTileImage(doorTile.getDoorResourceId());
-                fallbackColor = keyColor(doorTile.getKeyColor());
-            }
-            case FloorSwitcherTile fsTile -> {
-                fgImage = resourceManager.getTileImage(fsTile.getSwitcherResourceId());
-                fallbackColor = Color.web("#32cd32");
-            }
-            case TrickyTile trickyTile -> {
-                fgImage = resourceManager.getTileImage(trickyTile.getTrickyResourceId());
-                fallbackColor = Color.web("#4a4a4a");
-            }
-            case RegionGateTile gateTile -> {
-                fgImage = resourceManager.getTileImage(gateTile.getGateResourceId());
-                fallbackColor = Color.web("#8a2be2");
-            }
-        }
-
-        // 走到这里的五种格子都已给出兜底色，无需再判空
-        if (fgImage != null) {
-            gc.drawImage(fgImage, px, py, cellSize, cellSize);
-        } else {
-            gc.setFill(fallbackColor);
-            gc.fillRect(px + 0.5, py + 0.5, cellSize - 1, cellSize - 1);
-        }
-    }
-
-    private void renderItem(GraphicsContext gc, Item item, double px, double py) {
-        Image img = resourceManager.getItemImage(item.getItemId());
-        if (img != null) {
-            gc.drawImage(img, px, py, cellSize, cellSize);
-            return;
-        }
-
-        // 缺少图片资源时的占位：宝石画成菱形，其余画成圆角方块，颜色按道具语义取。
-        // Item 是封闭类型，新增一个道具大类会让这里编译失败，不会静默落到某个兜底色
-        switch (item) {
-            case AbilityGem gem -> drawGemPlaceholder(gc, px, py, abilityGemColor(gem));
-            case Key key -> drawItemBlock(gc, px, py, keyColor(key.getKeyColor()));
-            case Portion _ -> drawItemBlock(gc, px, py, Color.web("#ff5a5a"));
-            case Equipment _ -> drawItemBlock(gc, px, py, Color.web("#9aa5b1"));
-            case AuxiliaryItem _ -> drawItemBlock(gc, px, py, Color.web("#b07cff"));
-            case GenericItem _ -> drawItemBlock(gc, px, py, Color.web("#ffa500"));
-        }
-    }
-
-    /** 能力宝石占位色：攻击红 / 防御蓝 / 生命上限黄（黄色宝石美术资源到位前的替代） */
-    private Color abilityGemColor(AbilityGem gem) {
-        return switch (gem.getEffectedAbilityType()) {
-            case ATK -> Color.web("#e74c3c");
-            case DEF -> Color.web("#3498db");
-            case MAX_HP -> Color.web("#ffd700");
-            case HP -> Color.web("#2ecc71");
-        };
-    }
-
-    /** 钥匙与门共用同一套配色——分开写两份，改了一处忘另一处就会对不上 */
-    private static Color keyColor(KeyColor color) {
-        return switch (color) {
-            case YELLOW -> Color.web("#ffd700");
-            case BLUE -> Color.web("#4169e1");
-            case RED -> Color.web("#dc143c");
-            case GREEN -> Color.web("#2e8b57");
-        };
-    }
-
-    /** 道具缺图时的占位方块 */
-    private void drawItemBlock(GraphicsContext gc, double px, double py, Color color) {
-        gc.setFill(color);
-        double margin = cellSize * 0.3;
-        gc.fillRoundRect(px + margin, py + margin, cellSize - 2 * margin, cellSize - 2 * margin, 4, 4);
-    }
-
-    /** 用色块画一颗菱形宝石（带描边与高光，便于和普通道具方块区分） */
-    private void drawGemPlaceholder(GraphicsContext gc, double px, double py, Color color) {
-        double cx = px + cellSize / 2;
-        double cy = py + cellSize / 2;
-        double r = cellSize * 0.3;
-        double[] xs = {cx, cx + r, cx, cx - r};
-        double[] ys = {cy - r, cy, cy + r, cy};
-
-        gc.setFill(color);
-        gc.fillPolygon(xs, ys, 4);
-        gc.setStroke(color.darker());
-        gc.setLineWidth(2);
-        gc.strokePolygon(xs, ys, 4);
-
-        gc.setFill(color.brighter());
-        gc.fillPolygon(
-                new double[]{cx, cx + r * 0.45, cx},
-                new double[]{cy - r, cy - r * 0.2, cy - r * 0.2}, 3);
-    }
-
-    private void renderMonster(GraphicsContext gc, Monster monster, double px, double py) {
-        Image img = resourceManager.getMonsterImage(monster.getCharacterId());
-        if (img != null) {
-            gc.drawImage(img, px, py, cellSize, cellSize);
-        } else {
-            gc.setFill(Color.web("#cc0000"));
-            double margin = cellSize * 0.1;
-            gc.fillOval(px + margin, py + margin, cellSize - 2 * margin, cellSize - 2 * margin);
-        }
-
-        DamageRange range = monster.getCurrentDamageRange();
-        Color dmgColor = DamagePalette.colorOf(range, monster.isLethalTo(engine.getPlayerStateManager()));
-
-        String dmgText;
-        if (range == DamageRange.OVER_KILL) {
-            dmgText = "???";
-        } else if (monster.getCurrentDamage() == null) {
-            dmgText = "?";
-        } else {
-            dmgText = ValueFormatter.formatScaled(monster.getCurrentDamage(),
-                    engine.getPlayerStateManager().getMaxHP());
-        }
-
-        // 右下角对齐 + 全图统一字号（fitFont 仅在极端长度下兜底收缩），保证数字完整落格且大小一致
-        double padding = cellSize * 0.05;
-        double maxWidth = cellSize - 2 * padding;
-        Font dmgFont = painter.fitFont(dmgText, "Consolas",
-                cellSize * DAMAGE_FONT_RATIO, cellSize * DAMAGE_FONT_MIN_RATIO, maxWidth);
-        double textX = px + cellSize - padding - painter.measureWidth(dmgText, dmgFont);
-        double textY = py + cellSize - padding;
-
-        gc.setFont(dmgFont);
-        gc.setFill(Color.BLACK);
-        gc.fillText(dmgText, textX + 1, textY + 1);
-        gc.setFill(dmgColor);
-        gc.fillText(dmgText, textX, textY);
-    }
-
-    private void renderPlayer(GraphicsContext gc, Position playerPos) {
-        if (playerPos == null) return;
-        double ppx = playerPos.getX_index() * cellSize;
-        double ppy = playerPos.getY_index() * cellSize;
-
-        Direction dir = engine.getPlayerStateManager().getCurrentDirection();
-        Image playerImg = resourceManager.getPlayerSprite(dir);
-
-        if (playerImg != null) {
-            gc.drawImage(playerImg, ppx, ppy, cellSize, cellSize);
-        } else {
-            gc.setFill(Color.DODGERBLUE);
-            double margin = cellSize * 0.15;
-            gc.fillOval(ppx + margin, ppy + margin, cellSize - 2 * margin, cellSize - 2 * margin);
-
-            gc.setFill(Color.WHITE);
-            double cx = ppx + cellSize / 2;
-            double cy = ppy + cellSize / 2;
-            double sz = cellSize * 0.2;
-            switch (dir) {
-                case UP -> gc.fillPolygon(
-                        new double[]{cx, cx - sz, cx + sz},
-                        new double[]{cy - sz, cy + sz * 0.5, cy + sz * 0.5}, 3);
-                case DOWN -> gc.fillPolygon(
-                        new double[]{cx, cx - sz, cx + sz},
-                        new double[]{cy + sz, cy - sz * 0.5, cy - sz * 0.5}, 3);
-                case LEFT -> gc.fillPolygon(
-                        new double[]{cx - sz, cx + sz * 0.5, cx + sz * 0.5},
-                        new double[]{cy, cy - sz, cy + sz}, 3);
-                case RIGHT -> gc.fillPolygon(
-                        new double[]{cx + sz, cx - sz * 0.5, cx - sz * 0.5},
-                        new double[]{cy, cy - sz, cy + sz}, 3);
-            }
-        }
-    }
-
-    private void renderTileAndPlayerAt(GraphicsContext gc, Position playerPos) {
-        Tile tile = this.engine.getMapManager().getCurrentMap().getTileAt(playerPos);
-        renderTile(gc, tile, playerPos.getX_index() * cellSize, playerPos.getY_index() * cellSize);
-        renderPlayer(gc, playerPos);
     }
 }

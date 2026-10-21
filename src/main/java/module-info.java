@@ -51,6 +51,7 @@ module com.demo.mota {
     exports com.demo.mota.ui.screen.loading;
     exports com.demo.mota.ui.screen.title;
     exports com.demo.mota.ui.screen.game;
+    exports com.demo.mota.ui.screen.game.map;
     exports com.demo.mota.ui.screen.game.side;
     exports com.demo.mota.ui.screen.gameover;
     exports com.demo.mota.ui.screen.gamemenu;
