@@ -184,4 +184,11 @@ public class MotaController {
             currentScreen.handleKeyRelease(event.getCode());
         }
     }
+
+    /** 窗口失焦时由宿主调用，转给当前界面（见 {@link Screen#onFocusLost()}） */
+    public void handleFocusLost() {
+        if (currentScreen != null) {
+            currentScreen.onFocusLost();
+        }
+    }
 }

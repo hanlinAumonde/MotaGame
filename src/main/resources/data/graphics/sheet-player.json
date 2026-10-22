@@ -16,7 +16,7 @@
     "UP": 3
   },
 
-  "_comment_frames": "walkColumns 按播放顺序列出行走循环用到的列；idleFrame 是静止时取第几帧（walkColumns 的下标）。动画系统落地前只有 idle 帧会被渲染，其余帧照常切出来缓存着。",
+  "_comment_frames": "walkColumns 按播放顺序列出行走循环用到的列；idleFrame 是静止时取第几帧（walkColumns 的下标）。静止时显示 idle 帧；行走时由地图显示按步播放其余帧（见 WalkCycle）。",
   "walkColumns": [0, 1, 2, 3],
   "idleFrame": 0
 }

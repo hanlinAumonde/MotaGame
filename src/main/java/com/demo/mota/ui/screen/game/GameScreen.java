@@ -41,6 +41,10 @@ import java.util.Map;
  * 组合快捷键：按住 D 再按数字键切换技能组、按住 W 再按数字键换上套装（{@link ChordKey}）。
  * Backspace 撤销最近一次开门 / 战斗 / 拾取（{@link #undoLastAction()}，游戏结束框里同样可用）。
  *
+ * <p>地图有动画（走一格的平滑移动、换层的黑幕）。动画没播完时方向键先进 {@link StepBuffer}，
+ * 播完（{@link MapView#setOnAnimationsFinished}）再走下一步；按住方向键即连续行走。
+ * 其他按键（菜单、撤销、组合键）不等动画，照常立即处理。
+ *
  * <p>每次回到本界面都重算一次当前层伤害：其他界面里穿脱装备、改预设都可能影响战斗推演，
  * 统一在这里补算，那些界面就不必各自汇报「改没改」。当前层怪物只有几十只，开销可以忽略。
  *
@@ -79,6 +83,9 @@ public class GameScreen implements Screen {
     /** 文本测量与绘制工具（阴影描边、自适应字号、折行） */
     private final TextPainter painter = new TextPainter();
 
+    /** 动画期间缓下来的方向键，见类注释 */
+    private final StepBuffer steps = new StepBuffer();
+
     private String currentMessage = "";
 
     public GameScreen(GameEngine engine, ResourceManager resourceManager, GameFlow flow,
@@ -90,6 +97,7 @@ public class GameScreen implements Screen {
         this.mapView = mapView;
         this.sideCanvas = sideCanvas;
         this.sidePanelRenderer = new SidePanelRenderer(resourceManager);
+        mapView.setOnAnimationsFinished(this::continueWalking);
     }
 
     /** 新的一局：清掉上一局残留的消息 */
@@ -109,7 +117,16 @@ public class GameScreen implements Screen {
         // 松键可能落在了别的界面里，回来时不能让「按住」状态残留
         presetChord.reset();
         setChord.reset();
+        steps.clear();
         engine.recalculateCurrentFloorDamage();
+    }
+
+    /** 窗口失焦：之后的松键事件收不到，按住的方向键 / 修饰键都当作已松开，免得回来时自己一直走 */
+    @Override
+    public void onFocusLost() {
+        presetChord.reset();
+        setChord.reset();
+        steps.clear();
     }
 
     // ==================== 输入 ====================
@@ -148,16 +165,56 @@ public class GameScreen implements Screen {
                 Direction direction = toDirection(code);
                 if (direction == null) break;
 
-                MoveResult result = engine.handlePlayerMove(direction);
-                handleMoveResult(result);
-                autoSaveAfter(result);
-                render();
-
-                // 行动之后统一判死：战斗、以及将来的岩浆 / 毒 / 陷阱都汇到这一处
-                if (engine.getPlayerStateManager().isDead()) {
-                    flow.to(GamePhase.GAME_OVER);
+                boolean fresh = steps.press(direction);
+                if (mapView.isAnimating()) {
+                    // 上一步还没走完：新按下的记下来，等动画播完再走；自动重复不记（按着就会接着走）
+                    if (fresh) {
+                        steps.queue(direction);
+                    }
+                } else {
+                    move(direction);
                 }
             }
+        }
+    }
+
+    /** 走一步（或撞上怪物 / 门 / 楼梯……），之后统一判死 */
+    private void move(Direction direction) {
+        MoveResult result = engine.handlePlayerMove(direction);
+        handleMoveResult(result);
+        autoSaveAfter(result);
+        playFloorTransitionAfter(result);
+        render();
+
+        // 行动之后统一判死：战斗、以及将来的岩浆 / 毒 / 陷阱都汇到这一处
+        if (engine.getPlayerStateManager().isDead()) {
+            flow.to(GamePhase.GAME_OVER);
+        }
+    }
+
+    /** 地图动画播完：接着走缓下来的一步，或沿仍按着的方向继续走 */
+    private void continueWalking() {
+        if (flow.getPhase() != GamePhase.PLAYING) {
+            // 动画播的途中切去了别的界面：回来时不该自己接着走
+            steps.clear();
+            return;
+        }
+        Direction next = steps.next();
+        if (next != null) {
+            move(next);
+        }
+    }
+
+    /** 换层 / 进入新区域：地图换图时播一段黑幕过渡，黑屏上写出到了哪 */
+    private void playFloorTransitionAfter(MoveResult result) {
+        switch (result.getType()) {
+            case FLOOR_SWITCHED, REGION_ENTERED -> {
+                RegionInfo region = engine.getMapManager().getCurrentRegion();
+                String floor = "第 " + engine.getMapManager().getCurrentMap().getFloorNumber() + " 层";
+                // 区域名本身常带「·」（如「试炼之塔·下层」），与楼层分两行写，免得连成一串
+                mapView.playFloorTransition(region == null ? floor : region.name() + "\n" + floor);
+            }
+            default -> { }
         }
     }
 
@@ -166,6 +223,8 @@ public class GameScreen implements Screen {
      * 因此提示在恢复之后再写、再重绘。游戏结束框里按 Backspace 也走这里：恢复时阶段已迁回 {@code PLAYING}。
      */
     public void undoLastAction() {
+        // 撤销整局重建，行走动画随之打断：缓下来的那一步不该落在撤销后的局面上
+        steps.clear();
         String undone = engine.undoLastAction();
         currentMessage = undone == null ? "没有可撤销的行动" : "已撤销：" + undone;
         render();
@@ -192,6 +251,10 @@ public class GameScreen implements Screen {
     /** 单按 D（按住期间没有组合数字键）松开时才打开技能设置 */
     @Override
     public void handleKeyRelease(KeyCode code) {
+        Direction direction = toDirection(code);
+        if (direction != null) {
+            steps.release(direction);
+        }
         if (presetChord.release(code)) {
             flow.to(GamePhase.SKILL_SETUP);
         }

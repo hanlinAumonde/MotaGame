@@ -84,6 +84,12 @@ public class MotaApplication extends GameApplication {
 
         controller = new MotaController(mapView);
         FXGL.getGameScene().addUINode(controller.getRoot());
+        // 失焦后收不到松键事件：通知界面把「按住」的状态清掉（否则按住方向键切出窗口，人会一直走）
+        FXGL.getPrimaryStage().focusedProperty().addListener((obs, was, focused) -> {
+            if (!focused) {
+                controller.handleFocusLost();
+            }
+        });
         startLoading(controller);
     }
 

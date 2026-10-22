@@ -24,6 +24,9 @@ public interface Screen {
     /** 处理一次松键。只有用到组合快捷键（{@link ChordKey}）的界面才需要关心 */
     default void handleKeyRelease(KeyCode code) {}
 
+    /** 窗口失去焦点：之后的松键事件收不到，「按住」类的状态应当在这里清掉 */
+    default void onFocusLost() {}
+
     /** 每次切入本界面时调用，用于重置光标等界面内状态 */
     default void onEnter() {}
 

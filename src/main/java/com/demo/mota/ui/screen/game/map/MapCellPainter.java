@@ -7,10 +7,12 @@ import com.demo.mota.engine.Item.GenericItem.GenericItem;
 import com.demo.mota.engine.Item.Item;
 import com.demo.mota.engine.Item.Key;
 import com.demo.mota.engine.Item.Portion;
+import com.demo.mota.engine.configs.GraphicsConfigConstants;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.map.tile.*;
 import com.demo.mota.engine.resource.ResourceManager;
+import com.demo.mota.engine.resource.sprite.CharacterSprites;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.engine.state.monster.DamageRange;
 import com.demo.mota.engine.state.monster.Monster;
@@ -221,8 +223,15 @@ public final class MapCellPainter {
 
     // ==================== 玩家 ====================
 
-    public void paintPlayer(GraphicsContext gc, Direction dir) {
-        Image playerImg = resourceManager.getPlayerSprite(dir);
+    /** 主角的行走帧；没有切出行走图时为 {@code null}（绘制走纯色 fallback，也就没有走路帧可播） */
+    public CharacterSprites playerSprites() {
+        return resourceManager.getCharacterSprites(GraphicsConfigConstants.PLAYER_CHARACTER_ID);
+    }
+
+    /** 主角某朝向的第 {@code frame} 帧（下标按帧数取模，见 {@link CharacterSprites#frame}） */
+    public void paintPlayer(GraphicsContext gc, Direction dir, int frame) {
+        CharacterSprites sprites = playerSprites();
+        Image playerImg = sprites == null ? null : sprites.frame(dir, frame);
         if (playerImg != null) {
             gc.drawImage(playerImg, 0, 0, cellSize, cellSize);
             return;

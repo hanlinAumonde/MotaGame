@@ -11,10 +11,8 @@ import java.util.Map;
 /**
  * 一个角色从行走图里切出来的全部帧：朝向 → 该朝向的帧序列（按播放顺序）。
  *
- * <p><b>动画系统的扩展入口就在这里</b>。当前游戏没有动画，渲染只取
- * {@link #idle(Direction)}；但整行的行走帧照样切出来缓存着，因此日后加动画系统时
- * 只需要新增一个「按时间推进帧下标」的组件去调 {@link #frame(Direction, int)}，
- * 资源侧（配置格式、切分逻辑、缓存结构）一行都不用改。
+ * <p>静止时渲染 {@link #idle(Direction)}；行走时由界面侧的动画组件按时间推进帧下标、
+ * 调 {@link #frame(Direction, int)} 取帧（主角的平滑行走即如此），资源侧不关心谁在播、怎么播。
  */
 public final class CharacterSprites {
 
@@ -34,7 +32,7 @@ public final class CharacterSprites {
         this.idleFrame = Math.max(0, idleFrame);
     }
 
-    /** 静止帧，当前渲染唯一用到的帧 */
+    /** 静止帧 */
     public Image idle(Direction direction) {
         return frame(direction, idleFrame);
     }
