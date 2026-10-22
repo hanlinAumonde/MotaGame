@@ -10,6 +10,7 @@ import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.map.region.RegionInfo;
+import com.demo.mota.engine.rules.GameRules;
 import com.demo.mota.engine.skill.preset.SkillPreset;
 import com.demo.mota.engine.skill.preset.SkillPresetBook;
 import com.demo.mota.engine.state.PlayerStateManager;
@@ -68,16 +69,17 @@ public class GameScreen implements Screen {
     private final Canvas statusCanvas;
     private final MapView mapView;
     private final Canvas sideCanvas;
-    private final SidePanelRenderer sidePanelRenderer;
+    /** 分区顺序取自塔规则，因此在每局开始时（内容已载入）才建 */
+    private SidePanelRenderer sidePanelRenderer;
 
     /** 按住 D 再按数字键：激活 / 停用技能组；单按 D：打开技能设置 */
     private final ChordKey presetChord = new ChordKey(PresetHotkeys.SKILL_CHORD);
     /** 按住 W 再按数字键：换上对应套装 */
     private final ChordKey setChord = new ChordKey(PresetHotkeys.EQUIPMENT_SET_CHORD);
-    /** 数字键 → 预设下标，取自塔规则 {@code skill.hotkeys} */
-    private final Map<KeyCode, Integer> presetHotkeys = PresetHotkeys.fromRules();
-    /** 数字键 → 套装下标，取自塔规则 {@code equipment.setHotkeys} */
-    private final Map<KeyCode, Integer> setHotkeys = PresetHotkeys.equipmentSetsFromRules();
+    /** 数字键 → 预设下标，取自塔规则 {@code skill.hotkeys}（每局开始时读取） */
+    private Map<KeyCode, Integer> presetHotkeys = Map.of();
+    /** 数字键 → 套装下标，取自塔规则 {@code equipment.setHotkeys}（每局开始时读取） */
+    private Map<KeyCode, Integer> setHotkeys = Map.of();
 
     /** 文本测量与绘制工具（阴影描边、自适应字号、折行） */
     private final TextPainter painter = new TextPainter();
@@ -95,14 +97,20 @@ public class GameScreen implements Screen {
         this.statusCanvas = statusCanvas;
         this.mapView = mapView;
         this.sideCanvas = sideCanvas;
-        this.sidePanelRenderer = new SidePanelRenderer(assets);
         mapView.setOnAnimationsFinished(this::continueWalking);
     }
 
-    /** 新的一局：清掉上一局残留的消息 */
+    /**
+     * 新的一局：清掉上一局残留的消息，按塔规则准备快捷键与右侧栏。
+     * 界面在内容载入之前就建好了，规则只能在这里（以及之后）读。
+     */
     @Override
     public void onNewGame() {
         this.currentMessage = "";
+        GameRules rules = engine.getContent().rules();
+        this.presetHotkeys = PresetHotkeys.fromRules(rules);
+        this.setHotkeys = PresetHotkeys.equipmentSetsFromRules(rules);
+        this.sidePanelRenderer = new SidePanelRenderer(assets, rules.sidePanel().sections());
     }
 
     /** 其他界面带回来的一句提示（如「已切换到第1号套装」），显示在状态栏消息处 */
@@ -206,7 +214,7 @@ public class GameScreen implements Screen {
 
     /** 换层 / 进入新区域：地图换图时播一段黑幕过渡，黑屏上写出到了哪 */
     private void playFloorTransitionAfter(MoveResult result) {
-        switch (result.getType()) {
+        switch (result.type()) {
             case FLOOR_SWITCHED, REGION_ENTERED -> {
                 RegionInfo region = engine.getMapManager().getCurrentRegion();
                 String floor = "第 " + engine.getMapManager().getCurrentMap().getFloorNumber() + " 层";
@@ -231,7 +239,7 @@ public class GameScreen implements Screen {
 
     /** 切换楼层 / 进入新区域之后写自动存档；失败只在状态栏消息后补一句 */
     private void autoSaveAfter(MoveResult result) {
-        switch (result.getType()) {
+        switch (result.type()) {
             case FLOOR_SWITCHED, REGION_ENTERED -> {
                 if (!engine.autoSave()) {
                     currentMessage = currentMessage + "（自动存档失败）";
@@ -332,8 +340,8 @@ public class GameScreen implements Screen {
     }
 
     private void handleMoveResult(MoveResult result) {
-        String detail = result.getDetail();
-        currentMessage = switch (result.getType()) {
+        String detail = result.detail();
+        currentMessage = switch (result.type()) {
             case BATTLE_WON -> "击败 " + detail + "！";
             case BATTLE_LOST -> "败给 " + detail + "！";
             case ITEM_PICKED -> "获得 " + detail;

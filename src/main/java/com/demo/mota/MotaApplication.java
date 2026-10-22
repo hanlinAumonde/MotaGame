@@ -10,10 +10,13 @@ import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.logging.Logger;
 import com.demo.mota.app.services.AssetService;
 import com.demo.mota.app.services.DevToolsService;
+import com.demo.mota.content.ContentLoader;
+import com.demo.mota.content.ContentSource;
+import com.demo.mota.content.LoadingRunner;
+import com.demo.mota.content.LoadingTask;
 import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.app.GamePhase;
-import com.demo.mota.engine.boot.GameBootstrap;
-import com.demo.mota.engine.boot.LoadingTask;
+import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.ui.screen.game.map.EntityMapView;
 import com.demo.mota.ui.screen.game.map.MapCellPainter;
 import javafx.application.Platform;
@@ -24,15 +27,13 @@ import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.demo.mota.engine.configs.MapConfigConstants.MAP_SIDE_LENGTH;
-
 /**
  * 应用入口：由 FXGL 托管窗口、场景与主循环。
  *
  * <p>FXGL 自带的主菜单 / 游戏菜单 / 开场动画全部关掉，生命周期仍由自己的 {@code GameFlow} 掌管；
  * 整套界面（{@link MotaController} 搭的画布）作为一个 UI 节点挂进 FXGL 的游戏场景，按键经 FXGL 的 {@link Input} 转发；
  * 中间的地图则是世界层里的实体（{@link EntityMapView}），从界面层留出的透明占位处透出来。
- * FXGL 自己的加载阶段（{@code initGame}）这里不用——配置表加载仍走 {@code GameBootstrap}，进度画在我们的加载界面上；
+ * FXGL 自己的加载阶段（{@code initGame}）这里不用——塔的内容由 {@link ContentLoader} 在后台线程读取，进度画在我们的加载界面上；
  * 精灵目录则由 {@link AssetService} 在 FXGL 的启动期（服务初始化）载入。
  *
  * <p>字体、样式表、窗口图标都按 FXGL 的约定放在 {@code assets/} 下、经 {@link GameSettings} 注册。
@@ -110,7 +111,7 @@ public class MotaApplication extends GameApplication {
         FXGL.getGameScene().setBackgroundColor(Color.web("#2a2a2a"));
 
         AssetService assets = FXGL.getService(AssetService.class);
-        MapCellPainter cellPainter = new MapCellPainter(assets, (double) MotaController.MAP_SIZE / MAP_SIDE_LENGTH);
+        MapCellPainter cellPainter = new MapCellPainter(assets, (double) MotaController.MAP_SIZE / GameMap.SIDE);
         EntityMapView mapView = new EntityMapView(GameEngine.getGameEngine(), cellPainter,
                 MotaController.MAP_X, MotaController.MAP_Y);
 
@@ -126,20 +127,26 @@ public class MotaApplication extends GameApplication {
     }
 
     /**
-     * 在后台线程跑完 {@code GameBootstrap}，加载界面同步显示进度，完成后迁到标题界面。
-     * 任务表 = 引擎的默认任务 + 预载内容表引用的图片（读完道具 / 怪物 / 技能表才知道要哪些图）。
+     * 在后台线程跑完加载任务表，加载界面同步显示进度，完成后迁到标题界面。
+     * 任务表 = 读塔的内容（{@link ContentLoader}）+ 装进引擎并扫描存档 + 预载内容表引用的图片。
      *
      * <p>放后台是为了让进度条真的能动——同步加载会把 FX 线程占满，加载界面根本画不出来。
      * 进度回调发生在后台线程，因此一律经 {@link Platform#runLater} 切回 FX 线程再碰画布。
      */
     private void startLoading(MotaController controller, AssetService assets) {
-        List<LoadingTask> tasks = new ArrayList<>(GameBootstrap.defaultTasks());
-        tasks.add(new LoadingTask("载入图像资源", 20, assets::preloadContentSprites));
+        GameEngine engine = GameEngine.getGameEngine();
+        ContentLoader loader = new ContentLoader(ContentSource.getInstance());
+        List<LoadingTask> tasks = new ArrayList<>(loader.tasks());
+        tasks.add(new LoadingTask("扫描存档", 3, () -> {
+            engine.install(loader.result());
+            engine.getSaveRepository().refresh();
+        }));
+        tasks.add(new LoadingTask("载入图像资源", 20, () -> assets.preloadContentSprites(engine.getContent())));
 
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() {
-                new GameBootstrap(tasks).run((progress, taskName) -> Platform.runLater(() -> {
+                LoadingRunner.run(tasks, (progress, taskName) -> Platform.runLater(() -> {
                     controller.getLoadingScreen().update(progress, taskName);
                     controller.getLoadingScreen().render();
                 }));

@@ -1,6 +1,6 @@
 package com.demo.mota.ui.screen.gamemenu;
 
-import com.demo.mota.engine.Item.AuxiliaryType;
+import com.demo.mota.engine.item.AuxiliaryType;
 import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.map.MapManager;
 import com.demo.mota.engine.map.Position;
@@ -273,8 +273,8 @@ public class GameMenuState {
         }
         List<Map.Entry<Position, Monster>> entries = new ArrayList<>(map.getMonsters().entrySet());
         entries.sort(Comparator
-                .comparingInt((Map.Entry<Position, Monster> e) -> e.getKey().getY_index())
-                .thenComparingInt(e -> e.getKey().getX_index()));
+                .comparingInt((Map.Entry<Position, Monster> e) -> e.getKey().y())
+                .thenComparingInt(e -> e.getKey().x()));
 
         Map<String, Monster> distinct = new LinkedHashMap<>();
         for (Map.Entry<Position, Monster> entry : entries) {

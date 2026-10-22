@@ -1,8 +1,8 @@
 package com.demo.mota.ui;
 
 import com.demo.mota.app.services.AssetService;
-import com.demo.mota.engine.Item.Equipment;
-import com.demo.mota.engine.Item.Item;
+import com.demo.mota.engine.item.Equipment;
+import com.demo.mota.engine.item.Item;
 import com.demo.mota.engine.skill.Skill;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;

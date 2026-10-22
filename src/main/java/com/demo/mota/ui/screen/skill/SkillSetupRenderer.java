@@ -2,7 +2,6 @@ package com.demo.mota.ui.screen.skill;
 
 import com.demo.mota.app.services.AssetService;
 import com.demo.mota.engine.enums.Direction;
-import com.demo.mota.engine.rules.GameRules;
 import com.demo.mota.engine.skill.Skill;
 import com.demo.mota.engine.skill.book.OwnedSkill;
 import com.demo.mota.engine.skill.book.SkillBook;
@@ -39,14 +38,17 @@ public class SkillSetupRenderer {
     private final TextPainter painter = new TextPainter();
     private final IconPainter iconPainter;
     private final SkillCardPainter cardPainter;
-    /** 各套预设的快捷键（KeyCode 名），取自塔规则，只用来显示 */
-    private final List<String> hotkeys;
+    /** 各套预设的快捷键（KeyCode 名），取自塔规则，只用来显示；每局开始时由界面交进来 */
+    private List<String> hotkeys = List.of();
 
     public SkillSetupRenderer(AssetService assets) {
         this.assets = assets;
         this.iconPainter = new IconPainter(assets, painter);
         this.cardPainter = new SkillCardPainter(painter, iconPainter);
-        this.hotkeys = GameRules.get().skill().hotkeys();
+    }
+
+    public void setHotkeys(List<String> hotkeys) {
+        this.hotkeys = List.copyOf(hotkeys);
     }
 
     public void render(GraphicsContext gc, SkillSetupState menu, double width, double height) {

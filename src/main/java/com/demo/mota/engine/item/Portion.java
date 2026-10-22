@@ -1,0 +1,19 @@
+package com.demo.mota.engine.item;
+
+import com.demo.mota.engine.GameNumber;
+
+public final class Portion extends Item {
+    private final GameNumber replyAmount;
+
+    public Portion(String itemId, String itemName, String itemDescription,
+                   long itemPrice, int itemCount,
+                   boolean isStorable, boolean isConsumable,
+                   GameNumber replyAmount) {
+        super(itemId, itemName, itemDescription, itemPrice, itemCount, isStorable, isConsumable);
+        this.replyAmount = replyAmount;
+    }
+
+    public GameNumber getReplyAmount() {
+        return replyAmount;
+    }
+}

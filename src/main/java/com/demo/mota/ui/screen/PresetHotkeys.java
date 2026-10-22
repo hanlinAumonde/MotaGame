@@ -24,13 +24,14 @@ public final class PresetHotkeys {
 
     private PresetHotkeys() {}
 
-    public static Map<KeyCode, Integer> fromRules() {
-        return parse(GameRules.get().skill().hotkeys());
+    /** 技能组的按键 → 预设下标，取自塔规则 {@code skill.hotkeys} */
+    public static Map<KeyCode, Integer> fromRules(GameRules rules) {
+        return parse(rules.skill().hotkeys());
     }
 
     /** 装备套装的按键 → 套装下标，取自塔规则 {@code equipment.setHotkeys}（装备界面与套装界面共用） */
-    public static Map<KeyCode, Integer> equipmentSetsFromRules() {
-        return parse(GameRules.get().equipment().setHotkeys());
+    public static Map<KeyCode, Integer> equipmentSetsFromRules(GameRules rules) {
+        return parse(rules.equipment().setHotkeys());
     }
 
     /** 规则里写的是 JavaFX {@code KeyCode} 名；写错的忽略，不影响其余按键 */

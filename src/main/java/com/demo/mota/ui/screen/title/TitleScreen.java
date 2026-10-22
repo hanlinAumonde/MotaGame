@@ -29,9 +29,6 @@ public class TitleScreen implements Screen {
     private static final String CONTINUE = "continue";
     private static final String QUIT = "quit";
 
-    /** 新开一局从第几层起步 */
-    private static final int INITIAL_FLOOR = 1;
-
     private static final Color BACKGROUND = Color.web("#12131a");
     private static final Color SELECTED = Color.web("#f0c96b");
     private static final Color NORMAL = Color.web("#e8e8e8");
@@ -77,7 +74,7 @@ public class TitleScreen implements Screen {
         }
         switch (chosen) {
             // startNewGame 内部会把阶段推进到 PLAYING，界面切换由 Controller 订阅阶段变更完成
-            case START -> engine.startNewGame(INITIAL_FLOOR);
+            case START -> engine.startNewGame();
             case CONTINUE -> {
                 saveLoad.accept(SaveLoadMode.LOAD);
                 engine.getGameFlow().to(GamePhase.SAVE_LOAD);

@@ -1,6 +1,6 @@
 package com.demo.mota.ui.screen.inventory;
 
-import com.demo.mota.engine.Item.Item;
+import com.demo.mota.engine.item.Item;
 
 /**
  * 物品栏里的一行：同一种道具合并为一行，{@code count} 为持有数量。

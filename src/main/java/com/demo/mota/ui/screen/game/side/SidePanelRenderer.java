@@ -1,7 +1,6 @@
 package com.demo.mota.ui.screen.game.side;
 
 import com.demo.mota.app.services.AssetService;
-import com.demo.mota.engine.rules.GameRules;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.ui.IconPainter;
 import com.demo.mota.ui.TextPainter;
@@ -27,10 +26,6 @@ public class SidePanelRenderer {
     private final TextPainter painter = new TextPainter();
     private final IconPainter iconPainter;
     private final List<String> sectionIds;
-
-    public SidePanelRenderer(AssetService assets) {
-        this(assets, GameRules.get().sidePanel().sections());
-    }
 
     public SidePanelRenderer(AssetService assets, List<String> sectionIds) {
         this.iconPainter = new IconPainter(assets, painter);

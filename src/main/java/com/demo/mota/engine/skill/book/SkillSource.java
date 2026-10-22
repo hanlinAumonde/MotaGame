@@ -1,6 +1,6 @@
 package com.demo.mota.engine.skill.book;
 
-import com.demo.mota.engine.Item.Equipment;
+import com.demo.mota.engine.item.Equipment;
 
 /**
  * 玩家持有某个技能的<b>来源</b>。同一个技能可以同时有多个来源，

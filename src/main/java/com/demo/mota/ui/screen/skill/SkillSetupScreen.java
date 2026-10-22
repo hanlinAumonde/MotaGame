@@ -11,6 +11,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,7 +25,8 @@ public class SkillSetupScreen extends InGameScreen {
     private final GameEngine engine;
     private final SkillSetupRenderer renderer;
     private final ChordKey presetChord = new ChordKey(PresetHotkeys.SKILL_CHORD);
-    private final Map<KeyCode, Integer> presetHotkeys = PresetHotkeys.fromRules();
+    /** 数字键 → 预设下标（每局开始时按塔规则读取） */
+    private Map<KeyCode, Integer> presetHotkeys = Map.of();
     private SkillSetupState state;
 
     public SkillSetupScreen(GameEngine engine, GameFlow flow, Canvas canvas, SkillSetupRenderer renderer) {
@@ -36,6 +38,9 @@ public class SkillSetupScreen extends InGameScreen {
     @Override
     public void onNewGame() {
         this.state = new SkillSetupState(engine.getPlayerStateManager());
+        List<String> hotkeys = engine.getContent().rules().skill().hotkeys();
+        this.presetHotkeys = PresetHotkeys.fromRules(engine.getContent().rules());
+        renderer.setHotkeys(hotkeys);
     }
 
     @Override

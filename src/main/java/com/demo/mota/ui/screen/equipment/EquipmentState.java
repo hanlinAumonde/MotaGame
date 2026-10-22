@@ -1,7 +1,7 @@
 package com.demo.mota.ui.screen.equipment;
 
 import com.demo.mota.ui.MenuCommand;
-import com.demo.mota.engine.Item.Equipment;
+import com.demo.mota.engine.item.Equipment;
 import com.demo.mota.engine.state.PlayerStateManager;
 
 import java.util.List;

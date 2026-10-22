@@ -1,7 +1,7 @@
 package com.demo.mota.ui.screen.equipset;
 
 import com.demo.mota.app.services.AssetService;
-import com.demo.mota.engine.Item.Equipment;
+import com.demo.mota.engine.item.Equipment;
 import com.demo.mota.engine.state.equipset.EquipmentSet;
 import com.demo.mota.ui.Fonts;
 import com.demo.mota.ui.IconPainter;

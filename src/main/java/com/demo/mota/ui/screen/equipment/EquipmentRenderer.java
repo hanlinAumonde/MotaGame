@@ -2,7 +2,7 @@ package com.demo.mota.ui.screen.equipment;
 
 import com.demo.mota.app.services.AssetService;
 import com.demo.mota.engine.GameNumber;
-import com.demo.mota.engine.Item.Equipment;
+import com.demo.mota.engine.item.Equipment;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.skill.Skill;

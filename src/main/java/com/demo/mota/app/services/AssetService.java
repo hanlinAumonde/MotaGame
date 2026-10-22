@@ -7,11 +7,9 @@ import com.almasb.fxgl.texture.ImagesKt;
 import com.demo.mota.app.services.SpriteCatalog.CharacterDef;
 import com.demo.mota.app.services.SpriteCatalog.Geometry;
 import com.demo.mota.app.services.SpriteCatalog.SheetDef;
+import com.demo.mota.content.ContentSource;
+import com.demo.mota.engine.catalog.TowerContent;
 import com.demo.mota.engine.enums.Direction;
-import com.demo.mota.engine.factory.item.ItemFactory;
-import com.demo.mota.engine.factory.monster.MonsterFactory;
-import com.demo.mota.engine.factory.skill.SkillFactory;
-import com.demo.mota.engine.resource.ResourceManager;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 
@@ -33,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *   <li>{@link #onInit()}（FXGL 启动期、后台线程）按精灵目录（{@link SpriteCatalog}）载入图集，
  *       切出各精灵与角色帧并<b>最近邻放大</b>（{@code ImagesKt.resize}），像素图放大后依旧锐利；</li>
  *   <li>数据表里直接写图片路径的精灵第一次用到时才载入，{@link #preloadContentSprites()} 让加载期提前做完；</li>
- *   <li>定位走 engine 的 provider 链（{@link ResourceManager#findResourceUrl}，外置目录能覆盖内置图片），
+ *   <li>定位走内容层的 provider 链（{@link ContentSource#findResourceUrl}，外置目录能覆盖内置图片），
  *       载入走 FXGL 的资源加载器（带缓存）。</li>
  * </ul>
  *
@@ -51,8 +49,10 @@ public final class AssetService extends EngineService {
     /** 由 FXGL 按字段类型注入（Engine.injectDependenciesIntoService） */
     private FXGLAssetLoaderService assetLoader;
 
-    private final ResourceManager resources = ResourceManager.getInstance();
+    private final ContentSource resources = ContentSource.getInstance();
     private int scale = 1;
+    /** 塔的内容：按道具 / 怪物 id 查它们引用的精灵；加载期装好之前为 null */
+    private volatile TowerContent content;
 
     private final Map<String, Image> sprites = new ConcurrentHashMap<>();
     private final Map<String, CharacterSprite> characters = new ConcurrentHashMap<>();
@@ -103,12 +103,14 @@ public final class AssetService extends EngineService {
 
     /** 道具表里该道具的图 */
     public Image itemImage(String itemId) {
-        return sprite(ItemFactory.getInstance().getSprite(itemId));
+        TowerContent tower = content;
+        return tower == null ? null : sprite(tower.items().getSprite(itemId));
     }
 
     /** 怪物表里该怪物的图 */
     public Image monsterImage(String monsterId) {
-        return sprite(MonsterFactory.getInstance().getSprite(monsterId));
+        TowerContent tower = content;
+        return tower == null ? null : sprite(tower.monsters().getSprite(monsterId));
     }
 
     /** 角色行走图；精灵目录里没有该角色、或图集载入失败时返回 {@code null} */
@@ -123,14 +125,15 @@ public final class AssetService extends EngineService {
     }
 
     /**
-     * 把道具 / 怪物 / 技能表引用到的图片全部载入一遍，并对缺失的告警。
+     * 记下塔的内容，并把道具 / 怪物 / 技能表引用到的图片全部载入一遍、对缺失的告警。
      * 由加载期的任务调用（后台线程），之后绘制时取图都直接命中缓存。
      */
-    public void preloadContentSprites() {
+    public void preloadContentSprites(TowerContent content) {
+        this.content = content;
         Set<String> refs = new TreeSet<>();
-        refs.addAll(SkillFactory.getInstance().referencedSprites());
-        refs.addAll(ItemFactory.getInstance().referencedSprites());
-        refs.addAll(MonsterFactory.getInstance().referencedSprites());
+        refs.addAll(content.skills().referencedSprites());
+        refs.addAll(content.items().referencedSprites());
+        refs.addAll(content.monsters().referencedSprites());
         refs.forEach(this::sprite);
         log.infof("预载内容表图片 %d 张", refs.size());
     }

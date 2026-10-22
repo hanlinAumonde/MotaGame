@@ -1,6 +1,6 @@
 package com.demo.mota.ui.screen.game.side;
 
-import com.demo.mota.engine.Item.Equipment;
+import com.demo.mota.engine.item.Equipment;
 import com.demo.mota.engine.skill.Skill;
 import com.demo.mota.engine.skill.book.OwnedSkill;
 import com.demo.mota.engine.skill.preset.PresetSlotView;

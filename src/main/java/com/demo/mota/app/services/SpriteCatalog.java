@@ -1,7 +1,7 @@
 package com.demo.mota.app.services;
 
+import com.demo.mota.content.ContentSource;
 import com.demo.mota.engine.enums.Direction;
-import com.demo.mota.engine.resource.ResourceManager;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -41,7 +41,7 @@ public record SpriteCatalog(int scale,
     }
 
     /** 读取精灵目录；文件缺失或格式错误直接抛异常（属于打包错误） */
-    public static SpriteCatalog load(ResourceManager resources) {
+    public static SpriteCatalog load(ContentSource resources) {
         return resources.loadJsonResource(PATH, new TypeReference<>() {});
     }
 

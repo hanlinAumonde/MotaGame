@@ -49,9 +49,7 @@ final class LayerSync<T, V> {
         }
         current.forEach((pos, source) -> {
             if (source != null && !shown.containsKey(pos)) {
-                // 位置拷一份：Position 可变，不能让地图那边的改动悄悄影响这里的键
-                Position key = new Position(pos.getX_index(), pos.getY_index());
-                shown.put(key, new Shown<>(source, spawn.apply(key, source)));
+                shown.put(pos, new Shown<>(source, spawn.apply(pos, source)));
             }
         });
     }

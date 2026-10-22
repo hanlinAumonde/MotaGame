@@ -5,7 +5,7 @@ import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
 import com.demo.mota.app.services.CharacterSprite;
 import com.demo.mota.engine.GameEngine;
-import com.demo.mota.engine.Item.Item;
+import com.demo.mota.engine.item.Item;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.map.Position;
@@ -25,7 +25,6 @@ import javafx.scene.text.TextAlignment;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.demo.mota.engine.configs.MapConfigConstants.MAP_SIDE_LENGTH;
 
 /**
  * 用 FXGL 实体显示地图：每个地块、道具、怪物各是一个实体，玩家一个实体，按 z 序叠放。
@@ -160,8 +159,8 @@ public final class EntityMapView implements MapView {
 
     private static Map<Position, Tile> tilesOf(GameMap map) {
         Map<Position, Tile> result = new HashMap<>();
-        for (short y = 0; y < MAP_SIDE_LENGTH; y++) {
-            for (short x = 0; x < MAP_SIDE_LENGTH; x++) {
+        for (int y = 0; y < GameMap.SIDE; y++) {
+            for (int x = 0; x < GameMap.SIDE; x++) {
                 Position pos = new Position(x, y);
                 result.put(pos, map.getTileAt(pos));
             }
@@ -206,11 +205,11 @@ public final class EntityMapView implements MapView {
     }
 
     private double xOf(Position pos) {
-        return originX + pos.getX_index() * cellSize;
+        return originX + pos.x() * cellSize;
     }
 
     private double yOf(Position pos) {
-        return originY + pos.getY_index() * cellSize;
+        return originY + pos.y() * cellSize;
     }
 
     /** 只增删 / 刷新的组件：不需要 FXGL 反射注入字段 */
@@ -288,8 +287,8 @@ public final class EntityMapView implements MapView {
                 }
                 return;
             }
-            boolean step = animate && logical != null && isAdjacent(logical, pos);
-            logical = new Position(pos.getX_index(), pos.getY_index());
+            boolean step = animate && logical != null && logical.isAdjacentTo(pos);
+            logical = pos;
             toX = xOf(pos);
             toY = yOf(pos);
             if (step) {
@@ -339,10 +338,6 @@ public final class EntityMapView implements MapView {
         }
     }
 
-    private static boolean isAdjacent(Position a, Position b) {
-        return Math.abs(a.getX_index() - b.getX_index()) + Math.abs(a.getY_index() - b.getY_index()) == 1;
-    }
-
     // ==================== 楼层过渡 ====================
 
     private FloorCover cover() {
@@ -366,7 +361,7 @@ public final class EntityMapView implements MapView {
         private double elapsed;
 
         FloorCover() {
-            double size = cellSize * MAP_SIDE_LENGTH;
+            double size = cellSize * GameMap.SIDE;
             caption.setFont(Fonts.bold(34));
             caption.setFill(Color.web("#f5f5f5"));
             caption.setTextAlignment(TextAlignment.CENTER);

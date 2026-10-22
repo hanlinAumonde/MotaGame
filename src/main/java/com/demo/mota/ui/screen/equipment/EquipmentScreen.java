@@ -21,7 +21,8 @@ public class EquipmentScreen extends InGameScreen {
 
     /** 保存套装：按住 W 再按数字键（与对局中切换套装同一按法）；W 因此不作为「上」的别名 */
     private final ChordKey saveChord = new ChordKey(PresetHotkeys.EQUIPMENT_SET_CHORD);
-    private final Map<KeyCode, Integer> setHotkeys = PresetHotkeys.equipmentSetsFromRules();
+    /** 数字键 → 套装下标（每局开始时按塔规则读取） */
+    private Map<KeyCode, Integer> setHotkeys = Map.of();
     private final GameEngine engine;
     private final EquipmentRenderer renderer;
     private EquipmentState state;
@@ -35,6 +36,7 @@ public class EquipmentScreen extends InGameScreen {
     @Override
     public void onNewGame() {
         this.state = new EquipmentState(engine.getPlayerStateManager());
+        this.setHotkeys = PresetHotkeys.equipmentSetsFromRules(engine.getContent().rules());
     }
 
     @Override

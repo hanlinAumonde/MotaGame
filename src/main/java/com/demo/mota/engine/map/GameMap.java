@@ -1,6 +1,6 @@
 package com.demo.mota.engine.map;
 
-import com.demo.mota.engine.Item.Item;
+import com.demo.mota.engine.item.Item;
 import com.demo.mota.engine.map.tile.BackGroundTile;
 import com.demo.mota.engine.map.tile.RegionGateTile;
 import com.demo.mota.engine.map.tile.Tile;
@@ -17,9 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.demo.mota.engine.configs.MapConfigConstants.MAP_SIDE_LENGTH;
-
 public class GameMap {
+    /** 地图边长（格）：每层都是 SIDE × SIDE */
+    public static final int SIDE = 13;
+
     private final Tile[][] tiles;
     private final int floorNumber;
     private final Map<Position, Item> items;
@@ -50,11 +51,11 @@ public class GameMap {
     }
 
     public Tile getTileAt(Position position) {
-        return tiles[position.getX_index()][position.getY_index()];
+        return tiles[position.x()][position.y()];
     }
 
     public void setTileAt(Position position, Tile tile) {
-        tiles[position.getX_index()][position.getY_index()] = tile;
+        tiles[position.x()][position.y()] = tile;
     }
 
     public Item getItemAt(Position position) {
@@ -110,8 +111,8 @@ public class GameMap {
 
     private <T extends Tile> List<T> tilesOfType(Class<T> type) {
         List<T> result = new ArrayList<>();
-        for (int x = 0; x < MAP_SIDE_LENGTH; x++) {
-            for (int y = 0; y < MAP_SIDE_LENGTH; y++) {
+        for (int x = 0; x < SIDE; x++) {
+            for (int y = 0; y < SIDE; y++) {
                 if (type.isInstance(tiles[x][y])) {
                     result.add(type.cast(tiles[x][y]));
                 }
@@ -125,8 +126,8 @@ public class GameMap {
     /** 导出本层相对楼层文件的变化 */
     public FloorState toFloorState() {
         List<FloorState.TrickyBinding> bindings = getAllTrickyTiles().stream()
-                .map(tricky -> new FloorState.TrickyBinding(tricky.getPosition().getX_index(),
-                        tricky.getPosition().getY_index(), List.copyOf(tricky.getBoundMonsterIds())))
+                .map(tricky -> new FloorState.TrickyBinding(tricky.getPosition().x(),
+                        tricky.getPosition().y(), List.copyOf(tricky.getBoundMonsterIds())))
                 .sorted(Comparator.comparingInt(FloorState.TrickyBinding::y).thenComparingInt(FloorState.TrickyBinding::x))
                 .toList();
         return new FloorState(floorNumber, toCells(defeatedMonsters), toCells(takenItems), toCells(openedTiles), bindings);
@@ -141,28 +142,23 @@ public class GameMap {
         state.takenItems().forEach(cell -> removeItemAt(toPosition(cell)));
         for (FloorState.Cell cell : state.openedTiles()) {
             Position position = toPosition(cell);
-            if (isInside(position)) {
+            if (position.isInside()) {
                 openTile(position);
             }
         }
         for (FloorState.TrickyBinding binding : state.trickyBindings()) {
-            Position position = new Position((short) binding.x(), (short) binding.y());
-            if (isInside(position) && getTileAt(position) instanceof TrickyTile tricky) {
+            Position position = new Position(binding.x(), binding.y());
+            if (position.isInside() && getTileAt(position) instanceof TrickyTile tricky) {
                 tricky.resetBoundMonsters(binding.boundMonsterIds());
             }
         }
     }
 
     private static List<FloorState.Cell> toCells(Collection<Position> positions) {
-        return positions.stream().map(p -> new FloorState.Cell(p.getX_index(), p.getY_index())).toList();
+        return positions.stream().map(p -> new FloorState.Cell(p.x(), p.y())).toList();
     }
 
     private static Position toPosition(FloorState.Cell cell) {
-        return new Position((short) cell.x(), (short) cell.y());
-    }
-
-    private static boolean isInside(Position position) {
-        return position.getX_index() >= 0 && position.getX_index() < MAP_SIDE_LENGTH
-                && position.getY_index() >= 0 && position.getY_index() < MAP_SIDE_LENGTH;
+        return new Position(cell.x(), cell.y());
     }
 }

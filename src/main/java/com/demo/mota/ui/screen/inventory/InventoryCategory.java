@@ -1,7 +1,7 @@
 package com.demo.mota.ui.screen.inventory;
 
-import com.demo.mota.engine.Item.GenericItem.GenericItem;
-import com.demo.mota.engine.Item.Key;
+import com.demo.mota.engine.item.generic.GenericItem;
+import com.demo.mota.engine.item.Key;
 import com.demo.mota.engine.state.PlayerStateManager;
 
 import java.util.ArrayList;
