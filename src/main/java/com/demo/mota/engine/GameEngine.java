@@ -55,7 +55,7 @@ public class GameEngine {
             MoveResult.Type.BATTLE_LOST, MoveResult.Type.ITEM_PICKED);
 
     private GameEngine() {
-        // 只保证 provider 链就位；精灵图与各配置表由 GameBootstrap 在加载阶段统一加载
+        // 只保证 provider 链就位；各配置表由 GameBootstrap 在加载阶段统一加载
         ResourceManager.getInstance();
     }
 

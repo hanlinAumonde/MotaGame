@@ -1,23 +1,22 @@
 package com.demo.mota.ui.screen.skill;
 
-import com.demo.mota.ui.PanelStyle;
-import com.demo.mota.ui.TextPainter;
-import com.demo.mota.ui.IconPainter;
-import com.demo.mota.ui.SkillCardPainter;
-import com.demo.mota.engine.resource.ResourceManager;
+import com.demo.mota.app.services.AssetService;
 import com.demo.mota.engine.enums.Direction;
+import com.demo.mota.engine.rules.GameRules;
 import com.demo.mota.engine.skill.Skill;
 import com.demo.mota.engine.skill.book.OwnedSkill;
 import com.demo.mota.engine.skill.book.SkillBook;
-import com.demo.mota.engine.rules.GameRules;
 import com.demo.mota.engine.skill.preset.SkillPreset;
 import com.demo.mota.engine.skill.preset.SkillPresetBook;
 import com.demo.mota.engine.state.PlayerStateManager;
+import com.demo.mota.ui.Fonts;
+import com.demo.mota.ui.IconPainter;
+import com.demo.mota.ui.PanelStyle;
+import com.demo.mota.ui.SkillCardPainter;
+import com.demo.mota.ui.TextPainter;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,16 +35,16 @@ public class SkillSetupRenderer {
     private static final Color ARMED_COLOR = Color.web("#7cfc7c");
     private static final Color SLOT_TEXT_COLOR = Color.web("#e8ecff");
 
-    private final ResourceManager resourceManager;
+    private final AssetService assets;
     private final TextPainter painter = new TextPainter();
     private final IconPainter iconPainter;
     private final SkillCardPainter cardPainter;
     /** 各套预设的快捷键（KeyCode 名），取自塔规则，只用来显示 */
     private final List<String> hotkeys;
 
-    public SkillSetupRenderer(ResourceManager resourceManager) {
-        this.resourceManager = resourceManager;
-        this.iconPainter = new IconPainter(resourceManager, painter);
+    public SkillSetupRenderer(AssetService assets) {
+        this.assets = assets;
+        this.iconPainter = new IconPainter(assets, painter);
         this.cardPainter = new SkillCardPainter(painter, iconPainter);
         this.hotkeys = GameRules.get().skill().hotkeys();
     }
@@ -63,16 +62,16 @@ public class SkillSetupRenderer {
         PanelStyle.drawPanel(gc, PADDING, PADDING, width - 2 * PADDING, bottom - PADDING, false);
         PlayerStateManager player = menu.getPlayer();
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 34));
+        gc.setFont(Fonts.bold(34));
         String name = player.getCharacterName() == null ? "勇者" : player.getCharacterName();
         double nameWidth = painter.measureWidth(name, gc.getFont());
         painter.drawCenteredShadowText(gc, name, width / 2, 58, PanelStyle.TITLE_COLOR);
-        Image avatar = resourceManager.getPlayerSprite(Direction.DOWN);
+        Image avatar = assets.idleFrame(AssetService.PLAYER, Direction.DOWN);
         if (avatar != null) {
             gc.drawImage(avatar, width / 2 + nameWidth / 2 + 14, 22, 44, 44);
         }
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 22));
+        gc.setFont(Fonts.bold(22));
         painter.drawShadowText(gc, "技能列表：", 40, 100, PanelStyle.SECTION_COLOR);
 
         List<Skill> skills = menu.getSkills();
@@ -81,7 +80,7 @@ public class SkillSetupRenderer {
         double top = 116;
         double areaBottom = bottom - 12;
         if (skills.isEmpty()) {
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 24));
+            gc.setFont(Fonts.bold(24));
             painter.drawShadowText(gc, "尚未掌握任何技能", cardX + 20, top + 50, PanelStyle.DISABLED_COLOR);
             return;
         }
@@ -117,7 +116,7 @@ public class SkillSetupRenderer {
             last = i + 1;
         }
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 18));
+        gc.setFont(Fonts.bold(18));
         if (first > 0) {
             painter.drawCenteredShadowText(gc, "▲", width / 2, top - 2, PanelStyle.HINT_COLOR);
         }
@@ -155,7 +154,7 @@ public class SkillSetupRenderer {
         SkillPreset preset = menu.getEditingPreset();
         int presetCount = player.getPresetBook().presetCount();
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 24));
+        gc.setFont(Fonts.bold(24));
         String title = "技能组合 · " + preset.getName();
         painter.drawShadowText(gc, title, x + 20, y + 36, PanelStyle.SECTION_COLOR);
         double titleWidth = painter.measureWidth(title, gc.getFont());
@@ -164,7 +163,7 @@ public class SkillSetupRenderer {
         drawPresetTabs(gc, player.getPresetBook(), menu.getEditingPresetIndex(), active, tabsX, y + 14);
         if (!active) {
             // 游戏中停用了技能组：只在这种情况下提示，放入技能即重新激活
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 18));
+            gc.setFont(Fonts.bold(18));
             painter.drawShadowText(gc, "当前未激活（全程普攻）", tabsX + player.getPresetBook().presetCount() * 36 + 12,
                     y + 36, PanelStyle.DISABLED_COLOR);
         }
@@ -183,7 +182,7 @@ public class SkillSetupRenderer {
 
         for (int round = 0; round < slots; round++) {
             double sx = x + 20 + round * (slotW + gap);
-            gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 15));
+            gc.setFont(Fonts.regular(15));
             painter.drawCenteredShadowText(gc, round == 0 ? "战前" : "第" + round + "回",
                     sx + slotW / 2, slotY - 8, PanelStyle.HINT_COLOR);
 
@@ -194,7 +193,7 @@ public class SkillSetupRenderer {
             drawSlot(gc, book, preset.getSlot(round), round, sx, slotY, slotW, slotH);
         }
 
-        gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 16));
+        gc.setFont(Fonts.regular(16));
         String hint = player.isPresetEditable()
                 ? "↑↓ 选技能   ←→ 选回合   Enter 放入   Delete 卸下   D+数字键 切换技能组   X 返回游戏"
                 : "↑↓ 查看技能   ←→ 查看回合   D+数字键 切换技能组   X 返回游戏";
@@ -220,7 +219,7 @@ public class SkillSetupRenderer {
             gc.setStroke(selected ? (active ? ARMED_COLOR : Color.WHITE) : PanelStyle.PANEL_BORDER_DIM);
             gc.setLineWidth(selected ? 2 : 1);
             gc.strokeRect(tx, y, size, size);
-            gc.setFont(Font.font("Consolas", FontWeight.BOLD, 18));
+            gc.setFont(Fonts.mono(18));
             painter.drawCenteredShadowText(gc, keyLabel(i), tx + size / 2, y + 22,
                     selected ? Color.WHITE : filled ? SLOT_TEXT_COLOR : PanelStyle.DISABLED_COLOR);
         }
@@ -238,7 +237,7 @@ public class SkillSetupRenderer {
         if (skillId == null) {
             gc.setFill(Color.rgb(255, 255, 255, 0.06));
             gc.fillRect(x, y, w, h);
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 20));
+            gc.setFont(Fonts.bold(20));
             // 战前没有「普攻」可言，空着就是什么也不做
             painter.drawCenteredShadowText(gc, round == 0 ? "—" : "普攻", x + w / 2, y + h / 2 + 7, SLOT_TEXT_COLOR);
             return;
@@ -248,7 +247,7 @@ public class SkillSetupRenderer {
             // 预设引用的技能暂时不在手上（例如装备卸下了）：保留占位，战斗中按普攻处理
             gc.setFill(Color.rgb(120, 40, 40, 0.35));
             gc.fillRect(x, y, w, h);
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 16));
+            gc.setFont(Fonts.bold(16));
             painter.drawCenteredShadowText(gc, "失效", x + w / 2, y + h / 2 + 6, PanelStyle.DISABLED_COLOR);
             return;
         }

@@ -1,18 +1,17 @@
 package com.demo.mota.ui.screen.gameover;
 
-import com.demo.mota.ui.screen.Screen;
 import com.demo.mota.engine.app.GameFlow;
 import com.demo.mota.engine.app.GamePhase;
+import com.demo.mota.ui.Fonts;
 import com.demo.mota.ui.MenuCommand;
 import com.demo.mota.ui.OptionMenu;
 import com.demo.mota.ui.TextPainter;
+import com.demo.mota.ui.screen.Screen;
 import com.demo.mota.ui.screen.saveload.SaveLoadMode;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -135,10 +134,10 @@ public class GameOverScreen implements Screen {
         gc.setLineWidth(3);
         gc.strokeLine(0, panelY + 1.5, w, panelY + 1.5);
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 30));
+        gc.setFont(Fonts.bold(30));
         painter.drawCenteredShadowText(gc, "你死了", w / 2, panelY + 50, Color.web("#ff7a7a"));
         if (canUndo.getAsBoolean()) {
-            gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 16));
+            gc.setFont(Fonts.regular(16));
             painter.drawCenteredShadowText(gc, "按 Backspace 撤销这一战", w / 2, panelY + 74, NORMAL);
         }
 
@@ -150,7 +149,7 @@ public class GameOverScreen implements Screen {
             boolean selected = i == options.getSelectedIndex();
             double centerX = slotWidth * (i + 1);
 
-            gc.setFont(Font.font("SimHei", selected ? FontWeight.BOLD : FontWeight.NORMAL, selected ? 26 : 23));
+            gc.setFont(selected ? Fonts.bold(26) : Fonts.regular(23));
             Color color = !option.enabled() ? DISABLED : selected ? SELECTED : NORMAL;
             painter.drawCenteredShadowText(gc, option.label(), centerX, optionY, color);
 

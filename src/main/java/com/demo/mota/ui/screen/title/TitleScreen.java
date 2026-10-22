@@ -1,19 +1,18 @@
 package com.demo.mota.ui.screen.title;
 
-import com.demo.mota.ui.screen.Screen;
 import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.app.GamePhase;
-import com.demo.mota.ui.screen.saveload.SaveLoadMode;
+import com.demo.mota.ui.Fonts;
 import com.demo.mota.ui.MenuCommand;
 import com.demo.mota.ui.OptionMenu;
 import com.demo.mota.ui.TextPainter;
+import com.demo.mota.ui.screen.Screen;
+import com.demo.mota.ui.screen.saveload.SaveLoadMode;
 import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -106,10 +105,10 @@ public class TitleScreen implements Screen {
         gc.setFill(BACKGROUND);
         gc.fillRect(0, 0, w, h);
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 76));
+        gc.setFont(Fonts.bold(76));
         painter.drawCenteredShadowText(gc, "魔  塔", w / 2, h * 0.3, Color.web("#f5f5f5"));
 
-        gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 20));
+        gc.setFont(Fonts.regular(20));
         painter.drawCenteredShadowText(gc, "W / S 选择    Enter 确认", w / 2, h * 0.3 + 44,
                 Color.web("#8d93a3"));
 
@@ -121,7 +120,7 @@ public class TitleScreen implements Screen {
             boolean selected = i == options.getSelectedIndex();
             double y = optionY + i * lineHeight;
 
-            gc.setFont(Font.font("SimHei", selected ? FontWeight.BOLD : FontWeight.NORMAL, selected ? 32 : 28));
+            gc.setFont(selected ? Fonts.bold(32) : Fonts.regular(28));
             Color color = !option.enabled() ? DISABLED : selected ? SELECTED : NORMAL;
             painter.drawCenteredShadowText(gc, option.label(), w / 2, y, color);
 

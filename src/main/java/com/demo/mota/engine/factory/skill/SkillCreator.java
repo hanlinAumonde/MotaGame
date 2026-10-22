@@ -8,6 +8,6 @@ import com.demo.mota.engine.skill.cost.SkillCostSpec;
 @FunctionalInterface
 public interface SkillCreator {
     Skill createSkill(String skillId, String skillName, SkillType skillType,
-                      String description, String resourceId,
+                      String description, String sprite,
                       String effectId, SkillParams params, SkillCostSpec cost, int maxCasts);
 }

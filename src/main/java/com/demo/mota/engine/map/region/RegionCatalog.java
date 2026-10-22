@@ -10,7 +10,7 @@ import java.util.Map;
 import static com.demo.mota.engine.configs.MapConfigConstants.REGION_MANIFEST_PATH;
 
 /**
- * 区域清单（{@code data/map/regions.json}）：列出全部区域，**顺序即推进顺序**。
+ * 区域清单（{@code assets/json/regions.json}）：列出全部区域，**顺序即推进顺序**。
  *
  * <p>楼层文件各自写着 {@code regionId}，但「这个区域有哪些层」必须有一处集中回答——
  * 否则载入一个区域就得扫描全部楼层文件，而资源 provider 只能按路径取流、不能列目录

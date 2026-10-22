@@ -3,23 +3,22 @@ package com.demo.mota.ui.screen.game.map;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
+import com.demo.mota.app.services.CharacterSprite;
 import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.Item.Item;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.map.Position;
 import com.demo.mota.engine.map.tile.Tile;
-import com.demo.mota.engine.resource.sprite.CharacterSprites;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.engine.state.monster.Monster;
+import com.demo.mota.ui.Fonts;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
@@ -257,7 +256,7 @@ public final class EntityMapView implements MapView {
         private int stepIndex;
 
         private Direction shownDirection;
-        private int shownFrame = -1;
+        private int shownFrame = Integer.MIN_VALUE;
 
         PlayerSprite() {
             entity = spawn(originX, originY, canvas, Z_PLAYER);
@@ -285,7 +284,7 @@ public final class EntityMapView implements MapView {
             if (pos.equals(logical)) {
                 // 位置没变（转身、打怪、开门……）：走路动画照常播完，否则只更新朝向
                 if (!walking) {
-                    show(direction, idleFrame());
+                    show(direction, WalkCycle.IDLE);
                 }
                 return;
             }
@@ -302,7 +301,7 @@ public final class EntityMapView implements MapView {
             } else {
                 walking = false;
                 entity.setPosition(toX, toY);
-                show(direction, idleFrame());
+                show(direction, WalkCycle.IDLE);
             }
         }
 
@@ -314,12 +313,12 @@ public final class EntityMapView implements MapView {
             double progress = Math.min(1, elapsed / WALK_STEP_SECONDS);
             entity.setPosition(fromX + (toX - fromX) * progress, fromY + (toY - fromY) * progress);
             if (progress < 1) {
-                show(direction, WalkCycle.frameAt(stepIndex, progress, idleFrame(), frameCount()));
+                show(direction, WalkCycle.frameAt(stepIndex, progress, walkLength()));
                 return;
             }
             walking = false;
             stepIndex++;
-            show(direction, idleFrame());
+            show(direction, WalkCycle.IDLE);
             animationEnded();
         }
 
@@ -334,14 +333,9 @@ public final class EntityMapView implements MapView {
             painter.paintPlayer(gc, dir, frame);
         }
 
-        private int idleFrame() {
-            CharacterSprites sprites = painter.playerSprites();
-            return sprites == null ? 0 : sprites.getIdleFrame();
-        }
-
-        private int frameCount() {
-            CharacterSprites sprites = painter.playerSprites();
-            return sprites == null ? 0 : sprites.frameCount(direction);
+        private int walkLength() {
+            CharacterSprite sprite = painter.playerSprite();
+            return sprite == null ? 0 : sprite.walkLength(direction);
         }
     }
 
@@ -373,7 +367,7 @@ public final class EntityMapView implements MapView {
 
         FloorCover() {
             double size = cellSize * MAP_SIDE_LENGTH;
-            caption.setFont(Font.font("SimHei", FontWeight.BOLD, 34));
+            caption.setFont(Fonts.bold(34));
             caption.setFill(Color.web("#f5f5f5"));
             caption.setTextAlignment(TextAlignment.CENTER);
             caption.setLineSpacing(14);

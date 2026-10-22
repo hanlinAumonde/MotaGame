@@ -21,7 +21,7 @@ import java.util.List;
  * @param skillName   技能名
  * @param skillType   主动 / 被动
  * @param description 技能说明，允许手动换行，渲染时还会按可用宽度再次折行
- * @param resourceId  技能图标文件名（位于 {@code /Graphics/skills/} 下），缺省时渲染占位图标
+ * @param sprite      技能图标：精灵目录里的 id，或 {@code assets/textures/} 下的图片路径；缺省时渲染占位图标
  * @param effectId    战斗效果机制标识，对应 {@code SkillEffectRegistry} 中注册的 provider；
  *                    留空表示纯展示技能（不参与战斗计算）
  * @param params      效果参数，永不为 null（无参数时为 {@link SkillParams#EMPTY}）
@@ -32,7 +32,7 @@ import java.util.List;
  *                    预设里超出次数的格子不允许放入，即使放入了（例如规则里的固定预设）也按普攻处理
  */
 public record Skill(String skillId, String skillName, SkillType skillType,
-                    String description, String resourceId,
+                    String description, String sprite,
                     String effectId, SkillParams params, SkillCostSpec cost, int maxCasts) {
 
     public static final int DEFAULT_MAX_CASTS = 1;
@@ -45,9 +45,9 @@ public record Skill(String skillId, String skillName, SkillType skillType,
     }
 
     public Skill(String skillId, String skillName, SkillType skillType,
-                 String description, String resourceId,
+                 String description, String sprite,
                  String effectId, SkillParams params) {
-        this(skillId, skillName, skillType, description, resourceId, effectId, params,
+        this(skillId, skillName, skillType, description, sprite, effectId, params,
                 SkillCostSpec.NONE, DEFAULT_MAX_CASTS);
     }
 

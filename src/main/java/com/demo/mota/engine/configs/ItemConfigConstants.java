@@ -1,7 +1,7 @@
 package com.demo.mota.engine.configs;
 
 public class ItemConfigConstants {
-    public static final String ITEM_LIST_FILE = "/data/item/itemList.json";
+    public static final String ITEM_LIST_FILE = "/assets/json/items.json";
 
     public static final String EQUIPMENT = "Equipment";
     public static final String EQUIPMENT_STATS = "stats";

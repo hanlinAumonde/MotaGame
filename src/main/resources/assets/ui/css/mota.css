@@ -1,0 +1,8 @@
+/*
+ * 魔塔的界面样式，经 GameSettings.setCssList 应用到 FXGL 的全部场景（排在 fxgl_dark.css 之后）。
+ * 目前界面多数仍画在 Canvas 上，这里只统一 JavaFX 节点的默认字体（打包的 Noto Sans SC）；
+ * 界面改为节点后，面板 / 列表 / 按键提示的样式与 ui.PanelStyle 的配色都迁到这里。
+ */
+.root {
+    -fx-font-family: "Noto Sans SC";
+}

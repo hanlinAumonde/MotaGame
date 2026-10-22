@@ -13,7 +13,7 @@ import java.net.URL;
  * 日后新增读取方式只需实现本接口并注册，无需改动任何读取代码。
  * <p>
  * 路径约定：与类路径资源一致的风格，以 / 开头表示资源根目录，
- * 例如 /data/map/floor_1.json、/Graphics/tiles/magictower.png。
+ * 例如 /assets/levels/floor_1.json、/assets/textures/tiles/magictower.png。
  */
 public interface ResourceProvider {
 
@@ -27,7 +27,7 @@ public interface ResourceProvider {
     InputStream openStream(String resourcePath) throws IOException;
 
     /**
-     * 返回资源的 URL，供 FXMLLoader 等需要 URL 定位的组件使用。
+     * 返回资源的 URL，供需要 URL 定位的加载器使用。
      *
      * @param resourcePath 资源路径（/ 开头）
      * @return 资源存在时返回其 URL；不存在时返回 null

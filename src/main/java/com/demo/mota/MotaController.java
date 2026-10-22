@@ -1,9 +1,9 @@
 package com.demo.mota;
 
+import com.demo.mota.app.services.AssetService;
 import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.app.GameFlow;
 import com.demo.mota.engine.app.GamePhase;
-import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.ui.screen.Screen;
 import com.demo.mota.ui.screen.equipment.EquipmentRenderer;
 import com.demo.mota.ui.screen.equipment.EquipmentScreen;
@@ -17,11 +17,11 @@ import com.demo.mota.ui.screen.gameover.GameOverScreen;
 import com.demo.mota.ui.screen.inventory.InventoryRenderer;
 import com.demo.mota.ui.screen.inventory.InventoryScreen;
 import com.demo.mota.ui.screen.loading.LoadingScreen;
+import com.demo.mota.ui.screen.saveload.SaveLoadRenderer;
+import com.demo.mota.ui.screen.saveload.SaveLoadScreen;
 import com.demo.mota.ui.screen.skill.SkillSetupRenderer;
 import com.demo.mota.ui.screen.skill.SkillSetupScreen;
 import com.demo.mota.ui.screen.title.TitleScreen;
-import com.demo.mota.ui.screen.saveload.SaveLoadRenderer;
-import com.demo.mota.ui.screen.saveload.SaveLoadScreen;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
@@ -83,17 +83,16 @@ public class MotaController {
     /** 加载界面单独留一个引用：进度要从加载线程推进来 */
     private LoadingScreen loadingScreen;
 
-    public MotaController(MapView mapView) {
+    public MotaController(MapView mapView, AssetService assets) {
         this.mapView = mapView;
         gameBox = new HBox(0, statusCanvas, mapSlot(), sideCanvas);
         root = buildLayout();
 
         engine = GameEngine.getGameEngine();
         flow = engine.getGameFlow();
-        ResourceManager resources = ResourceManager.getInstance();
 
         loadingScreen = new LoadingScreen(screenCanvas);
-        gameScreen = new GameScreen(engine, resources, flow, statusCanvas, mapView, sideCanvas);
+        gameScreen = new GameScreen(engine, assets, flow, statusCanvas, mapView, sideCanvas);
         SaveLoadScreen saveLoadScreen = new SaveLoadScreen(engine, flow, screenCanvas, new SaveLoadRenderer(),
                 gameScreen::showMessageNow);
 
@@ -101,16 +100,16 @@ public class MotaController {
         screens.put(GamePhase.TITLE, new TitleScreen(screenCanvas, engine, saveLoadScreen::prepare));
         screens.put(GamePhase.PLAYING, gameScreen);
         screens.put(GamePhase.GAME_MENU,
-                new GameMenuScreen(engine, flow, screenCanvas, new GameMenuRenderer(resources),
+                new GameMenuScreen(engine, flow, screenCanvas, new GameMenuRenderer(assets),
                         saveLoadScreen::prepare));
         screens.put(GamePhase.INVENTORY,
-                new InventoryScreen(engine, flow, screenCanvas, new InventoryRenderer(resources)));
+                new InventoryScreen(engine, flow, screenCanvas, new InventoryRenderer(assets)));
         screens.put(GamePhase.EQUIPMENT,
-                new EquipmentScreen(engine, flow, screenCanvas, new EquipmentRenderer(resources)));
+                new EquipmentScreen(engine, flow, screenCanvas, new EquipmentRenderer(assets)));
         screens.put(GamePhase.SKILL_SETUP,
-                new SkillSetupScreen(engine, flow, screenCanvas, new SkillSetupRenderer(resources)));
+                new SkillSetupScreen(engine, flow, screenCanvas, new SkillSetupRenderer(assets)));
         screens.put(GamePhase.EQUIPMENT_SETS, new EquipmentSetScreen(engine, flow, screenCanvas,
-                new EquipmentSetRenderer(resources), gameScreen::showMessage));
+                new EquipmentSetRenderer(assets), gameScreen::showMessage));
         screens.put(GamePhase.GAME_OVER, new GameOverScreen(screenCanvas, flow,
                 engine::canUndo, gameScreen::undoLastAction,
                 () -> engine.getSaveRepository().hasAnySave(), saveLoadScreen::prepare));

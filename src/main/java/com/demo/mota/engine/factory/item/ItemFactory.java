@@ -1,13 +1,12 @@
 package com.demo.mota.engine.factory.item;
 
+import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.Item.*;
 import com.demo.mota.engine.Item.GenericItem.FloorJumper;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.factory.AbstractFactory;
 import com.demo.mota.engine.factory.skill.SkillFactory;
-import com.demo.mota.engine.resource.ResourceManager;
-import com.demo.mota.engine.GameNumber;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,11 +39,13 @@ public class ItemFactory extends AbstractFactory<Item, ItemFactory.ItemData, Ite
         JsonNode rootNode = mapper.readTree(inputStream);
         for(JsonNode itemNode: rootNode){
             mapper.treeToValue(itemNode, new TypeReference<Map<String, List<ItemData>>>(){})
-                    .values().forEach(itemData -> itemData.forEach(data -> {
-                        dataRegistry.put(data.itemId, data);
-                        ResourceManager.getInstance().registerItemImage(data.itemId, data.resourceId);
-                    }));
+                    .values().forEach(itemData -> itemData.forEach(data -> dataRegistry.put(data.itemId, data)));
         }
+    }
+
+    @Override
+    protected String spriteOf(ItemData data) {
+        return data.sprite;
     }
 
     @Override
@@ -143,5 +144,5 @@ public class ItemFactory extends AbstractFactory<Item, ItemFactory.ItemData, Ite
     public record ItemData(String itemId, String itemType, String itemName, String itemDescription,
                          long itemPrice, boolean isStorable, boolean isConsumable,
                          Map<String, Object> parameters,
-                         String resourceId) implements Serializable {}
+                         String sprite) implements Serializable {}
 }

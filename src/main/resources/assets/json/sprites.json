@@ -1,0 +1,29 @@
+{
+  "scale": 2,
+  "sheets": {
+    "magictower": { "image": "tiles/magictower.png", "cell": [32, 32] },
+    "braver":     { "image": "characters/011-Braver01.png", "grid": [4, 4] }
+  },
+  "sprites": {
+    "bg_default":  { "sheet": "magictower", "cell": [3, 1] },
+    "wall_normal": { "sheet": "magictower", "cell": [6, 0] },
+    "wall_magma":  { "sheet": "magictower", "cell": [6, 1] },
+    "wall_dark":   { "sheet": "magictower", "cell": [7, 1] },
+    "door_yellow": { "sheet": "magictower", "cell": [0, 30] },
+    "door_blue":   { "sheet": "magictower", "cell": [1, 30] },
+    "door_red":    { "sheet": "magictower", "cell": [2, 30] },
+    "door_green":  { "sheet": "magictower", "cell": [3, 30] },
+    "stair_up":    { "sheet": "magictower", "cell": [1, 31] },
+    "stair_down":  { "sheet": "magictower", "cell": [0, 31] },
+    "tricky_wall": { "sheet": "magictower", "cell": [3, 30] },
+    "region_gate": { "sheet": "magictower", "cell": [6, 23] }
+  },
+  "characters": {
+    "player": {
+      "sheet": "braver",
+      "rows": { "DOWN": 0, "LEFT": 1, "RIGHT": 2, "UP": 3 },
+      "idle": 0,
+      "walk": [1, 2, 3, 0]
+    }
+  }
+}

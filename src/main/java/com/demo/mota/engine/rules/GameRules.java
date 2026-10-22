@@ -8,7 +8,7 @@ import java.util.List;
 import static com.demo.mota.engine.configs.GameContextConfigConstants.GAME_RULES_PATH;
 
 /**
- * 塔级规则配置（{@code data/rules/gameRules.json}）。
+ * 塔级规则配置（{@code assets/json/rules.json}）。
  *
  * <p>凡是「不同的塔可能想要不同答案」的设定都收在这里，而不是写死在代码里——
  * 技能预设能不能由玩家编辑、装备有几个槽、右侧栏显示哪些内容……

@@ -11,7 +11,7 @@ import java.nio.file.Path;
  * 文件系统资源提供者：从项目路径之外的某个目录读取资源。
  * <p>
  * 目录结构应与资源根目录保持一致，例如 baseDir 为 D:/mota-resources 时，
- * /data/map/floor_1.json 对应 D:/mota-resources/data/map/floor_1.json。
+ * /assets/levels/floor_1.json 对应 D:/mota-resources/assets/levels/floor_1.json。
  * 由此可以支持"资源外置"（如 mod 目录、用户自定义资源包）。
  */
 public class FileSystemResourceProvider implements ResourceProvider {

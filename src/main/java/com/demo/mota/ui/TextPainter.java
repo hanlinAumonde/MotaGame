@@ -3,11 +3,11 @@ package com.demo.mota.ui;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.DoubleFunction;
 
 /**
  * Canvas 文本绘制的公共工具：阴影描边、按宽度自适应字号、宽度测量与折行。
@@ -42,24 +42,26 @@ public class TextPainter {
         drawShadowText(gc, text, centerX - measureWidth(text, gc.getFont()) / 2, y, color);
     }
 
-    /** 以能放进 maxWidth 的最大字号绘制（字号下限 minSize） */
-    public void drawFittedShadowText(GraphicsContext gc, String text, String family,
+    /** 以能放进 maxWidth 的最大字号绘制（字号下限 minSize），{@code face} 如 {@code Fonts::mono} */
+    public void drawFittedShadowText(GraphicsContext gc, String text, DoubleFunction<Font> face,
                                      double x, double y, double maxWidth,
                                      double preferredSize, double minSize) {
-        gc.setFont(fitFont(text, family, preferredSize, minSize, maxWidth));
+        gc.setFont(fitFont(text, face, preferredSize, minSize, maxWidth));
         drawShadowText(gc, text, x, y);
     }
 
     /**
      * 从 preferredSize 起逐级缩小字号，直到文本宽度不超过 maxWidth。
      * 缩到 minSize 仍放不下时返回 minSize 字号（此时应配合紧凑记法使用）。
+     *
+     * @param face 字体（按字号取），如 {@code Fonts::bold}、{@code Fonts::mono}
      */
-    public Font fitFont(String text, String family, double preferredSize, double minSize, double maxWidth) {
+    public Font fitFont(String text, DoubleFunction<Font> face, double preferredSize, double minSize, double maxWidth) {
         double size = preferredSize;
-        Font font = Font.font(family, FontWeight.BOLD, size);
+        Font font = face.apply(size);
         while (size > minSize && measureWidth(text, font) > maxWidth) {
             size -= 1;
-            font = Font.font(family, FontWeight.BOLD, size);
+            font = face.apply(size);
         }
         return font;
     }

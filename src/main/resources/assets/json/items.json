@@ -15,7 +15,7 @@
             "skills": ["skill-quick-draw"],
             "slotType": "weapon"
           },
-          "resourceId": null
+          "sprite": null
         },
         {
           "itemId": "shield-001",
@@ -30,7 +30,7 @@
             "skills": ["skill-iron-wall"],
             "slotType": "shield"
           },
-          "resourceId": null
+          "sprite": null
         }
       ]
   },
@@ -48,7 +48,7 @@
         "parameters": {
           "healingAmount": 50
         },
-        "resourceId": "103-05.png"
+        "sprite": "items/103-05.png"
       },
       {
         "itemId": "potion-002",
@@ -61,7 +61,7 @@
         "parameters": {
           "healingAmount": 200
         },
-        "resourceId": "103-06.png"
+        "sprite": "items/103-06.png"
       },
       {
         "itemId": "potion-003",
@@ -74,7 +74,7 @@
         "parameters": {
           "healingAmount": 500
         },
-        "resourceId": "103-07.png"
+        "sprite": "items/103-07.png"
       }
     ]
   },
@@ -93,7 +93,7 @@
             "abilityType": "attack",
             "abilityValue": 2
           },
-          "resourceId": "103-01.png"
+          "sprite": "items/103-01.png"
         },
         {
           "itemId": "ability-gem-002",
@@ -107,7 +107,7 @@
             "abilityType": "defense",
             "abilityValue": 2
           },
-          "resourceId": "103-02.png"
+          "sprite": "items/103-02.png"
         },
         {
           "itemId": "ability-gem-003",
@@ -121,7 +121,7 @@
             "abilityType": "maxHealth",
             "abilityValue": 100
           },
-          "resourceId": null
+          "sprite": null
         },
         {
           "itemId": "ability-gem-004",
@@ -135,7 +135,7 @@
             "abilityType": "maxHealth",
             "abilityValue": 10000
           },
-          "resourceId": null
+          "sprite": null
         }
       ]
   },
@@ -153,7 +153,7 @@
         "parameters": {
           "keyColor": "yellow"
         },
-        "resourceId": "101-01.png"
+        "sprite": "items/101-01.png"
       },
       {
         "itemId": "key-001-blue",
@@ -166,7 +166,7 @@
         "parameters": {
           "keyColor": "blue"
         },
-        "resourceId": "101-02.png"
+        "sprite": "items/101-02.png"
       },
       {
         "itemId": "key-001-red",
@@ -179,7 +179,7 @@
         "parameters": {
           "keyColor": "red"
         },
-        "resourceId": "101-03.png"
+        "sprite": "items/101-03.png"
       }
     ]
   },
@@ -197,7 +197,7 @@
         "parameters": {
           "auxiliaryType": "monsterBook"
         },
-        "resourceId": null
+        "sprite": null
       }
     ]
   },
@@ -216,7 +216,7 @@
           "className": "FloorJumper",
           "floorNumberSelected": 0
         },
-        "resourceId": null
+        "sprite": null
       }
     ]
   }

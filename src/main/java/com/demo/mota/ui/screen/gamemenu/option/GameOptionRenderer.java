@@ -1,11 +1,10 @@
 package com.demo.mota.ui.screen.gamemenu.option;
 
+import com.demo.mota.ui.Fonts;
 import com.demo.mota.ui.PanelStyle;
 import com.demo.mota.ui.TextPainter;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.util.List;
 
@@ -30,13 +29,13 @@ public class GameOptionRenderer {
         double h = 90 + options.size() * 44;
         PanelStyle.drawPanel(gc, x, y, w, h, false);
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 26));
+        gc.setFont(Fonts.bold(26));
         painter.drawShadowText(gc, "游戏选项", x + 28, y + 46, PanelStyle.TITLE_COLOR);
         for (int i = 0; i < options.size(); i++) {
             double lineY = y + 92 + i * 44;
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 22));
+            gc.setFont(Fonts.bold(22));
             painter.drawShadowText(gc, options.get(i).getDisplayName(), x + 40, lineY, PanelStyle.SECTION_COLOR);
-            gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 19));
+            gc.setFont(Fonts.regular(19));
             painter.drawShadowText(gc, description(options.get(i)), x + 180, lineY, PanelStyle.HINT_COLOR);
         }
     }
@@ -60,7 +59,7 @@ public class GameOptionRenderer {
         gc.fillRect(x, y, POPUP_WIDTH, h);
         PanelStyle.drawPanel(gc, x, y, POPUP_WIDTH, h, true);
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 24));
+        gc.setFont(Fonts.bold(24));
         for (int i = 0; i < options.size(); i++) {
             double itemY = y + 8 + i * POPUP_ITEM_HEIGHT;
             if (i == popup.getSelectedIndex()) {

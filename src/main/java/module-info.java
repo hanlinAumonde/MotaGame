@@ -1,23 +1,15 @@
-module com.demo.mota {
+/**
+ * open module：FXGL 按名字加载 assets/ 下的资源、给服务 / 组件注入依赖、调用 @Spawns 方法都要反射访问本模块，
+ * Jackson 绑定配置与存档也一样——整个模块开放，不再逐包 opens（FXGL 迁移指南的写法）。
+ */
+open module com.demo.mota {
     requires javafx.controls;
     requires com.almasb.fxgl.all;
 
     requires com.fasterxml.jackson.databind;
 
-    opens com.demo.mota.engine to com.fasterxml.jackson.databind;
-    opens com.demo.mota.engine.state to com.fasterxml.jackson.databind;
-    opens com.demo.mota.engine.map to com.fasterxml.jackson.databind;
-    opens com.demo.mota.engine.map.region to com.fasterxml.jackson.databind;
-    opens com.demo.mota.engine.factory.item to com.fasterxml.jackson.databind;
-    opens com.demo.mota.engine.factory.monster to com.fasterxml.jackson.databind;
-    opens com.demo.mota.engine.factory.skill to com.fasterxml.jackson.databind;
-    opens com.demo.mota.engine.resource to com.fasterxml.jackson.databind;
-    opens com.demo.mota.engine.state.level to com.fasterxml.jackson.databind;
-    opens com.demo.mota.engine.rules to com.fasterxml.jackson.databind;
-    opens com.demo.mota.engine.snapshot to com.fasterxml.jackson.databind;
-    opens com.demo.mota.engine.save to com.fasterxml.jackson.databind;
-
     exports com.demo.mota;
+    exports com.demo.mota.app.services;
     exports com.demo.mota.engine;
     exports com.demo.mota.engine.enums;
     exports com.demo.mota.engine.event;
@@ -39,8 +31,6 @@ module com.demo.mota {
     exports com.demo.mota.engine.battle;
     exports com.demo.mota.engine.resource;
     exports com.demo.mota.engine.resource.provider;
-    exports com.demo.mota.engine.resource.sprite;
-    exports com.demo.mota.engine.resource.sprite.builtin;
     exports com.demo.mota.engine.state.level;
     exports com.demo.mota.engine.snapshot;
     exports com.demo.mota.engine.save;

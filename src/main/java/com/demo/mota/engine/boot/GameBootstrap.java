@@ -4,8 +4,6 @@ import com.demo.mota.engine.factory.item.ItemFactory;
 import com.demo.mota.engine.factory.monster.MonsterFactory;
 import com.demo.mota.engine.factory.skill.SkillFactory;
 import com.demo.mota.engine.map.region.RegionCatalog;
-import com.demo.mota.engine.resource.ResourceManager;
-import com.demo.mota.engine.resource.sprite.SheetSlicerRegistry;
 import com.demo.mota.engine.rules.GameRules;
 import com.demo.mota.engine.save.SaveRepository;
 import com.demo.mota.engine.skill.cost.SkillCostRegistry;
@@ -18,13 +16,15 @@ import java.util.List;
 /**
  * 启动引导：把全局资源与各注册表 / 工厂的初始化集中成一张<b>有序、可观测</b>的任务表。
  *
- * <p>改造前这些初始化是「谁先用到谁触发」——{@code ResourceManager} 在 {@code GameEngine}
- * 构造里被叫起、三个工厂是第一次 {@code createById} 才读表、{@code SkillEffectRegistry}
- * 第一次解析技能才注册内置效果。功能上没问题，但没有任何地方能回答「现在加载到哪一步了」，
- * 也就做不出加载界面。
+ * <p>改造前这些初始化是「谁先用到谁触发」——三个工厂是第一次 {@code createById} 才读表、
+ * {@code SkillEffectRegistry} 第一次解析技能才注册内置效果。功能上没问题，但没有任何地方能回答
+ * 「现在加载到哪一步了」，也就做不出加载界面。
  *
  * <p>本类不改变这些单例的惰性语义（仍可被任何调用方触发），只是提前、按序地把它们叫起来，
- * 并在每一步之前回调进度。将来的存档索引扫描、外部脚本加载器都往这张表里加一项即可。
+ * 并在每一步之前回调进度。将来的外部脚本加载器等往这张表里加一项即可；
+ * 表现层的任务（预载内容表引用的图片）由宿主追加在默认任务表之后。
+ *
+ * <p>图片不在这里：精灵目录由表现层的 {@code AssetService} 在 FXGL 启动期加载，engine 不认识图片。
  *
  * <p><b>线程</b>：{@link #run} 设计为在后台线程执行（见 {@code MotaApplication}），
  * 因此进度回调也发生在后台线程，UI 侧需要自行切回 FX 线程。
@@ -48,16 +48,11 @@ public final class GameBootstrap {
     }
 
     /**
-     * 默认任务表，顺序即依赖顺序：
-     * 精灵图依赖已搭好的 provider 链，三个工厂在读表时会回头调 {@code registerXxxImage}，
-     * 因此都排在资源之后。
+     * 默认任务表，顺序即依赖顺序：装备附带技能、怪物技能都要先有技能表，
+     * 因此技能表排在道具表、怪物表之前。
      */
     public static List<LoadingTask> defaultTasks() {
         List<LoadingTask> tasks = new ArrayList<>();
-        tasks.add(new LoadingTask("加载图像资源", 40,
-                () -> ResourceManager.getInstance().loadSpriteSheets()));
-        tasks.add(new LoadingTask("注册切图规则", 5,
-                () -> {var _ = SheetSlicerRegistry.getInstance();}));
         tasks.add(new LoadingTask("载入规则配置", 3,
                 () -> {var _ = GameRules.get();}));
         tasks.add(new LoadingTask("载入区域表", 2,

@@ -4,7 +4,6 @@ import com.demo.mota.engine.skill.Skill;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +18,7 @@ public class SkillCardPainter {
 
     private final TextPainter painter;
     private final IconPainter iconPainter;
-    private final Font descFont = Font.font("SimHei", FontWeight.NORMAL, 18);
+    private final Font descFont = Fonts.regular(18);
 
     public SkillCardPainter(TextPainter painter, IconPainter iconPainter) {
         this.painter = painter;
@@ -56,13 +55,13 @@ public class SkillCardPainter {
         iconPainter.drawSkillIcon(gc, skill, x + 14, y + 16, ICON_WIDTH, h - 32, dimmed);
 
         double textX = x + 14 + ICON_WIDTH + 20;
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 22));
+        gc.setFont(Fonts.bold(22));
         String title = skill.skillName() + "（" + skill.skillType().getDisplayName() + "）";
         painter.drawShadowText(gc, title, textX, y + 42,
                 dimmed ? PanelStyle.DISABLED_COLOR : PanelStyle.SKILL_TITLE_COLOR);
         if (titleSuffix != null && !titleSuffix.isEmpty()) {
             double titleWidth = painter.measureWidth(title, gc.getFont());
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 18));
+            gc.setFont(Fonts.bold(18));
             painter.drawShadowText(gc, titleSuffix, textX + titleWidth + 10, y + 42, Color.web("#d6a2ff"));
         }
 

@@ -1,24 +1,23 @@
 package com.demo.mota.ui.screen.gamemenu;
 
-import com.demo.mota.ui.PanelStyle;
-import com.demo.mota.ui.TextPainter;
-import com.demo.mota.ui.IconPainter;
-import com.demo.mota.ui.SkillCardPainter;
-import com.demo.mota.ui.ValueFormatter;
-import com.demo.mota.ui.DamagePalette;
-import com.demo.mota.ui.screen.gamemenu.option.GameOptionRenderer;
+import com.demo.mota.app.services.AssetService;
 import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.enums.StateType;
-import com.demo.mota.engine.resource.ResourceManager;
+import com.demo.mota.engine.skill.Skill;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.engine.state.monster.DamageRange;
-import com.demo.mota.engine.skill.Skill;
 import com.demo.mota.engine.state.monster.Monster;
+import com.demo.mota.ui.DamagePalette;
+import com.demo.mota.ui.Fonts;
+import com.demo.mota.ui.IconPainter;
+import com.demo.mota.ui.PanelStyle;
+import com.demo.mota.ui.SkillCardPainter;
+import com.demo.mota.ui.TextPainter;
+import com.demo.mota.ui.ValueFormatter;
+import com.demo.mota.ui.screen.gamemenu.option.GameOptionRenderer;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.util.List;
 
@@ -59,14 +58,14 @@ public class GameMenuRenderer {
     private static final Color SECTION_COLOR = PanelStyle.SECTION_COLOR;
 
 
-    private final ResourceManager resourceManager;
+    private final AssetService assets;
     private final TextPainter painter = new TextPainter();
     private final SkillCardPainter cardPainter;
     private final GameOptionRenderer optionRenderer = new GameOptionRenderer(painter);
 
-    public GameMenuRenderer(ResourceManager resourceManager) {
-        this.resourceManager = resourceManager;
-        this.cardPainter = new SkillCardPainter(painter, new IconPainter(resourceManager, painter));
+    public GameMenuRenderer(AssetService assets) {
+        this.assets = assets;
+        this.cardPainter = new SkillCardPainter(painter, new IconPainter(assets, painter));
     }
 
     public void render(GraphicsContext gc, GameMenuState menu, PlayerStateManager player,
@@ -113,7 +112,7 @@ public class GameMenuRenderer {
         double boxH = 20 + entries.size() * LEFT_ITEM_HEIGHT;
         drawPanel(gc, PADDING, PADDING, LEFT_WIDTH, boxH, menu.getPage() == MenuPage.ROOT);
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 26));
+        gc.setFont(Fonts.bold(26));
         for (int i = 0; i < entries.size(); i++) {
             double itemY = PADDING + 10 + i * LEFT_ITEM_HEIGHT;
             if (i == menu.getSelectedEntryIndex()) {
@@ -133,14 +132,14 @@ public class GameMenuRenderer {
 
         double infoY = PADDING + boxH + 14;
         drawPanel(gc, PADDING, infoY, LEFT_WIDTH, 92, false);
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 22));
+        gc.setFont(Fonts.bold(22));
         painter.drawShadowText(gc, "当前楼层", PADDING + 18, infoY + 34);
-        gc.setFont(Font.font("Consolas", FontWeight.BOLD, 28));
+        gc.setFont(Fonts.mono(28));
         painter.drawShadowText(gc, "第 " + menu.getFloorNumber() + " 层", PADDING + 18, infoY + 74);
 
         double hintY = infoY + 92 + 14;
         drawPanel(gc, PADDING, hintY, LEFT_WIDTH, 150, false);
-        gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 17));
+        gc.setFont(Fonts.regular(17));
         String[] hints = {"↑ ↓ / W S   选择", "Enter / Space   确认", "Esc   返回上一层", "X   关闭菜单"};
         for (int i = 0; i < hints.length; i++) {
             painter.drawShadowText(gc, hints[i], PADDING + 16, hintY + 34 + i * 30, HINT_COLOR);
@@ -154,7 +153,7 @@ public class GameMenuRenderer {
         String notice = menu.getNotice();
         if (notice == null || notice.isEmpty()) return;
         drawPanel(gc, x, y, w, 56, false);
-        gc.setFont(painter.fitFont(notice, "SimHei", 19, 12, w - 28));
+        gc.setFont(painter.fitFont(notice, Fonts::bold, 19, 12, w - 28));
         painter.drawShadowText(gc, notice, x + 14, y + 36, PanelStyle.NOTICE_COLOR);
     }
 
@@ -163,9 +162,9 @@ public class GameMenuRenderer {
         double x = RIGHT_X;
         double w = width - RIGHT_X - PADDING;
         drawPanel(gc, x, PADDING, w, 130, false);
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 26));
+        gc.setFont(Fonts.bold(26));
         painter.drawShadowText(gc, title, x + 28, PADDING + 52, PLAIN_MONSTER_COLOR);
-        gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 19));
+        gc.setFont(Fonts.regular(19));
         painter.drawShadowText(gc, detail, x + 28, PADDING + 96, HINT_COLOR);
     }
 
@@ -179,7 +178,7 @@ public class GameMenuRenderer {
 
         if (monsters.isEmpty()) {
             drawPanel(gc, listX, PADDING, listW, 110, false);
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 26));
+            gc.setFont(Fonts.bold(26));
             painter.drawShadowText(gc, "本层没有敌物", listX + 28, PADDING + 66, PLAIN_MONSTER_COLOR);
             return;
         }
@@ -196,7 +195,7 @@ public class GameMenuRenderer {
                     listFocused && i == selected);
         }
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 20));
+        gc.setFont(Fonts.bold(20));
         if (first > 0) {
             painter.drawCenteredShadowText(gc, "▲", listX + listW / 2, PADDING + 4, HINT_COLOR);
         }
@@ -216,22 +215,22 @@ public class GameMenuRenderer {
         // --- 头像与回合数 ---
         double iconSize = 60;
         double iconCenterX = x + 18 + iconSize / 2;
-        Image icon = resourceManager.getMonsterImage(monster.getCharacterId());
+        Image icon = assets.monsterImage(monster.getCharacterId());
         if (icon != null) {
             gc.drawImage(icon, x + 18, y + 14, iconSize, iconSize);
         } else {
             gc.setFill(Color.web("#cc0000"));
             gc.fillOval(x + 18, y + 14, iconSize, iconSize);
         }
-        gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 15));
+        gc.setFont(Fonts.regular(15));
         painter.drawCenteredShadowText(gc, "回合数", iconCenterX, y + 96, HINT_COLOR);
-        gc.setFont(Font.font("Consolas", FontWeight.BOLD, 22));
+        gc.setFont(Fonts.mono(22));
         painter.drawCenteredShadowText(gc, roundsText(monster), iconCenterX, y + 124, VALUE_COLOR);
 
         // --- 名称与技能标签 ---
         double nameCenterX = x + 190;
         // 名称栏宽度有限（右侧紧接属性网格），过长的名字按可用宽度缩字号
-        gc.setFont(painter.fitFont(monster.getCharacterName(), "SimHei", 26, 16, 220));
+        gc.setFont(painter.fitFont(monster.getCharacterName(), Fonts::bold, 26, 16, 220));
         painter.drawCenteredShadowText(gc, monster.getCharacterName(), nameCenterX, y + 52, Color.WHITE);
         drawSkillTags(gc, monster, nameCenterX, y + 84);
 
@@ -261,17 +260,17 @@ public class GameMenuRenderer {
     /** 一格「绿色标签 + 右对齐数值」，数值过长时自动缩字号 */
     private void drawStat(GraphicsContext gc, String label, String value,
                           double labelX, double valueRightX, double baselineY, Color valueColor) {
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 22));
+        gc.setFont(Fonts.bold(22));
         painter.drawShadowText(gc, label, labelX, baselineY, LABEL_COLOR);
 
         double maxWidth = valueRightX - (labelX + 70);
-        gc.setFont(painter.fitFont(value, "Consolas", 22, 14, maxWidth));
+        gc.setFont(painter.fitFont(value, Fonts::mono, 22, 14, maxWidth));
         painter.drawRightAlignedShadowText(gc, value, valueRightX, baselineY, valueColor);
     }
 
     /** 技能名标签；没有技能的怪物标注「普通」，与原版手册保持一致 */
     private void drawSkillTags(GraphicsContext gc, Monster monster, double centerX, double baselineY) {
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 16));
+        gc.setFont(Fonts.bold(16));
         if (!monster.hasSkills()) {
             painter.drawCenteredShadowText(gc, "普通", centerX, baselineY, PLAIN_MONSTER_COLOR);
             return;
@@ -313,15 +312,15 @@ public class GameMenuRenderer {
         if (monster == null) return;
 
         // 标题：怪物名居中，右侧跟一个小头像
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 36));
+        gc.setFont(Fonts.bold(36));
         double nameWidth = painter.measureWidth(monster.getCharacterName(), gc.getFont());
         painter.drawCenteredShadowText(gc, monster.getCharacterName(), width / 2, 66, TITLE_COLOR);
-        Image icon = resourceManager.getMonsterImage(monster.getCharacterId());
+        Image icon = assets.monsterImage(monster.getCharacterId());
         if (icon != null) {
             gc.drawImage(icon, width / 2 + nameWidth / 2 + 16, 30, 44, 44);
         }
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 22));
+        gc.setFont(Fonts.bold(22));
         painter.drawShadowText(gc, "技能列表：", 40, 120, SECTION_COLOR);
 
         double cardX = 40;
@@ -340,7 +339,7 @@ public class GameMenuRenderer {
             cardY += cardH + 12;
         }
 
-        gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 17));
+        gc.setFont(Fonts.regular(17));
         painter.drawShadowText(gc, "↑ ↓ 切换技能    Esc 返回敌物列表    X 关闭菜单",
                 40, height - 28, HINT_COLOR);
     }

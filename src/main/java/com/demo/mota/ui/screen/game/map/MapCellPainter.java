@@ -1,5 +1,7 @@
 package com.demo.mota.ui.screen.game.map;
 
+import com.demo.mota.app.services.AssetService;
+import com.demo.mota.app.services.CharacterSprite;
 import com.demo.mota.engine.Item.AbilityGem;
 import com.demo.mota.engine.Item.AuxiliaryItem;
 import com.demo.mota.engine.Item.Equipment;
@@ -7,16 +9,14 @@ import com.demo.mota.engine.Item.GenericItem.GenericItem;
 import com.demo.mota.engine.Item.Item;
 import com.demo.mota.engine.Item.Key;
 import com.demo.mota.engine.Item.Portion;
-import com.demo.mota.engine.configs.GraphicsConfigConstants;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.map.tile.*;
-import com.demo.mota.engine.resource.ResourceManager;
-import com.demo.mota.engine.resource.sprite.CharacterSprites;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.engine.state.monster.DamageRange;
 import com.demo.mota.engine.state.monster.Monster;
 import com.demo.mota.ui.DamagePalette;
+import com.demo.mota.ui.Fonts;
 import com.demo.mota.ui.TextPainter;
 import com.demo.mota.ui.ValueFormatter;
 import javafx.scene.canvas.GraphicsContext;
@@ -39,13 +39,13 @@ public final class MapCellPainter {
     /** 兜底字号下限：仅在超出末级单位等极端情况下才会触发收缩 */
     private static final double DAMAGE_FONT_MIN_RATIO = 0.17;
 
-    private final ResourceManager resourceManager;
+    private final AssetService assets;
     private final double cellSize;
     /** 文本测量（伤害数字的自适应字号与右对齐） */
     private final TextPainter painter = new TextPainter();
 
-    public MapCellPainter(ResourceManager resourceManager, double cellSize) {
-        this.resourceManager = resourceManager;
+    public MapCellPainter(AssetService assets, double cellSize) {
+        this.assets = assets;
         this.cellSize = cellSize;
     }
 
@@ -56,7 +56,7 @@ public final class MapCellPainter {
     // ==================== 地块 ====================
 
     public void paintTile(GraphicsContext gc, Tile tile) {
-        Image bgImage = resourceManager.getTileImage(tile.getBgResourceId());
+        Image bgImage = assets.sprite(tile.getBgResourceId());
         if (bgImage != null) {
             gc.drawImage(bgImage, 0, 0, cellSize, cellSize);
         } else {
@@ -73,26 +73,26 @@ public final class MapCellPainter {
                 return;
             }
             case WallTile wallTile -> {
-                fgImage = resourceManager.getTileImage(wallTile.getWallResourceId());
+                fgImage = assets.sprite(wallTile.getWallResourceId());
                 fallbackColor = switch (wallTile.getWallType()) {
                     case NORMAL, DARK -> Color.web("#4a4a4a");
                     case MAGMA -> Color.web("#ff4500");
                 };
             }
             case DoorTile doorTile -> {
-                fgImage = resourceManager.getTileImage(doorTile.getDoorResourceId());
+                fgImage = assets.sprite(doorTile.getDoorResourceId());
                 fallbackColor = keyColor(doorTile.getKeyColor());
             }
             case FloorSwitcherTile fsTile -> {
-                fgImage = resourceManager.getTileImage(fsTile.getSwitcherResourceId());
+                fgImage = assets.sprite(fsTile.getSwitcherResourceId());
                 fallbackColor = Color.web("#32cd32");
             }
             case TrickyTile trickyTile -> {
-                fgImage = resourceManager.getTileImage(trickyTile.getTrickyResourceId());
+                fgImage = assets.sprite(trickyTile.getTrickyResourceId());
                 fallbackColor = Color.web("#4a4a4a");
             }
             case RegionGateTile gateTile -> {
-                fgImage = resourceManager.getTileImage(gateTile.getGateResourceId());
+                fgImage = assets.sprite(gateTile.getGateResourceId());
                 fallbackColor = Color.web("#8a2be2");
             }
         }
@@ -109,7 +109,7 @@ public final class MapCellPainter {
     // ==================== 道具 ====================
 
     public void paintItem(GraphicsContext gc, Item item) {
-        Image img = resourceManager.getItemImage(item.getItemId());
+        Image img = assets.itemImage(item.getItemId());
         if (img != null) {
             gc.drawImage(img, 0, 0, cellSize, cellSize);
             return;
@@ -178,7 +178,7 @@ public final class MapCellPainter {
 
     /** 怪物本体 + 右下角的伤害数字（伤害由 {@link #damageLabel} 给出，调用方据此判断要不要重画） */
     public void paintMonster(GraphicsContext gc, Monster monster, DamageLabel label) {
-        Image img = resourceManager.getMonsterImage(monster.getCharacterId());
+        Image img = assets.monsterImage(monster.getCharacterId());
         if (img != null) {
             gc.drawImage(img, 0, 0, cellSize, cellSize);
         } else {
@@ -190,7 +190,7 @@ public final class MapCellPainter {
         // 右下角对齐 + 全图统一字号（fitFont 仅在极端长度下兜底收缩），保证数字完整落格且大小一致
         double padding = cellSize * 0.05;
         double maxWidth = cellSize - 2 * padding;
-        Font dmgFont = painter.fitFont(label.text(), "Consolas",
+        Font dmgFont = painter.fitFont(label.text(), Fonts::mono,
                 cellSize * DAMAGE_FONT_RATIO, cellSize * DAMAGE_FONT_MIN_RATIO, maxWidth);
         double textX = cellSize - padding - painter.measureWidth(label.text(), dmgFont);
         double textY = cellSize - padding;
@@ -223,15 +223,19 @@ public final class MapCellPainter {
 
     // ==================== 玩家 ====================
 
-    /** 主角的行走帧；没有切出行走图时为 {@code null}（绘制走纯色 fallback，也就没有走路帧可播） */
-    public CharacterSprites playerSprites() {
-        return resourceManager.getCharacterSprites(GraphicsConfigConstants.PLAYER_CHARACTER_ID);
+    /** 主角的行走图；没有切出来时为 {@code null}（绘制走纯色 fallback，也就没有走路帧可播） */
+    public CharacterSprite playerSprite() {
+        return assets.character(AssetService.PLAYER);
     }
 
-    /** 主角某朝向的第 {@code frame} 帧（下标按帧数取模，见 {@link CharacterSprites#frame}） */
-    public void paintPlayer(GraphicsContext gc, Direction dir, int frame) {
-        CharacterSprites sprites = playerSprites();
-        Image playerImg = sprites == null ? null : sprites.frame(dir, frame);
+    /**
+     * 主角某朝向的一帧：{@code walkIndex} 是行走循环里的下标（按帧数取模，见 {@link CharacterSprite#walkFrame}），
+     * {@link WalkCycle#IDLE} 表示静止帧。
+     */
+    public void paintPlayer(GraphicsContext gc, Direction dir, int walkIndex) {
+        CharacterSprite sprite = playerSprite();
+        Image playerImg = sprite == null ? null
+                : walkIndex == WalkCycle.IDLE ? sprite.idle(dir) : sprite.walkFrame(dir, walkIndex);
         if (playerImg != null) {
             gc.drawImage(playerImg, 0, 0, cellSize, cellSize);
             return;

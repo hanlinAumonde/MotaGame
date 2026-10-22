@@ -1,5 +1,6 @@
 package com.demo.mota.ui.screen;
 
+import com.almasb.fxgl.logging.Logger;
 import com.demo.mota.engine.rules.GameRules;
 import javafx.scene.input.KeyCode;
 
@@ -19,6 +20,8 @@ public final class PresetHotkeys {
     /** 套装快捷键的修饰键：按住 W 再按数字键（对局中换上该套，装备界面中把当前穿戴存为该套） */
     public static final KeyCode EQUIPMENT_SET_CHORD = KeyCode.W;
 
+    private static final Logger log = Logger.get(PresetHotkeys.class);
+
     private PresetHotkeys() {}
 
     public static Map<KeyCode, Integer> fromRules() {
@@ -37,7 +40,7 @@ public final class PresetHotkeys {
             try {
                 keys.put(KeyCode.valueOf(names.get(i).trim().toUpperCase()), i);
             } catch (IllegalArgumentException e) {
-                System.err.println("[PresetHotkeys] 无法识别的预设按键: " + names.get(i));
+                log.warning("无法识别的预设按键: " + names.get(i));
             }
         }
         return keys;

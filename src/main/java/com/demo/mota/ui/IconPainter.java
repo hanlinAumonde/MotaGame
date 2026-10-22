@@ -1,8 +1,8 @@
 package com.demo.mota.ui;
 
+import com.demo.mota.app.services.AssetService;
 import com.demo.mota.engine.Item.Equipment;
 import com.demo.mota.engine.Item.Item;
-import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.skill.Skill;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -10,8 +10,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 /**
  * 技能 / 装备图标的绘制：有图画图，缺图时画<b>带首字的色块</b>占位——
@@ -19,11 +17,11 @@ import javafx.scene.text.FontWeight;
  */
 public class IconPainter {
 
-    private final ResourceManager resourceManager;
+    private final AssetService assets;
     private final TextPainter painter;
 
-    public IconPainter(ResourceManager resourceManager, TextPainter painter) {
-        this.resourceManager = resourceManager;
+    public IconPainter(AssetService assets, TextPainter painter) {
+        this.assets = assets;
         this.painter = painter;
     }
 
@@ -33,7 +31,7 @@ public class IconPainter {
 
     /** @param dimmed 是否画成暗色（未生效的技能） */
     public void drawSkillIcon(GraphicsContext gc, Skill skill, double x, double y, double w, double h, boolean dimmed) {
-        Image image = resourceManager.getSkillImage(skill.skillId());
+        Image image = assets.sprite(skill.sprite());
         Color top = skill.isActive() ? Color.web("#6a2a2a") : Color.web("#6a4b2a");
         Color bottom = skill.isActive() ? Color.web("#2d1010") : Color.web("#2d1e10");
         drawIcon(gc, image, skill.skillName(), top, bottom, Color.web("#ffcf8a"), x, y, w, h);
@@ -44,14 +42,14 @@ public class IconPainter {
     }
 
     public void drawEquipmentIcon(GraphicsContext gc, Equipment equipment, double x, double y, double w, double h) {
-        Image image = resourceManager.getItemImage(equipment.getItemId());
+        Image image = assets.itemImage(equipment.getItemId());
         drawIcon(gc, image, equipment.getItemName(), Color.web("#5b6572"), Color.web("#262b33"),
                 Color.web("#e6edf5"), x, y, w, h);
     }
 
     /** 物品栏里的道具图标；缺图时同样画带首字的色块 */
     public void drawItemIcon(GraphicsContext gc, Item item, double x, double y, double w, double h) {
-        Image image = resourceManager.getItemImage(item.getItemId());
+        Image image = assets.itemImage(item.getItemId());
         drawIcon(gc, image, item.getItemName(), Color.web("#4b3f7a"), Color.web("#1f1a38"),
                 Color.web("#e8dcff"), x, y, w, h);
     }
@@ -69,7 +67,7 @@ public class IconPainter {
         gc.strokeRect(x, y, w, h);
         if (name == null || name.isEmpty()) return;
         double size = Math.min(w, h) * 0.5;
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, size));
+        gc.setFont(Fonts.bold(size));
         painter.drawCenteredShadowText(gc, name.substring(0, 1), x + w / 2, y + h / 2 + size * 0.36, textColor);
     }
 }

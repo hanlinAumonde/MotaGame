@@ -1,13 +1,12 @@
 package com.demo.mota.ui.screen.loading;
 
-import com.demo.mota.ui.screen.Screen;
+import com.demo.mota.ui.Fonts;
 import com.demo.mota.ui.TextPainter;
+import com.demo.mota.ui.screen.Screen;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 /**
  * 资源加载界面：进度条 + 当前任务名。
@@ -58,7 +57,7 @@ public class LoadingScreen implements Screen {
         gc.setFill(BACKGROUND);
         gc.fillRect(0, 0, w, h);
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 56));
+        gc.setFont(Fonts.bold(56));
         painter.drawCenteredShadowText(gc, "魔  塔", w / 2, h * 0.38, Color.web("#f5f5f5"));
 
         double barWidth = w * 0.5;
@@ -71,7 +70,7 @@ public class LoadingScreen implements Screen {
         gc.setFill(BAR_FILL);
         gc.fillRoundRect(barX, barY, barWidth * progress, barHeight, barHeight, barHeight);
 
-        gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 18));
+        gc.setFont(Fonts.regular(18));
         painter.drawCenteredShadowText(gc, taskName + "  " + Math.round(progress * 100) + "%",
                 w / 2, barY + barHeight + 34, Color.web("#c9cdd8"));
     }

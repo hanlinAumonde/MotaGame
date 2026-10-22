@@ -220,7 +220,7 @@ public class MapManager {
 
     /**
      * 读取楼层 JSON
-     * 文件路径格式: data/map/floor_{floorNumber}.json
+     * 文件路径格式: assets/levels/floor_{floorNumber}.json
      */
     private Map<String, Object> readFloorFile(int floorNumber) {
         String filePath = MAP_FLOOR_PATH_PREFIX + floorNumber + ".json";

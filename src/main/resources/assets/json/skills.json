@@ -4,7 +4,7 @@
     "name": "亡灵协同",
     "skillType": "PASSIVE",
     "description": "弱小亡灵们总是聚在一起展现出强大的协同作战能力\n地图上每有一只除自身外的亡灵，便增加20%生命",
-    "resourceId": "",
+    "sprite": null,
     "effectId": "tag-count-stat-bonus",
     "params": {
       "target": "SELF",
@@ -19,7 +19,7 @@
     "name": "疾风之翼",
     "skillType": "PASSIVE",
     "description": "振翅带起的疾风让它总能抢在对手之前出手\n战斗开始时先手攻击一次，该回合不会遭到反击",
-    "resourceId": "",
+    "sprite": null,
     "effectId": "first-strike",
     "params": {
       "target": "SELF",
@@ -31,7 +31,7 @@
     "name": "致命一击",
     "skillType": "ACTIVE",
     "description": "每隔三回合蓄力挥出一记重击\n该回合造成的伤害提升至三倍",
-    "resourceId": "",
+    "sprite": null,
     "effectId": "periodic-damage-multiplier",
     "params": {
       "target": "SELF",
@@ -44,7 +44,7 @@
     "name": "王者威压",
     "skillType": "PASSIVE",
     "description": "身处其威压之下，武器都会变得沉重\n战斗期间玩家的攻击力降低 10%",
-    "resourceId": "",
+    "sprite": null,
     "effectId": "stat-modifier",
     "params": {
       "target": "OPPONENT",
@@ -57,7 +57,7 @@
     "name": "重斩",
     "skillType": "ACTIVE",
     "description": "集中全身力量劈出一刀\n释放回合造成的伤害翻倍（战前释放无效）",
-    "resourceId": "",
+    "sprite": null,
     "effectId": "round-damage-multiplier",
     "params": {
       "target": "SELF",
@@ -69,7 +69,7 @@
     "name": "盾击",
     "skillType": "ACTIVE",
     "description": "用盾牌猛击对手使其眩晕\n释放回合内敌人无法反击",
-    "resourceId": "",
+    "sprite": null,
     "effectId": "round-stun",
     "params": {
       "target": "OPPONENT",
@@ -81,7 +81,7 @@
     "name": "拔刀术",
     "skillType": "ACTIVE",
     "description": "出鞘即是一击\n释放回合追加一次普通攻击；排在战前即为先手，不会遭到反击",
-    "resourceId": "",
+    "sprite": null,
     "effectId": "extra-strike",
     "params": {
       "target": "SELF",
@@ -94,7 +94,7 @@
     "name": "铁壁",
     "skillType": "PASSIVE",
     "description": "厚重的盾牌让防御更加稳固\n战斗期间防御力 +5",
-    "resourceId": "",
+    "sprite": null,
     "effectId": "stat-modifier",
     "params": {
       "target": "SELF",

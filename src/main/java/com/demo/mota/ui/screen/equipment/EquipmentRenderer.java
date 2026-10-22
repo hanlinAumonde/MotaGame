@@ -1,21 +1,21 @@
 package com.demo.mota.ui.screen.equipment;
 
-import com.demo.mota.ui.PanelStyle;
-import com.demo.mota.ui.TextPainter;
-import com.demo.mota.ui.IconPainter;
-import com.demo.mota.ui.ValueFormatter;
+import com.demo.mota.app.services.AssetService;
 import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.Item.Equipment;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.StateType;
-import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.skill.Skill;
 import com.demo.mota.engine.state.PlayerStateManager;
+import com.demo.mota.ui.Fonts;
+import com.demo.mota.ui.IconPainter;
+import com.demo.mota.ui.PanelStyle;
+import com.demo.mota.ui.TextPainter;
+import com.demo.mota.ui.ValueFormatter;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.util.List;
 import java.util.Map;
@@ -34,13 +34,13 @@ public class EquipmentRenderer {
     private static final Color EQUIPPED_COLOR = Color.web("#7cfc7c");
     private static final Color BONUS_COLOR = Color.web("#ffe08a");
 
-    private final ResourceManager resourceManager;
+    private final AssetService assets;
     private final TextPainter painter = new TextPainter();
     private final IconPainter iconPainter;
 
-    public EquipmentRenderer(ResourceManager resourceManager) {
-        this.resourceManager = resourceManager;
-        this.iconPainter = new IconPainter(resourceManager, painter);
+    public EquipmentRenderer(AssetService assets) {
+        this.assets = assets;
+        this.iconPainter = new IconPainter(assets, painter);
     }
 
     public void render(GraphicsContext gc, EquipmentState menu, double width, double height) {
@@ -64,13 +64,13 @@ public class EquipmentRenderer {
         PlayerStateManager player = menu.getPlayer();
         List<Equipment> equipments = menu.getEquipments();
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 24));
+        gc.setFont(Fonts.bold(24));
         painter.drawShadowText(gc, "装备", x + 18, y + 38, PanelStyle.SECTION_COLOR);
 
         double listTop = y + 56;
         double listBottom = y + h - 136;
         if (equipments.isEmpty()) {
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 20));
+            gc.setFont(Fonts.bold(20));
             painter.drawShadowText(gc, "还没有任何装备", x + 18, listTop + 36, PanelStyle.DISABLED_COLOR);
         } else {
             int visible = Math.max(1, (int) ((listBottom - listTop) / LIST_ROW_HEIGHT));
@@ -84,17 +84,17 @@ public class EquipmentRenderer {
                     PanelStyle.drawSelection(gc, x + 8, rowY, w - 16, LIST_ROW_HEIGHT - 6, focused);
                 }
                 iconPainter.drawEquipmentIcon(gc, equipment, x + 16, rowY + 5, 40, 40);
-                gc.setFont(painter.fitFont(equipment.getItemName(), "SimHei", 22, 14, w - 150));
+                gc.setFont(painter.fitFont(equipment.getItemName(), Fonts::bold, 22, 14, w - 150));
                 painter.drawShadowText(gc, equipment.getItemName(), x + 68, rowY + 33, Color.WHITE);
                 int slot = player.slotOf(equipment);
                 if (slot >= 0) {
-                    gc.setFont(Font.font("SimHei", FontWeight.BOLD, 16));
+                    gc.setFont(Fonts.bold(16));
                     painter.drawRightAlignedShadowText(gc, "已装备·" + (slot + 1), x + w - 18, rowY + 32, EQUIPPED_COLOR);
                 }
             }
         }
 
-        gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 16));
+        gc.setFont(Fonts.regular(16));
         String[] hints = focused
                 ? new String[]{"↑↓ 选择   Enter 选中并挑槽位", "→ 查看槽位", "X 返回游戏"}
                 : new String[]{"方向键 选槽位   Enter " + (menu.getPending() != null ? "装备到此槽" : "卸下"),
@@ -103,7 +103,7 @@ public class EquipmentRenderer {
             painter.drawShadowText(gc, hints[i], x + 18, y + h - 104 + i * 26, PanelStyle.HINT_COLOR);
         }
         // 套装保存提示（img_4）：按下 W 等数字键期间高亮
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 18));
+        gc.setFont(Fonts.bold(18));
         painter.drawShadowText(gc, menu.isSaveArmed() ? "W+数字键 保存套装（请按数字键）" : "W+数字键 保存套装",
                 x + 18, y + h - 22, menu.isSaveArmed() ? PanelStyle.NOTICE_COLOR : PanelStyle.SECTION_COLOR);
     }
@@ -115,10 +115,10 @@ public class EquipmentRenderer {
         PanelStyle.drawPanel(gc, x, y, w, h, focused);
         PlayerStateManager player = menu.getPlayer();
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 22));
+        gc.setFont(Fonts.bold(22));
         painter.drawShadowText(gc, "当前装备", x + 18, y + 34, PanelStyle.SECTION_COLOR);
         if (!menu.getNotice().isEmpty()) {
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 18));
+            gc.setFont(Fonts.bold(18));
             painter.drawRightAlignedShadowText(gc, menu.getNotice(), x + w - 18, y + 34, PanelStyle.NOTICE_COLOR);
         }
 
@@ -141,7 +141,7 @@ public class EquipmentRenderer {
             Equipment equipment = player.getEquipped(i);
             if (equipment != null) {
                 iconPainter.drawEquipmentIcon(gc, equipment, iconX, cy + 8, iconSize, iconSize);
-                gc.setFont(painter.fitFont(equipment.getItemName(), "SimHei", 18, 12, cellW - 12));
+                gc.setFont(painter.fitFont(equipment.getItemName(), Fonts::bold, 18, 12, cellW - 12));
                 painter.drawCenteredShadowText(gc, equipment.getItemName(), cx + cellW / 2, cy + iconSize + 30,
                         Color.web("#ff9ad8"));
             } else {
@@ -150,7 +150,7 @@ public class EquipmentRenderer {
                 gc.setLineDashes(6);
                 gc.strokeRect(iconX, cy + 8, iconSize, iconSize);
                 gc.setLineDashes(null);
-                gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 16));
+                gc.setFont(Fonts.regular(16));
                 painter.drawCenteredShadowText(gc, "槽位 " + (i + 1), cx + cellW / 2, cy + iconSize + 30,
                         PanelStyle.DISABLED_COLOR);
             }
@@ -163,11 +163,11 @@ public class EquipmentRenderer {
         PanelStyle.drawPanel(gc, x, y, w, h, false);
         GameNumber maxHp = player.getMaxHP();
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 24));
+        gc.setFont(Fonts.bold(24));
         painter.drawShadowText(gc, "等级", x + 24, y + 44, PanelStyle.HINT_COLOR);
-        gc.setFont(Font.font("Consolas", FontWeight.BOLD, 26));
+        gc.setFont(Fonts.mono(26));
         painter.drawShadowText(gc, String.valueOf(player.getLevelNumber()), x + 110, y + 44, Color.WHITE);
-        Image avatar = resourceManager.getPlayerSprite(Direction.DOWN);
+        Image avatar = assets.idleFrame(AssetService.PLAYER, Direction.DOWN);
         if (avatar != null) {
             gc.drawImage(avatar, x + w - 76, y + 12, 52, 52);
         }
@@ -182,15 +182,15 @@ public class EquipmentRenderer {
         StateType[] bonusTypes = {StateType.MAX_HP, StateType.ATK, StateType.DEF, null};
         for (int i = 0; i < rows.length; i++) {
             double rowY = y + 96 + i * 46;
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 22));
+            gc.setFont(Fonts.bold(22));
             painter.drawShadowText(gc, rows[i][0], x + 24, rowY, PanelStyle.LABEL_COLOR);
-            gc.setFont(painter.fitFont(rows[i][1], "Consolas", 24, 14, w - 260));
+            gc.setFont(painter.fitFont(rows[i][1], Fonts::mono, 24, 14, w - 260));
             painter.drawShadowText(gc, rows[i][1], x + 110, rowY, PanelStyle.VALUE_COLOR);
             // 装备带来的加成单独标出，一眼看出穿脱的影响
             if (bonusTypes[i] != null) {
                 GameNumber bonus = player.getEffectiveAttr(bonusTypes[i]).minus(player.getStateValue(bonusTypes[i]));
                 if (bonus.isPositive()) {
-                    gc.setFont(Font.font("Consolas", FontWeight.BOLD, 18));
+                    gc.setFont(Fonts.mono(18));
                     painter.drawRightAlignedShadowText(gc, "+" + ValueFormatter.formatScaled(bonus, maxHp),
                             x + w - 24, rowY, BONUS_COLOR);
                 }
@@ -203,31 +203,31 @@ public class EquipmentRenderer {
     private void drawDetail(GraphicsContext gc, Equipment equipment, double x, double y, double w, double h) {
         PanelStyle.drawPanel(gc, x, y, w, h, false);
         if (equipment == null) {
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 20));
+            gc.setFont(Fonts.bold(20));
             painter.drawShadowText(gc, "（未选中装备）", x + 20, y + 44, PanelStyle.DISABLED_COLOR);
             return;
         }
         double textW = w - 40;
         double cy = y + 42;
 
-        gc.setFont(painter.fitFont(equipment.getItemName(), "SimHei", 28, 16, textW));
+        gc.setFont(painter.fitFont(equipment.getItemName(), Fonts::bold, 28, 16, textW));
         painter.drawShadowText(gc, equipment.getItemName(), x + 20, cy, Color.web("#ff9ad8"));
         cy += 42;
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 20));
+        gc.setFont(Fonts.bold(20));
         for (Map.Entry<StateType, GameNumber> entry : equipment.getStateEffectMap().entrySet()) {
             painter.drawShadowText(gc, statName(entry.getKey()) + " +" + entry.getValue(), x + 20, cy, Color.WHITE);
             cy += 30;
         }
 
-        Font descFont = Font.font("SimHei", FontWeight.NORMAL, 17);
+        Font descFont = Fonts.regular(17);
         cy = drawWrapped(gc, equipment.getItemDescription(), descFont, x + 20, cy + 10, textW,
                 Color.web("#ffe08a"), y + h);
 
         for (Skill skill : equipment.getSkills()) {
             cy += 18;
             if (cy > y + h - 30) break;
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 20));
+            gc.setFont(Fonts.bold(20));
             painter.drawShadowText(gc, skill.skillName() + "（" + skill.skillType().getDisplayName() + "）",
                     x + 20, cy, skill.isActive() ? PanelStyle.ACTIVE_SKILL_COLOR : PanelStyle.PASSIVE_SKILL_COLOR);
             cy += 8;

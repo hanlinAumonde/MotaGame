@@ -6,12 +6,11 @@ import com.demo.mota.engine.skill.book.OwnedSkill;
 import com.demo.mota.engine.skill.preset.PresetSlotView;
 import com.demo.mota.engine.skill.preset.SkillPreset;
 import com.demo.mota.engine.state.PlayerStateManager;
+import com.demo.mota.ui.Fonts;
 import com.demo.mota.ui.PanelStyle;
 import com.demo.mota.ui.TextPainter;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -69,7 +68,7 @@ public final class BuiltinSidePanelSections {
             drawTitle(ctx, "技能组合", x, y, width);
             SkillPreset armed = ctx.player().getPresetBook().getArmed();
             double lineY = y + TITLE_HEIGHT + 22;
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 20));
+            gc.setFont(Fonts.bold(20));
             if (armed == null) {
                 ctx.painter().drawCenteredShadowText(gc, "未激活", x + width / 2, lineY, PanelStyle.DISABLED_COLOR);
                 return;
@@ -80,7 +79,7 @@ public final class BuiltinSidePanelSections {
             List<PresetSlotView> slots = ctx.player().getArmedPresetSlots();
             double gridTop = y + TITLE_HEIGHT + LINE_HEIGHT;
             if (slots.isEmpty()) {
-                gc.setFont(Font.font("SimHei", FontWeight.BOLD, 20));
+                gc.setFont(Fonts.bold(20));
                 ctx.painter().drawCenteredShadowText(gc, "全程普攻", x + width / 2, gridTop + 22, PanelStyle.DISABLED_COLOR);
                 return;
             }
@@ -114,7 +113,7 @@ public final class BuiltinSidePanelSections {
             List<OwnedSkill> passives = passives(ctx.player());
             double gridTop = y + TITLE_HEIGHT;
             if (passives.isEmpty()) {
-                ctx.gc().setFont(Font.font("SimHei", FontWeight.BOLD, 20));
+                ctx.gc().setFont(Fonts.bold(20));
                 ctx.painter().drawCenteredShadowText(ctx.gc(), "无", x + width / 2, gridTop + 22, PanelStyle.DISABLED_COLOR);
                 return;
             }
@@ -163,7 +162,7 @@ public final class BuiltinSidePanelSections {
     /** 加粗标题 + 一条细下划线 */
     private static void drawTitle(SidePanelContext ctx, String title, double x, double y, double width) {
         GraphicsContext gc = ctx.gc();
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 26));
+        gc.setFont(Fonts.bold(26));
         ctx.painter().drawCenteredShadowText(gc, title, x + width / 2, y + 28, TITLE_COLOR);
         gc.setStroke(Color.rgb(170, 182, 255, 0.35));
         gc.setLineWidth(1);
@@ -189,7 +188,7 @@ public final class BuiltinSidePanelSections {
     private static void drawBadge(GraphicsContext gc, TextPainter painter, String text, double x, double y) {
         gc.setFill(Color.rgb(0, 0, 0, 0.75));
         gc.fillRect(x, y + ICON_SIZE - 22, 26, 22);
-        gc.setFont(Font.font("Consolas", FontWeight.BOLD, 17));
+        gc.setFont(Fonts.mono(17));
         painter.drawCenteredShadowText(gc, text, x + 13, y + ICON_SIZE - 5, Color.web("#ffd95a"));
     }
 }

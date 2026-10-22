@@ -1,15 +1,14 @@
 package com.demo.mota.ui.screen.equipset;
 
+import com.demo.mota.app.services.AssetService;
 import com.demo.mota.engine.Item.Equipment;
-import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.state.equipset.EquipmentSet;
+import com.demo.mota.ui.Fonts;
 import com.demo.mota.ui.IconPainter;
 import com.demo.mota.ui.PanelStyle;
 import com.demo.mota.ui.TextPainter;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.util.List;
 
@@ -31,8 +30,8 @@ public class EquipmentSetRenderer {
     private final TextPainter painter = new TextPainter();
     private final IconPainter iconPainter;
 
-    public EquipmentSetRenderer(ResourceManager resourceManager) {
-        this.iconPainter = new IconPainter(resourceManager, painter);
+    public EquipmentSetRenderer(AssetService assets) {
+        this.iconPainter = new IconPainter(assets, painter);
     }
 
     public void render(GraphicsContext gc, EquipmentSetState state, double width, double height) {
@@ -43,7 +42,7 @@ public class EquipmentSetRenderer {
         double h = height - 2 * PADDING;
         PanelStyle.drawPanel(gc, x, y, w, h, true);
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 28));
+        gc.setFont(Fonts.bold(28));
         painter.drawShadowText(gc, "套装设定", x + 24, y + 44, PanelStyle.TITLE_COLOR);
 
         List<EquipmentSet> sets = state.getSets();
@@ -66,9 +65,9 @@ public class EquipmentSetRenderer {
             PanelStyle.drawSelection(gc, x, y + 4, w, h - 8, true);
         }
         boolean saved = set.isSaved();
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 26));
+        gc.setFont(Fonts.bold(26));
         painter.drawShadowText(gc, set.getName(), x + 16, y + 38, saved ? PanelStyle.HINT_COLOR : PanelStyle.DISABLED_COLOR);
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 18));
+        gc.setFont(Fonts.bold(18));
         if (!saved) {
             painter.drawShadowText(gc, "（未保存）", x + 170, y + 36, PanelStyle.DISABLED_COLOR);
         } else if (state.getPlayer().isWearingSet(index)) {
@@ -98,11 +97,11 @@ public class EquipmentSetRenderer {
         gc.setStroke(PanelStyle.PANEL_BORDER_DIM);
         gc.setLineWidth(1);
         gc.strokeLine(x + 16, y + 0.5, x + w - 16, y + 0.5);
-        gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 18));
+        gc.setFont(Fonts.regular(18));
         painter.drawShadowText(gc, "方向键 选择   Enter 换上并返回游戏   Esc / X 返回   （游戏中可直接按 W+数字键 换装）",
                 x + 24, y + 38, PanelStyle.HINT_COLOR);
         if (!state.getNotice().isEmpty()) {
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 18));
+            gc.setFont(Fonts.bold(18));
             painter.drawRightAlignedShadowText(gc, state.getNotice(), x + w - 24, y + 38, PanelStyle.NOTICE_COLOR);
         }
     }

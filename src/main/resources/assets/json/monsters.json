@@ -8,7 +8,7 @@
     "defense": 1,
     "gold": 1,
     "experience": 1,
-    "resourceId": "031-03.png"
+    "sprite": "monsters/031-03.png"
   },
   {
     "id": "monster-bat-001",
@@ -19,7 +19,7 @@
     "defense": 5,
     "gold": 2,
     "experience": 2,
-    "resourceId": "032-01.png",
+    "sprite": "monsters/032-01.png",
     "skills": ["skill-swift-wing"]
   },
   {
@@ -31,7 +31,7 @@
     "defense": 14,
     "gold": 5,
     "experience": 4,
-    "resourceId": "033-02.png",
+    "sprite": "monsters/033-02.png",
     "skills": ["skill-undead-synergy"]
   },
   {
@@ -43,7 +43,7 @@
     "defense": 20,
     "gold": 20,
     "experience": 15,
-    "resourceId": "033-02.png",
+    "sprite": "monsters/033-02.png",
     "skills": ["skill-undead-synergy"]
   },
   {
@@ -55,7 +55,7 @@
     "defense": 18,
     "gold": 8,
     "experience": 6,
-    "resourceId": "034-01.png"
+    "sprite": "monsters/034-01.png"
   },
   {
     "id": "monster-ghost-001",
@@ -66,7 +66,7 @@
     "defense": 5,
     "gold": 10,
     "experience": 8,
-    "resourceId": "035-01.png"
+    "sprite": "monsters/035-01.png"
   },
   {
     "id": "monster-slime-green-001",
@@ -77,7 +77,7 @@
     "defense": 0,
     "gold": 1,
     "experience": 1,
-    "resourceId": "031-01.png"
+    "sprite": "monsters/031-01.png"
   },
   {
     "id": "monster-slime-red-001",
@@ -88,7 +88,7 @@
     "defense": 5,
     "gold": 2,
     "experience": 2,
-    "resourceId": "031-02.png",
+    "sprite": "monsters/031-02.png",
     "skills": ["skill-fatal-strike"]
   },
   {
@@ -100,7 +100,7 @@
     "defense": 10,
     "gold": 3,
     "experience": 5,
-    "resourceId": "036-04.png"
+    "sprite": "monsters/036-04.png"
   },
   {
     "id": "monster-guard-b-001",
@@ -111,7 +111,7 @@
     "defense": 15,
     "gold": 4,
     "experience": 7,
-    "resourceId": "037-02.png"
+    "sprite": "monsters/037-02.png"
   },
   {
     "id": "monster-exp-ghost-001",
@@ -122,7 +122,7 @@
     "defense": 0,
     "gold": 0,
     "experience": 30,
-    "resourceId": "037-04.png"
+    "sprite": "monsters/037-04.png"
   },
   {
     "id": "monster-exp-wisp-001",
@@ -133,7 +133,7 @@
     "defense": 0,
     "gold": 0,
     "experience": 1000,
-    "resourceId": "038-01.png"
+    "sprite": "monsters/038-01.png"
   },
   {
     "id": "monster-gold-golem-001",
@@ -144,7 +144,7 @@
     "defense": 5,
     "gold": 500,
     "experience": 5,
-    "resourceId": "038-02.png"
+    "sprite": "monsters/038-02.png"
   },
   {
     "id": "monster-iron-001",
@@ -155,7 +155,7 @@
     "defense": 60,
     "gold": 0,
     "experience": 0,
-    "resourceId": "038-03.png"
+    "sprite": "monsters/038-03.png"
   },
   {
     "id": "monster-reaper-001",
@@ -166,7 +166,7 @@
     "defense": 10,
     "gold": 0,
     "experience": 0,
-    "resourceId": "035-01.png",
+    "sprite": "monsters/035-01.png",
     "skills": ["skill-undead-synergy", "skill-fatal-strike"]
   },
   {
@@ -178,7 +178,7 @@
     "defense": 15,
     "gold": 0,
     "experience": 500,
-    "resourceId": "032-01.png",
+    "sprite": "monsters/032-01.png",
     "skills": ["skill-kings-pressure", "skill-fatal-strike"]
   },
 
@@ -190,7 +190,7 @@
     "defense": 0,
     "gold": 0,
     "experience": 0,
-    "resourceId": "031-01.png"
+    "sprite": "monsters/031-01.png"
   },
   {
     "id": "monster-sample-low",
@@ -200,7 +200,7 @@
     "defense": 0,
     "gold": 0,
     "experience": 0,
-    "resourceId": "031-03.png"
+    "sprite": "monsters/031-03.png"
   },
   {
     "id": "monster-sample-medium",
@@ -210,7 +210,7 @@
     "defense": 0,
     "gold": 0,
     "experience": 0,
-    "resourceId": "031-02.png"
+    "sprite": "monsters/031-02.png"
   },
   {
     "id": "monster-sample-high",
@@ -220,7 +220,7 @@
     "defense": 0,
     "gold": 0,
     "experience": 0,
-    "resourceId": "036-04.png"
+    "sprite": "monsters/036-04.png"
   },
   {
     "id": "monster-sample-death",
@@ -230,7 +230,7 @@
     "defense": 0,
     "gold": 0,
     "experience": 0,
-    "resourceId": "035-01.png"
+    "sprite": "monsters/035-01.png"
   },
 
   {
@@ -241,7 +241,7 @@
     "defense": 0,
     "gold": 0,
     "experience": 0,
-    "resourceId": "037-02.png"
+    "sprite": "monsters/037-02.png"
   },
   {
     "id": "monster-digit-7",
@@ -251,7 +251,7 @@
     "defense": 0,
     "gold": 0,
     "experience": 0,
-    "resourceId": "037-04.png"
+    "sprite": "monsters/037-04.png"
   },
   {
     "id": "monster-digit-8",
@@ -261,7 +261,7 @@
     "defense": 0,
     "gold": 0,
     "experience": 0,
-    "resourceId": "038-01.png"
+    "sprite": "monsters/038-01.png"
   },
   {
     "id": "monster-digit-9",
@@ -271,7 +271,7 @@
     "defense": 0,
     "gold": 0,
     "experience": 0,
-    "resourceId": "038-02.png"
+    "sprite": "monsters/038-02.png"
   },
   {
     "id": "monster-digit-11",
@@ -281,7 +281,7 @@
     "defense": 0,
     "gold": 0,
     "experience": 0,
-    "resourceId": "035-01.png"
+    "sprite": "monsters/035-01.png"
   },
   {
     "id": "monster-digit-15",
@@ -291,7 +291,7 @@
     "defense": 0,
     "gold": 0,
     "experience": 0,
-    "resourceId": "038-03.png"
+    "sprite": "monsters/038-03.png"
   },
   {
     "id": "monster-skill-plain",
@@ -301,7 +301,7 @@
     "defense": 26,
     "gold": 0,
     "experience": 0,
-    "resourceId": "034-01.png"
+    "sprite": "monsters/034-01.png"
   },
   {
     "id": "monster-skill-first-strike",
@@ -311,7 +311,7 @@
     "defense": 26,
     "gold": 0,
     "experience": 0,
-    "resourceId": "032-01.png",
+    "sprite": "monsters/032-01.png",
     "skills": ["skill-swift-wing"]
   },
   {
@@ -322,7 +322,7 @@
     "defense": 26,
     "gold": 0,
     "experience": 0,
-    "resourceId": "031-02.png",
+    "sprite": "monsters/031-02.png",
     "skills": ["skill-fatal-strike"]
   },
   {
@@ -333,7 +333,7 @@
     "defense": 26,
     "gold": 0,
     "experience": 0,
-    "resourceId": "036-04.png",
+    "sprite": "monsters/036-04.png",
     "skills": ["skill-kings-pressure"]
   },
   {
@@ -345,7 +345,7 @@
     "defense": 26,
     "gold": 0,
     "experience": 0,
-    "resourceId": "033-02.png",
+    "sprite": "monsters/033-02.png",
     "skills": ["skill-undead-synergy"]
   },
   {
@@ -357,7 +357,7 @@
     "defense": 0,
     "gold": 0,
     "experience": 0,
-    "resourceId": "037-04.png"
+    "sprite": "monsters/037-04.png"
   },
   {
     "id": "monster-shadow-knight-001",
@@ -368,7 +368,7 @@
     "defense": 30,
     "gold": 15,
     "experience": 25,
-    "resourceId": "036-04.png"
+    "sprite": "monsters/036-04.png"
   },
   {
     "id": "monster-skeleton-elite-001",
@@ -379,7 +379,7 @@
     "defense": 35,
     "gold": 10,
     "experience": 20,
-    "resourceId": "033-02.png"
+    "sprite": "monsters/033-02.png"
   },
   {
     "id": "monster-gargoyle-001",
@@ -390,7 +390,7 @@
     "defense": 25,
     "gold": 20,
     "experience": 30,
-    "resourceId": "034-01.png"
+    "sprite": "monsters/034-01.png"
   },
   {
     "id": "monster-watcher-001",
@@ -401,7 +401,7 @@
     "defense": 200,
     "gold": 0,
     "experience": 0,
-    "resourceId": "038-03.png"
+    "sprite": "monsters/038-03.png"
   },
   {
     "id": "monster-abyss-lord-001",
@@ -412,7 +412,7 @@
     "defense": 40,
     "gold": 0,
     "experience": 500,
-    "resourceId": "032-01.png",
+    "sprite": "monsters/032-01.png",
     "skills": ["skill-swift-wing"]
   }
 ]

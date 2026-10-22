@@ -1,5 +1,6 @@
 package com.demo.mota.ui.screen.saveload;
 
+import com.almasb.fxgl.logging.Logger;
 import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.app.GameFlow;
 import com.demo.mota.engine.app.GamePhase;
@@ -26,6 +27,8 @@ import java.util.function.Consumer;
  * 存档成功留在本界面，刷新档位并给出提示。
  */
 public class SaveLoadScreen implements Screen {
+
+    private static final Logger log = Logger.get(SaveLoadScreen.class);
 
     private final GameEngine engine;
     private final GameFlow flow;
@@ -99,7 +102,7 @@ public class SaveLoadScreen implements Screen {
         try {
             engine.loadGame(slotId);
         } catch (SaveException e) {
-            System.err.println("[Save] 读取 " + name + " 失败：" + e.getMessage());
+            log.warning("读取 " + name + " 失败：" + e.getMessage());
             state.updateSlots(repository().refresh());
             state.setNotice(name + " 读取失败：" + e.getMessage());
             return false;

@@ -1,7 +1,6 @@
 package com.demo.mota.engine.factory.skill;
 
 import com.demo.mota.engine.factory.AbstractFactory;
-import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.skill.Skill;
 import com.demo.mota.engine.skill.SkillParams;
 import com.demo.mota.engine.skill.SkillType;
@@ -18,8 +17,7 @@ import java.util.Map;
 import static com.demo.mota.engine.configs.SkillConfigConstants.SKILL_LIST_FILE;
 
 /**
- * 技能工厂：读取 {@code /data/skill/skillList.json}，按 id 产出 {@link Skill}。
- * 解析时顺带把技能图标注册进 {@link ResourceManager}。
+ * 技能工厂：读取 {@code /assets/json/skills.json}，按 id 产出 {@link Skill}。
  *
  * <p>技能表不区分持有者，怪物与（将来的）玩家技能共用这一份配置。
  *
@@ -44,10 +42,12 @@ public class SkillFactory extends AbstractFactory<Skill, SkillFactory.SkillData,
     @Override
     protected void parseData(ObjectMapper mapper, InputStream inputStream) throws IOException {
         mapper.readValue(inputStream, new TypeReference<List<SkillData>>(){})
-                .forEach(skillData -> {
-                    dataRegistry.put(skillData.id, skillData);
-                    ResourceManager.getInstance().registerSkillImage(skillData.id, skillData.resourceId);
-                });
+                .forEach(skillData -> dataRegistry.put(skillData.id, skillData));
+    }
+
+    @Override
+    protected String spriteOf(SkillData data) {
+        return data.sprite;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class SkillFactory extends AbstractFactory<Skill, SkillFactory.SkillData,
     @Override
     protected Skill createProduct(SkillCreator creator, SkillData data) {
         return creator.createSkill(data.id, data.name, SkillType.fromString(data.skillType),
-                data.description, data.resourceId,
+                data.description, data.sprite,
                 data.effectId, new SkillParams(data.params), toCostSpec(data.cost),
                 data.maxCasts == null ? Skill.DEFAULT_MAX_CASTS : data.maxCasts);
     }
@@ -79,7 +79,7 @@ public class SkillFactory extends AbstractFactory<Skill, SkillFactory.SkillData,
     }
 
     public record SkillData(String id, String name, String skillType,
-                            String description, String resourceId,
+                            String description, String sprite,
                             String effectId, Map<String, Object> params,
                             CostData cost, Integer maxCasts) implements Serializable {
     }

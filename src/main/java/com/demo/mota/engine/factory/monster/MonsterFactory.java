@@ -1,11 +1,10 @@
 package com.demo.mota.engine.factory.monster;
 
 import com.demo.mota.engine.GameEngine;
+import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.StateType;
 import com.demo.mota.engine.factory.AbstractFactory;
-import com.demo.mota.engine.resource.ResourceManager;
-import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.factory.skill.SkillFactory;
 import com.demo.mota.engine.state.monster.Monster;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -36,10 +35,12 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
     @Override
     protected void parseData(ObjectMapper mapper, InputStream inputStream) throws IOException {
         mapper.readValue(inputStream, new TypeReference<List<MonsterData>>(){})
-                .forEach(monsterData -> {
-                    dataRegistry.put(monsterData.id, monsterData);
-                    ResourceManager.getInstance().registerMonsterImage(monsterData.id, monsterData.resourceId);
-                });
+                .forEach(monsterData -> dataRegistry.put(monsterData.id, monsterData));
+    }
+
+    @Override
+    protected String spriteOf(MonsterData data) {
+        return data.sprite;
     }
 
     @Override
@@ -76,7 +77,7 @@ public class MonsterFactory extends AbstractFactory<Monster, MonsterFactory.Mons
                               GameNumber health, GameNumber attack, GameNumber defense,
                               long gold,
                               GameNumber experience,
-                              String resourceId,
+                              String sprite,
                               List<String> skills,
                               List<String> tags) implements Serializable {
     }

@@ -1,5 +1,6 @@
 package com.demo.mota.ui.screen.game;
 
+import com.demo.mota.app.services.AssetService;
 import com.demo.mota.engine.GameEngine;
 import com.demo.mota.engine.GameNumber;
 import com.demo.mota.engine.app.GameFlow;
@@ -9,13 +10,13 @@ import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.map.region.RegionInfo;
-import com.demo.mota.engine.resource.ResourceManager;
 import com.demo.mota.engine.skill.preset.SkillPreset;
 import com.demo.mota.engine.skill.preset.SkillPresetBook;
 import com.demo.mota.engine.state.PlayerStateManager;
+import com.demo.mota.engine.state.equipset.EquipSetResult;
+import com.demo.mota.ui.Fonts;
 import com.demo.mota.ui.TextPainter;
 import com.demo.mota.ui.ValueFormatter;
-import com.demo.mota.engine.state.equipset.EquipSetResult;
 import com.demo.mota.ui.screen.ChordKey;
 import com.demo.mota.ui.screen.PresetHotkeys;
 import com.demo.mota.ui.screen.Screen;
@@ -27,8 +28,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.util.Map;
 
@@ -63,7 +62,7 @@ public class GameScreen implements Screen {
             KeyCode.A, GamePhase.EQUIPMENT_SETS);
 
     private final GameEngine engine;
-    private final ResourceManager resourceManager;
+    private final AssetService assets;
     private final GameFlow flow;
 
     private final Canvas statusCanvas;
@@ -88,15 +87,15 @@ public class GameScreen implements Screen {
 
     private String currentMessage = "";
 
-    public GameScreen(GameEngine engine, ResourceManager resourceManager, GameFlow flow,
+    public GameScreen(GameEngine engine, AssetService assets, GameFlow flow,
                       Canvas statusCanvas, MapView mapView, Canvas sideCanvas) {
         this.engine = engine;
-        this.resourceManager = resourceManager;
+        this.assets = assets;
         this.flow = flow;
         this.statusCanvas = statusCanvas;
         this.mapView = mapView;
         this.sideCanvas = sideCanvas;
-        this.sidePanelRenderer = new SidePanelRenderer(resourceManager);
+        this.sidePanelRenderer = new SidePanelRenderer(assets);
         mapView.setOnAnimationsFinished(this::continueWalking);
     }
 
@@ -368,7 +367,7 @@ public class GameScreen implements Screen {
     }
 
     private void drawStatusBackground(GraphicsContext gc, double w, double h) {
-        Image bgTile = resourceManager.getTileImage("wall_normal");
+        Image bgTile = assets.sprite("wall_normal");
         if (bgTile != null) {
             for (double ty = 0; ty < h; ty += 32) {
                 for (double tx = 0; tx < w; tx += 32) {
@@ -386,15 +385,15 @@ public class GameScreen implements Screen {
         double iconSize = 52;
         double iconX = 14;
 
-        Image playerSprite = resourceManager.getPlayerSprite(Direction.DOWN);
+        Image playerSprite = assets.idleFrame(AssetService.PLAYER, Direction.DOWN);
         if (playerSprite != null) {
             gc.drawImage(playerSprite, iconX, topY, iconSize, iconSize);
         }
 
-        gc.setFont(Font.font("Consolas", FontWeight.BOLD, 34));
+        gc.setFont(Fonts.mono(34));
         painter.drawShadowText(gc, String.valueOf(player.getLevelNumber()), iconX + iconSize + 18, topY + 38);
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 28));
+        gc.setFont(Fonts.bold(28));
         painter.drawShadowText(gc, "级", panelWidth - 42, topY + 38);
     }
 
@@ -419,10 +418,10 @@ public class GameScreen implements Screen {
         for (int i = 0; i < labels.length; i++) {
             double ly = statsY + i * lineHeight;
 
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 22));
+            gc.setFont(Fonts.bold(22));
             painter.drawShadowText(gc, labels[i], statsX, ly);
 
-            painter.drawFittedShadowText(gc, values[i], "Consolas", valueX, ly, valueMaxWidth, 22, 12);
+            painter.drawFittedShadowText(gc, values[i], Fonts::mono, valueX, ly, valueMaxWidth, 22, 12);
         }
     }
 
@@ -438,16 +437,16 @@ public class GameScreen implements Screen {
         for (int i = 0; i < 3; i++) {
             double ky = keysY + i * keyLineHeight;
 
-            Image keyImg = resourceManager.getItemImage(keyItemIds[i]);
+            Image keyImg = assets.itemImage(keyItemIds[i]);
             if (keyImg != null) {
                 gc.drawImage(keyImg, keysX, ky, keyIconSize, keyIconSize);
             }
 
-            gc.setFont(Font.font("Consolas", FontWeight.BOLD, 26));
+            gc.setFont(Fonts.mono(26));
             String countStr = String.format("%02d", player.getKeyCount(keyColors[i]));
             painter.drawShadowText(gc, countStr, keysX + keyIconSize + 14, ky + keyIconSize * 0.7);
 
-            gc.setFont(Font.font("SimHei", FontWeight.BOLD, 22));
+            gc.setFont(Fonts.bold(22));
             painter.drawShadowText(gc, "个", keysX + keyIconSize + 64, ky + keyIconSize * 0.7);
         }
     }
@@ -455,10 +454,10 @@ public class GameScreen implements Screen {
     private void drawFloorInfo(GraphicsContext gc, GameMap map, double h) {
         RegionInfo region = engine.getMapManager().getCurrentRegion();
         if (region != null) {
-            gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 16));
+            gc.setFont(Fonts.regular(16));
             painter.drawShadowText(gc, region.name(), 14, h - 58);
         }
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 26));
+        gc.setFont(Fonts.bold(26));
         String floorText = "第 " + map.getFloorNumber() + " 层";
         painter.drawShadowText(gc, floorText, 14, h - 25);
     }
@@ -470,7 +469,7 @@ public class GameScreen implements Screen {
         gc.setFill(Color.rgb(0, 0, 0, 0.6));
         gc.fillRect(6, msgY, w - 12, 28);
 
-        gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 15));
+        gc.setFont(Fonts.regular(15));
         gc.setFill(Color.web("#ff6b6b"));
         gc.fillText(currentMessage, 12, msgY + 20);
     }

@@ -2,12 +2,11 @@ package com.demo.mota.ui.screen.saveload;
 
 import com.demo.mota.engine.save.SaveMeta;
 import com.demo.mota.engine.save.SaveSlotInfo;
+import com.demo.mota.ui.Fonts;
 import com.demo.mota.ui.PanelStyle;
 import com.demo.mota.ui.TextPainter;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.util.List;
 
@@ -31,9 +30,9 @@ public class SaveLoadRenderer {
     public void render(GraphicsContext gc, SaveLoadState state, double width, double height) {
         PanelStyle.drawBackground(gc, width, height);
 
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 34));
+        gc.setFont(Fonts.bold(34));
         painter.drawShadowText(gc, state.getMode().getDisplayName(), PADDING, 72, PanelStyle.TITLE_COLOR);
-        gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 18));
+        gc.setFont(Fonts.regular(18));
         painter.drawShadowText(gc, state.getMode() == SaveLoadMode.SAVE
                         ? "选择要写入的档位（自动存档在切换楼层时写入）"
                         : "选择要读取的档位",
@@ -58,7 +57,7 @@ public class SaveLoadRenderer {
             }
             drawSlot(gc, slots.get(i), state.isSelectable(i), PADDING, y, rowW);
         }
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 18));
+        gc.setFont(Fonts.bold(18));
         if (top > 0) {
             painter.drawCenteredShadowText(gc, "▲", width / 2, LIST_TOP - 8, PanelStyle.HINT_COLOR);
         }
@@ -70,11 +69,11 @@ public class SaveLoadRenderer {
 
     private void drawSlot(GraphicsContext gc, SaveSlotInfo slot, boolean selectable, double x, double y, double w) {
         double baseline = y + ROW_HEIGHT * 0.64;
-        gc.setFont(Font.font("SimHei", FontWeight.BOLD, 24));
+        gc.setFont(Fonts.bold(24));
         painter.drawShadowText(gc, slot.name(), x + 24, baseline,
                 selectable ? Color.WHITE : PanelStyle.DISABLED_COLOR);
 
-        gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 20));
+        gc.setFont(Fonts.regular(20));
         double detailX = x + 200;
         switch (slot.status()) {
             case OK -> {
@@ -94,7 +93,7 @@ public class SaveLoadRenderer {
     private void drawFooter(GraphicsContext gc, SaveLoadState state, double width, double height) {
         double y = height - FOOTER_HEIGHT + 20;
         PanelStyle.drawPanel(gc, PADDING, y, width - 2 * PADDING, 46, false);
-        gc.setFont(Font.font("SimHei", FontWeight.NORMAL, 19));
+        gc.setFont(Fonts.regular(19));
         String notice = state.getNotice();
         if (notice != null) {
             painter.drawShadowText(gc, notice, PADDING + 20, y + 30, PanelStyle.NOTICE_COLOR);
