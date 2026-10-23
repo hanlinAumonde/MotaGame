@@ -22,10 +22,8 @@ import com.demo.mota.ui.MotaLayout;
 import com.demo.mota.ui.TextPainter;
 import com.demo.mota.ui.ValueFormatter;
 import com.demo.mota.ui.screen.equipset.EquipmentSetState;
-import com.demo.mota.ui.screen.game.map.EntityMapView;
-import com.demo.mota.ui.screen.game.map.MapCellPainter;
-import com.demo.mota.ui.screen.game.map.MapView;
 import com.demo.mota.ui.screen.game.side.SidePanelRenderer;
+import com.demo.mota.world.MapPresenter;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -38,12 +36,13 @@ import javafx.scene.paint.Color;
  * 对局画面（FXGL 的游戏场景）：左侧状态面板 + 中间地图 + 右侧技能装备栏（{@code side} 子包）。
  *
  * <p>本对象贯穿整个进程，每局开始时（FXGL 的 {@code initUI}，见 {@link #onNewGame()}）把两侧画布重新挂进游戏场景、
- * 新建地图显示——{@code startNewGame()} 会清空游戏场景的世界与 UI 节点。按键由 {@link GameplayInput}
+ * 新建地图显示（{@link MapPresenter}）——{@code startNewGame()} 会清空游戏场景的世界与 UI 节点。按键由 {@link GameplayInput}
  * 注册的 FXGL 动作翻译成这里的命令（{@link GameplayInput.Commands}）：走一步（或撞上怪物 / 门 / 楼梯……）、转身、撤销、
  * 叠上装备 / 套装 / 技能设置界面、切换技能组、换上套装。X（游戏菜单）由 FXGL 的菜单键处理。
  *
- * <p>地图有动画（走一格的平滑移动、换层的黑幕）。动画没播完时方向键先进 {@link StepBuffer}，
- * 播完（{@link MapView#setOnAnimationsFinished}）再走下一步；按住方向键即连续行走。
+ * <p>主角走一格有平滑移动。没走完时方向键先进 {@link StepBuffer}，
+ * 走完（{@link MapPresenter#setOnStepFinished}）再走下一步；按住方向键即连续行走。
+ * 换层的黑幕是叠上来的子场景，期间按键不会到这里。
  * 主角没有走动的行动（撞墙、开门、打怪）之后没有「走完一步」来接续，方向键按住超过 {@link #HOLD_REPEAT_SECONDS}
  * 时每帧再试一次，与以前系统按键重复的效果一致（FXGL 的动作不会因按键重复再次触发）。
  *
@@ -79,10 +78,9 @@ public class GameScreen implements GameplayInput.Commands {
     private final Canvas sideCanvas = new Canvas(MotaLayout.SIDE_WIDTH, MotaLayout.MAP_SIZE);
     /** 两侧画布 + 中间留给地图的透明占位；地图是世界层里的实体，从占位处透出来 */
     private final HBox hud = new HBox(0, statusCanvas, mapSlot(), sideCanvas);
-    private final MapCellPainter cellPainter;
     private final SidePanelRenderer sidePanelRenderer;
     /** 每局新建：startNewGame() 会清空世界里的实体 */
-    private MapView mapView;
+    private MapPresenter mapPresenter;
 
     /** 文本测量与绘制工具（阴影描边、自适应字号、折行） */
     private final TextPainter painter = new TextPainter();
@@ -100,7 +98,6 @@ public class GameScreen implements GameplayInput.Commands {
         this.navigator = navigator;
         this.menus = menus;
         this.sidePanelRenderer = new SidePanelRenderer(assets, sessions.content().rules().sidePanel().sections());
-        this.cellPainter = new MapCellPainter(assets, (double) MotaLayout.MAP_SIZE / GameMap.SIDE);
     }
 
     /** 地图位置的透明占位：只撑开尺寸，让两侧画布落在原位 */
@@ -122,9 +119,8 @@ public class GameScreen implements GameplayInput.Commands {
         resetHeld();
         clock = 0;
         currentMessage = sessions.takeStartMessage();
-        EntityMapView view = new EntityMapView(sessions, cellPainter, MotaLayout.MAP_X, MotaLayout.MAP_Y);
-        view.setOnAnimationsFinished(this::continueWalking);
-        mapView = view;
+        mapPresenter = new MapPresenter(sessions, assets, navigator);
+        mapPresenter.setOnStepFinished(this::continueWalking);
         FXGL.getGameScene().addUINode(hud);
         render();
     }
@@ -153,7 +149,7 @@ public class GameScreen implements GameplayInput.Commands {
     @Override
     public void pressDirection(Direction direction) {
         steps.press(direction, clock);
-        if (mapView.isAnimating()) {
+        if (mapPresenter.isAnimating()) {
             steps.queue(direction);
         } else {
             move(direction);
@@ -167,12 +163,12 @@ public class GameScreen implements GameplayInput.Commands {
 
     /** 每帧调用（只在对局场景活动时）：方向键按住够久、主角又空闲时接着行动，见类注释 */
     public void onFrame(double tpf) {
-        if (mapView == null) {
+        if (mapPresenter == null) {
             return;
         }
         clock += tpf;
         Direction held = steps.repeatDue(clock, HOLD_REPEAT_SECONDS);
-        if (held != null && !mapView.isAnimating()) {
+        if (held != null && !mapPresenter.isAnimating()) {
             move(held);
         }
     }
@@ -181,7 +177,7 @@ public class GameScreen implements GameplayInput.Commands {
     public void turn() {
         sessions.turn();
         // 只有朝向变了，同步时只会重画玩家实体
-        mapView.sync();
+        mapPresenter.sync();
     }
 
     @Override
@@ -204,7 +200,7 @@ public class GameScreen implements GameplayInput.Commands {
         MoveResult result = sessions.move(direction);
         handleMoveResult(result);
         autoSaveAfter(result);
-        playFloorTransitionAfter(result);
+        // 换了层的话，地图显示据 FloorChanged 事件先叠上黑幕过渡、黑幕下再换图
         render();
 
         // 行动之后统一判死：战斗、以及将来的岩浆 / 毒 / 陷阱都汇到这一处
@@ -213,30 +209,16 @@ public class GameScreen implements GameplayInput.Commands {
         }
     }
 
-    /** 地图动画播完：接着走缓下来的一步，或沿仍按着的方向继续走 */
+    /** 主角走完一步：接着走缓下来的一步，或沿仍按着的方向继续走 */
     private void continueWalking() {
         if (!navigator.isInGame()) {
-            // 动画播的途中叠上了别的界面：回来时不该自己接着走
+            // 走的途中叠上了别的界面：回来时不该自己接着走
             steps.clear();
             return;
         }
         Direction next = steps.next();
         if (next != null) {
             move(next);
-        }
-    }
-
-    /** 换层 / 进入新区域：地图换图时播一段黑幕过渡，黑屏上写出到了哪 */
-    private void playFloorTransitionAfter(MoveResult result) {
-        switch (result.type()) {
-            case FLOOR_SWITCHED, REGION_ENTERED -> {
-                GameSession session = sessions.session();
-                RegionInfo region = session.maps().getCurrentRegion();
-                String floor = "第 " + session.maps().getCurrentMap().getFloorNumber() + " 层";
-                // 区域名本身常带「·」（如「试炼之塔·下层」），与楼层分两行写，免得连成一串
-                mapView.playFloorTransition(region == null ? floor : region.name() + "\n" + floor);
-            }
-            default -> { }
         }
     }
 
@@ -302,7 +284,7 @@ public class GameScreen implements GameplayInput.Commands {
     // ==================== 渲染入口 ====================
 
     public void render() {
-        mapView.sync();
+        mapPresenter.sync();
         renderStatusPanel();
         sidePanelRenderer.render(sideCanvas, sessions.session().player());
     }

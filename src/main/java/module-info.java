@@ -10,6 +10,7 @@ open module com.demo.mota {
 
     exports com.demo.mota;
     exports com.demo.mota.app;
+    exports com.demo.mota.app.event;
     exports com.demo.mota.app.input;
     exports com.demo.mota.app.nav;
     exports com.demo.mota.app.services;
@@ -45,7 +46,6 @@ open module com.demo.mota {
     exports com.demo.mota.ui.screen.equipment;
     exports com.demo.mota.ui.screen.equipset;
     exports com.demo.mota.ui.screen.game;
-    exports com.demo.mota.ui.screen.game.map;
     exports com.demo.mota.ui.screen.game.side;
     exports com.demo.mota.ui.screen.gamemenu;
     exports com.demo.mota.ui.screen.gamemenu.option;
@@ -55,4 +55,8 @@ open module com.demo.mota {
     exports com.demo.mota.ui.screen.saveload;
     exports com.demo.mota.ui.screen.skill;
     exports com.demo.mota.ui.screen.title;
+    exports com.demo.mota.ui.screen.transition;
+    exports com.demo.mota.world;
+    exports com.demo.mota.world.component;
+    exports com.demo.mota.world.fx;
 }

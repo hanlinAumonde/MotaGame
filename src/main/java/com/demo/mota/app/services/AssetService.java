@@ -3,6 +3,7 @@ package com.demo.mota.app.services;
 import com.almasb.fxgl.app.services.FXGLAssetLoaderService;
 import com.almasb.fxgl.core.EngineService;
 import com.almasb.fxgl.logging.Logger;
+import com.almasb.fxgl.texture.AnimationChannel;
 import com.almasb.fxgl.texture.ImagesKt;
 import com.demo.mota.app.services.SpriteCatalog.CharacterDef;
 import com.demo.mota.app.services.SpriteCatalog.Geometry;
@@ -13,9 +14,9 @@ import com.demo.mota.engine.catalog.TowerContent;
 import com.demo.mota.engine.enums.Direction;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
+import javafx.util.Duration;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -195,9 +196,26 @@ public final class AssetService extends EngineService {
         return scaled(ImagesKt.subImage(sheet.image(), area));
     }
 
+    /**
+     * 切出一个角色：每个朝向的静止帧图片，以及静止 / 行走两条 FXGL 动画通道。
+     * 通道建在<b>整张放大后的图集</b>上（帧号 = 行 × 列数 + 列），不必逐帧切图。
+     */
     private CharacterSprite cutCharacter(String id, CharacterDef def, LoadedSheet sheet) {
+        if (sheet == null) {
+            log.warning("角色 " + id + " 引用的图集 \"" + def.sheet() + "\" 不存在或载入失败");
+            return null;
+        }
+        Geometry geometry = sheet.geometry();
+        Image sheetImage = scaled(sheet.image());
+        int frameWidth = geometry.cellWidth() * scale;
+        int frameHeight = geometry.cellHeight() * scale;
+        Duration idleDuration = Duration.seconds(1);
+        // 每帧半步：XP 式 [1, 2, 3, 0] 循环一遍正好走两格
+        Duration walkDuration = Duration.seconds(def.walk().size() * def.stepSeconds() / 2);
+
         Map<Direction, Image> idle = new EnumMap<>(Direction.class);
-        Map<Direction, List<Image>> walk = new EnumMap<>(Direction.class);
+        Map<Direction, AnimationChannel> idleChannels = new EnumMap<>(Direction.class);
+        Map<Direction, AnimationChannel> walkChannels = new EnumMap<>(Direction.class);
         def.rows().forEach((direction, row) -> {
             String what = "角色 " + id + " 的 " + direction;
             Image idleFrame = cut(sheet, def.sheet(), def.idle(), row, what);
@@ -205,20 +223,22 @@ public final class AssetService extends EngineService {
                 return;
             }
             idle.put(direction, idleFrame);
-            List<Image> frames = new ArrayList<>();
-            for (int col : def.walk()) {
-                Image frame = cut(sheet, def.sheet(), col, row, what);
-                if (frame != null) {
-                    frames.add(frame);
-                }
+            idleChannels.put(direction, new AnimationChannel(sheetImage, idleDuration, geometry.columns(),
+                    CharacterSprite.frameRuns(List.of(def.idle()), row, geometry.columns(), frameWidth, frameHeight)));
+            List<Integer> walk = def.walk().stream().filter(col -> geometry.contains(col, row)).toList();
+            if (walk.size() < def.walk().size()) {
+                log.warning(what + " 的行走帧有越界的列，已忽略");
             }
-            walk.put(direction, frames);
+            if (walk.size() >= 2) {
+                walkChannels.put(direction, new AnimationChannel(sheetImage, walkDuration, geometry.columns(),
+                        CharacterSprite.frameRuns(walk, row, geometry.columns(), frameWidth, frameHeight)));
+            }
         });
         if (idle.isEmpty()) {
             log.warning("角色 " + id + " 没有切出任何帧");
             return null;
         }
-        return new CharacterSprite(idle, walk);
+        return new CharacterSprite(idle, idleChannels, walkChannels, def.stepSeconds(), frameWidth, frameHeight);
     }
 
     /** 最近邻放大到目录规定的倍数 */

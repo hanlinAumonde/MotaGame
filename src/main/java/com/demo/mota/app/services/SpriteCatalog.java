@@ -106,12 +106,19 @@ public record SpriteCatalog(int scale,
     /**
      * 行走图：一行是一个朝向；{@code idle} 是静止帧所在的列，{@code walk} 是行走循环依次用到的列。
      * XP 式 4 帧行走图写 {@code walk: [1, 2, 3, 0]}——每步播两帧，左右脚交替、每步落回站立帧。
+     * {@code stepSeconds} 是走一格用的秒数（可省略，默认 {@link #DEFAULT_STEP_SECONDS}）。
      */
-    public record CharacterDef(String sheet, Map<Direction, Integer> rows, int idle, List<Integer> walk) {
+    public record CharacterDef(String sheet, Map<Direction, Integer> rows, int idle, List<Integer> walk,
+                               Double stepSeconds) {
+
+        public static final double DEFAULT_STEP_SECONDS = 0.12;
 
         public CharacterDef {
             rows = rows == null ? Map.of() : Map.copyOf(rows);
             walk = walk == null ? List.of() : List.copyOf(walk);
+            if (stepSeconds == null || stepSeconds <= 0) {
+                stepSeconds = DEFAULT_STEP_SECONDS;
+            }
         }
     }
 }

@@ -2,8 +2,11 @@ package com.demo.mota.app.services;
 
 import com.almasb.fxgl.core.EngineService;
 import com.almasb.fxgl.logging.Logger;
+import com.demo.mota.app.event.EngineEventBridge;
+import com.demo.mota.app.event.MotaEvent;
 import com.demo.mota.engine.catalog.TowerContent;
 import com.demo.mota.engine.enums.Direction;
+import com.demo.mota.engine.event.GameEvent;
 import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.save.SaveException;
 import com.demo.mota.engine.save.SaveFile;
@@ -11,10 +14,12 @@ import com.demo.mota.engine.save.SaveRepository;
 import com.demo.mota.engine.save.SaveSlotInfo;
 import com.demo.mota.engine.session.GameSession;
 import com.demo.mota.engine.snapshot.UndoHistory;
+import javafx.event.EventType;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * 对局会话服务（FXGL {@link EngineService}，取代原来的 {@code GameEngine} 单例）：持有当前这一局 {@link GameSession}，
@@ -26,6 +31,9 @@ import java.util.Objects;
  * 这样 {@code initGame} 只做不会失败的安装（它在后台线程执行，一抛异常 FXGL 就弹致命错误并退出）。
  *
  * <p>撤销是局内操作：按快照造一个新会话直接换上，不经加载场景；地图显示发现换了一张地图会整张重建。
+ *
+ * <p>命令产生的领域事件经 {@link EngineEventBridge} 发到 FXGL 的事件总线（{@link MotaEvent}），地图显示等据此播放表现；
+ * 订阅经 {@link #subscribe}，换局时统一注销。
  */
 public final class SessionService extends EngineService {
 
@@ -40,6 +48,8 @@ public final class SessionService extends EngineService {
 
     private GameSession session;
     private String startMessage = "";
+
+    private final EngineEventBridge events = new EngineEventBridge();
 
     // ==================== 换一局 ====================
 
@@ -87,10 +97,16 @@ public final class SessionService extends EngineService {
         return message;
     }
 
-    /** startNewGame() 清场时调用（源码：Engine.resetServices）：丢弃上一局 */
+    /** startNewGame() 清场时调用（源码：Engine.resetServices）：丢弃上一局，注销它的事件订阅 */
     @Override
     public void onGameReset() {
         session = null;
+        events.clear();
+    }
+
+    /** 订阅这一局的某类领域事件（同步回调，在 FX 线程上）；换局时自动注销 */
+    public void subscribe(EventType<MotaEvent> type, Consumer<GameEvent> handler) {
+        events.subscribe(type, handler);
     }
 
     // ==================== 当前这一局 ====================
@@ -108,12 +124,15 @@ public final class SessionService extends EngineService {
         return contentService.saves();
     }
 
+    /** 走一步；结果里的领域事件先广播出去，再返回给调用方 */
     public MoveResult move(Direction direction) {
-        return session.move(direction);
+        MoveResult result = session.move(direction);
+        events.publish(result.events());
+        return result;
     }
 
     public void turn() {
-        session.turn();
+        events.publish(session.turn());
     }
 
     /**
