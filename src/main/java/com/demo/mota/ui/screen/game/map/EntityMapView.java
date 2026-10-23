@@ -4,7 +4,7 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
 import com.demo.mota.app.services.CharacterSprite;
-import com.demo.mota.engine.GameEngine;
+import com.demo.mota.app.services.SessionService;
 import com.demo.mota.engine.item.Item;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.map.GameMap;
@@ -40,7 +40,8 @@ import java.util.Map;
  *   <li>玩家走到相邻格时<b>平滑滑过去</b>并播行走帧（{@link WalkCycle}），其余位置变化直接落位</li>
  * </ul>
  * 动画由挂在实体上的 FXGL {@link Component} 每帧推进；引擎状态在同步前就已是最终结果，动画只是追上它。
- * 实体放在 FXGL 游戏场景的世界层，位于界面层（各块画布）之下，地图区域由 {@code MotaController} 留空透出。
+ * 实体放在 FXGL 游戏场景的世界层，位于界面层（两侧画布）之下，地图区域由 {@code GameScreen} 留空透出。
+ * 每局新建一个：{@code startNewGame()} 会清空世界里的全部实体。
  */
 public final class EntityMapView implements MapView {
 
@@ -54,7 +55,7 @@ public final class EntityMapView implements MapView {
     /** 走一格用多少秒 */
     private static final double WALK_STEP_SECONDS = 0.12;
 
-    private final GameEngine engine;
+    private final SessionService sessions;
     private final MapCellPainter painter;
     private final double originX;
     private final double originY;
@@ -69,14 +70,13 @@ public final class EntityMapView implements MapView {
     private GameMap shownMap;
     private PlayerSprite player;
     private FloorCover cover;
-    private boolean visible = true;
 
     /** 下一次换图时要播的过渡说明（{@link #playFloorTransition}），{@code null} = 直接切换 */
     private String pendingCaption;
     private Runnable onAnimationsFinished = () -> { };
 
-    public EntityMapView(GameEngine engine, MapCellPainter painter, double originX, double originY) {
-        this.engine = engine;
+    public EntityMapView(SessionService sessions, MapCellPainter painter, double originX, double originY) {
+        this.sessions = sessions;
         this.painter = painter;
         this.originX = originX;
         this.originY = originY;
@@ -91,12 +91,12 @@ public final class EntityMapView implements MapView {
         if (cover != null && cover.isRunning() && !cover.isSwapped()) {
             return;
         }
-        GameMap map = engine.getMapManager().getCurrentMap();
+        GameMap map = sessions.session().maps().getCurrentMap();
         boolean mapChanged = map != shownMap;
         String caption = pendingCaption;
         pendingCaption = null;
 
-        if (mapChanged && caption != null && shownMap != null && visible) {
+        if (mapChanged && caption != null && shownMap != null) {
             cover().start(caption);
             return;
         }
@@ -108,23 +108,9 @@ public final class EntityMapView implements MapView {
         items.sync(map.getItems());
         monsters.sync(map.getMonsters());
 
-        PlayerStateManager state = engine.getPlayerStateManager();
+        PlayerStateManager state = sessions.session().player();
         monsters.views().forEach(sprite -> sprite.refresh(state));
         syncPlayer(state, mapChanged);
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-        tiles.views().forEach(this::applyVisibility);
-        items.views().forEach(this::applyVisibility);
-        monsters.views().forEach(sprite -> applyVisibility(sprite.entity()));
-        if (player != null) {
-            applyVisibility(player.entity());
-        }
-        if (cover != null) {
-            applyVisibility(cover.entity());
-        }
     }
 
     @Override
@@ -192,12 +178,7 @@ public final class EntityMapView implements MapView {
                 .view(view)
                 .zIndex(zIndex)
                 .buildAndAttach();
-        applyVisibility(entity);
         return entity;
-    }
-
-    private void applyVisibility(Entity entity) {
-        entity.getViewComponent().setVisible(visible);
     }
 
     private Canvas newCellCanvas() {
@@ -223,14 +204,14 @@ public final class EntityMapView implements MapView {
     // ==================== 玩家 ====================
 
     private void syncPlayer(PlayerStateManager state, boolean mapChanged) {
-        Position pos = engine.getMapManager().getPlayerPosition();
+        Position pos = sessions.session().maps().getPlayerPosition();
         if (pos == null) {
             return;
         }
         if (player == null) {
             player = new PlayerSprite();
         }
-        player.moveTo(pos, state.getCurrentDirection(), !mapChanged && visible);
+        player.moveTo(pos, state.getCurrentDirection(), !mapChanged);
     }
 
     /**
@@ -267,16 +248,12 @@ public final class EntityMapView implements MapView {
             });
         }
 
-        Entity entity() {
-            return entity;
-        }
-
         boolean isWalking() {
             return walking;
         }
 
         /**
-         * @param animate 允许走一步的动画（同一张地图、地图可见）；即便允许，也只有相邻格才会走
+         * @param animate 允许走一步的动画（同一张地图）；即便允许，也只有相邻格才会走
          */
         void moveTo(Position pos, Direction facing, boolean animate) {
             direction = facing;
@@ -375,10 +352,6 @@ public final class EntityMapView implements MapView {
                     advance(tpf);
                 }
             });
-        }
-
-        Entity entity() {
-            return entity;
         }
 
         boolean isRunning() {

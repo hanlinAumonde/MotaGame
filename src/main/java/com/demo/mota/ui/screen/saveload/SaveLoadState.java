@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * 存读档界面的状态机：档位列表 + 光标 + 覆盖确认 + 提示，不依赖 JavaFX，也不碰磁盘。
  *
- * <p>确认键只回答「要对哪个档位动手」，真正的读写由 {@link SaveLoadScreen} 交给引擎完成，结果再经 {@link #setNotice} 写回来。
+ * <p>确认键只回答「要对哪个档位动手」，真正的读写由 {@link SaveLoadSubScene} 交给会话服务完成，结果再经 {@link #setNotice} 写回来。
  * <ul>
  *   <li>存档：自动存档档位不可写（光标跳过）；已有内容的档位需要<b>连按两次</b>确认才覆盖，中途按别的键即取消</li>
  *   <li>读档：所有档位都能选中，空档 / 损坏 / 版本不兼容的只给出提示</li>
@@ -56,7 +56,7 @@ public final class SaveLoadState {
             case CONFIRM -> {
                 return confirm(wasConfirming);
             }
-            default -> { /* 返回由 Screen 处理，其余操作本界面不响应 */ }
+            default -> { /* 返回由场景处理，其余操作本界面不响应 */ }
         }
         return null;
     }

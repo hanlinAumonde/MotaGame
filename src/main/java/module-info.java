@@ -9,11 +9,13 @@ open module com.demo.mota {
     requires com.fasterxml.jackson.databind;
 
     exports com.demo.mota;
+    exports com.demo.mota.app;
+    exports com.demo.mota.app.input;
+    exports com.demo.mota.app.nav;
     exports com.demo.mota.app.services;
     exports com.demo.mota.content;
     exports com.demo.mota.content.provider;
     exports com.demo.mota.engine;
-    exports com.demo.mota.engine.app;
     exports com.demo.mota.engine.battle;
     exports com.demo.mota.engine.catalog;
     exports com.demo.mota.engine.enums;

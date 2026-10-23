@@ -1,116 +1,145 @@
 package com.demo.mota.ui.screen.game;
 
+import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.scene.SubScene;
+import com.demo.mota.app.input.GameplayInput;
+import com.demo.mota.app.nav.Navigator;
 import com.demo.mota.app.services.AssetService;
-import com.demo.mota.engine.GameEngine;
+import com.demo.mota.app.services.SessionService;
 import com.demo.mota.engine.GameNumber;
-import com.demo.mota.engine.app.GameFlow;
-import com.demo.mota.engine.app.GamePhase;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.event.MoveResult;
 import com.demo.mota.engine.map.GameMap;
 import com.demo.mota.engine.map.region.RegionInfo;
-import com.demo.mota.engine.rules.GameRules;
+import com.demo.mota.engine.session.GameSession;
 import com.demo.mota.engine.skill.preset.SkillPreset;
 import com.demo.mota.engine.skill.preset.SkillPresetBook;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.engine.state.equipset.EquipSetResult;
 import com.demo.mota.ui.Fonts;
+import com.demo.mota.ui.MotaLayout;
 import com.demo.mota.ui.TextPainter;
 import com.demo.mota.ui.ValueFormatter;
-import com.demo.mota.ui.screen.ChordKey;
-import com.demo.mota.ui.screen.PresetHotkeys;
-import com.demo.mota.ui.screen.Screen;
 import com.demo.mota.ui.screen.equipset.EquipmentSetState;
+import com.demo.mota.ui.screen.game.map.EntityMapView;
+import com.demo.mota.ui.screen.game.map.MapCellPainter;
 import com.demo.mota.ui.screen.game.map.MapView;
 import com.demo.mota.ui.screen.game.side.SidePanelRenderer;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
-
-import java.util.Map;
 
 
 /**
- * 对局界面（{@link GamePhase#PLAYING}）：左侧状态面板 + 中间地图 + 右侧技能装备栏（{@code side} 子包）。
+ * 对局画面（FXGL 的游戏场景）：左侧状态面板 + 中间地图 + 右侧技能装备栏（{@code side} 子包）。
  *
- * <p>负责移动分发、状态面板绘制；地图（含伤害数字）交给注入的 {@link MapView}（{@code map} 子包），每次重绘时同步一次；
- * 按 X / D / Q / A 迁往游戏菜单 / 技能设置 / 装备 / 套装界面，那些界面各自是独立的 Screen。
- * 组合快捷键：按住 D 再按数字键切换技能组、按住 W 再按数字键换上套装（{@link ChordKey}）。
- * Backspace 撤销最近一次开门 / 战斗 / 拾取（{@link #undoLastAction()}，游戏结束框里同样可用）。
+ * <p>本对象贯穿整个进程，每局开始时（FXGL 的 {@code initUI}，见 {@link #onNewGame()}）把两侧画布重新挂进游戏场景、
+ * 新建地图显示——{@code startNewGame()} 会清空游戏场景的世界与 UI 节点。按键由 {@link GameplayInput}
+ * 注册的 FXGL 动作翻译成这里的命令（{@link GameplayInput.Commands}）：走一步（或撞上怪物 / 门 / 楼梯……）、转身、撤销、
+ * 叠上装备 / 套装 / 技能设置界面、切换技能组、换上套装。X（游戏菜单）由 FXGL 的菜单键处理。
  *
  * <p>地图有动画（走一格的平滑移动、换层的黑幕）。动画没播完时方向键先进 {@link StepBuffer}，
  * 播完（{@link MapView#setOnAnimationsFinished}）再走下一步；按住方向键即连续行走。
- * 其他按键（菜单、撤销、组合键）不等动画，照常立即处理。
+ * 主角没有走动的行动（撞墙、开门、打怪）之后没有「走完一步」来接续，方向键按住超过 {@link #HOLD_REPEAT_SECONDS}
+ * 时每帧再试一次，与以前系统按键重复的效果一致（FXGL 的动作不会因按键重复再次触发）。
  *
- * <p>每次回到本界面都重算一次当前层伤害：其他界面里穿脱装备、改预设都可能影响战斗推演，
+ * <p>每次回到对局（{@link #returnToGame()}）都重算一次当前层伤害：其他界面里穿脱装备、改预设都可能影响战斗推演，
  * 统一在这里补算，那些界面就不必各自汇报「改没改」。当前层怪物只有几十只，开销可以忽略。
  *
  * <p>本界面同时负责<b>死亡检测</b>：每次玩家行动之后检查一次 {@code isDead()}，
- * 一旦归零就迁到 {@code GAME_OVER}。判死点放在这里而不是战斗结算里，
+ * 一旦归零就叠上游戏结束横幅。判死点放在这里而不是战斗结算里，
  * 是为了让将来的岩浆、毒、陷阱等一切掉血途径都走同一个口子。
  */
-public class GameScreen implements Screen {
-    /**
-     * 对局中呼出其他界面的快捷键（物品栏暂无快捷键，只能经游戏菜单进入）。
-     * 技能设置（D）不在这里：D 同时是技能组快捷键的修饰键，只有「单按」松开时才打开，见 {@link #handleKeyRelease}
-     */
-    private static final Map<KeyCode, GamePhase> SCREEN_KEYS = Map.of(
-            KeyCode.X, GamePhase.GAME_MENU,
-            KeyCode.Q, GamePhase.EQUIPMENT,
-            KeyCode.A, GamePhase.EQUIPMENT_SETS);
+public class GameScreen implements GameplayInput.Commands {
 
-    private final GameEngine engine;
+    /** 对局中经快捷键或游戏逻辑叠上的子场景，由组装处提供 */
+    public interface Menus {
+        SubScene equipment();
+
+        SubScene equipmentSets();
+
+        SubScene skillSetup();
+
+        SubScene gameOver();
+    }
+
+    /** 方向键按住多久之后，主角空闲时每帧再试着行动一次（与系统按键重复的默认延迟相当） */
+    static final double HOLD_REPEAT_SECONDS = 0.5;
+
+    private final SessionService sessions;
     private final AssetService assets;
-    private final GameFlow flow;
+    private final Navigator navigator;
+    private final Menus menus;
 
-    private final Canvas statusCanvas;
-    private final MapView mapView;
-    private final Canvas sideCanvas;
-    /** 分区顺序取自塔规则，因此在每局开始时（内容已载入）才建 */
-    private SidePanelRenderer sidePanelRenderer;
-
-    /** 按住 D 再按数字键：激活 / 停用技能组；单按 D：打开技能设置 */
-    private final ChordKey presetChord = new ChordKey(PresetHotkeys.SKILL_CHORD);
-    /** 按住 W 再按数字键：换上对应套装 */
-    private final ChordKey setChord = new ChordKey(PresetHotkeys.EQUIPMENT_SET_CHORD);
-    /** 数字键 → 预设下标，取自塔规则 {@code skill.hotkeys}（每局开始时读取） */
-    private Map<KeyCode, Integer> presetHotkeys = Map.of();
-    /** 数字键 → 套装下标，取自塔规则 {@code equipment.setHotkeys}（每局开始时读取） */
-    private Map<KeyCode, Integer> setHotkeys = Map.of();
+    private final Canvas statusCanvas = new Canvas(MotaLayout.STATUS_WIDTH, MotaLayout.MAP_SIZE);
+    private final Canvas sideCanvas = new Canvas(MotaLayout.SIDE_WIDTH, MotaLayout.MAP_SIZE);
+    /** 两侧画布 + 中间留给地图的透明占位；地图是世界层里的实体，从占位处透出来 */
+    private final HBox hud = new HBox(0, statusCanvas, mapSlot(), sideCanvas);
+    private final MapCellPainter cellPainter;
+    private final SidePanelRenderer sidePanelRenderer;
+    /** 每局新建：startNewGame() 会清空世界里的实体 */
+    private MapView mapView;
 
     /** 文本测量与绘制工具（阴影描边、自适应字号、折行） */
     private final TextPainter painter = new TextPainter();
 
     /** 动画期间缓下来的方向键，见类注释 */
     private final StepBuffer steps = new StepBuffer();
+    /** 本局对局场景活动的累计秒数（被子场景盖住时不走），用来判断方向键按住了多久 */
+    private double clock;
 
     private String currentMessage = "";
 
-    public GameScreen(GameEngine engine, AssetService assets, GameFlow flow,
-                      Canvas statusCanvas, MapView mapView, Canvas sideCanvas) {
-        this.engine = engine;
+    public GameScreen(SessionService sessions, AssetService assets, Navigator navigator, Menus menus) {
+        this.sessions = sessions;
         this.assets = assets;
-        this.flow = flow;
-        this.statusCanvas = statusCanvas;
-        this.mapView = mapView;
-        this.sideCanvas = sideCanvas;
-        mapView.setOnAnimationsFinished(this::continueWalking);
+        this.navigator = navigator;
+        this.menus = menus;
+        this.sidePanelRenderer = new SidePanelRenderer(assets, sessions.content().rules().sidePanel().sections());
+        this.cellPainter = new MapCellPainter(assets, (double) MotaLayout.MAP_SIZE / GameMap.SIDE);
     }
 
+    /** 地图位置的透明占位：只撑开尺寸，让两侧画布落在原位 */
+    private static Region mapSlot() {
+        Region slot = new Region();
+        slot.setMinSize(MotaLayout.MAP_SIZE, MotaLayout.MAP_SIZE);
+        slot.setPrefSize(MotaLayout.MAP_SIZE, MotaLayout.MAP_SIZE);
+        slot.setMaxSize(MotaLayout.MAP_SIZE, MotaLayout.MAP_SIZE);
+        return slot;
+    }
+
+    // ==================== 一局的开始与回到对局 ====================
+
     /**
-     * 新的一局：清掉上一局残留的消息，按塔规则准备快捷键与右侧栏。
-     * 界面在内容载入之前就建好了，规则只能在这里（以及之后）读。
+     * 新的一局（含读档）：由 FXGL 的 {@code initUI} 调用——加载场景的后台线程，游戏场景尚未显示，
+     * 在上面搭节点、生成实体是安全的。会话服务此前已在 {@code initGame} 里装上了这一局。
      */
-    @Override
     public void onNewGame() {
-        this.currentMessage = "";
-        GameRules rules = engine.getContent().rules();
-        this.presetHotkeys = PresetHotkeys.fromRules(rules);
-        this.setHotkeys = PresetHotkeys.equipmentSetsFromRules(rules);
-        this.sidePanelRenderer = new SidePanelRenderer(assets, rules.sidePanel().sections());
+        resetHeld();
+        clock = 0;
+        currentMessage = sessions.takeStartMessage();
+        EntityMapView view = new EntityMapView(sessions, cellPainter, MotaLayout.MAP_X, MotaLayout.MAP_Y);
+        view.setOnAnimationsFinished(this::continueWalking);
+        mapView = view;
+        FXGL.getGameScene().addUINode(hud);
+        render();
+    }
+
+    /** 从叠在上面的界面回到对局：补算当前层伤害，见类注释 */
+    public void returnToGame() {
+        // 松键可能落在了别的界面里，回来时不能让「按住」状态残留
+        resetHeld();
+        sessions.recalculateDamage();
+        render();
+    }
+
+    /** 清掉按住的方向键与缓下来的一步：离开对局之前、窗口失焦时（之后的松键事件收不到）、回到对局时 */
+    public void resetHeld() {
+        steps.clear();
     }
 
     /** 其他界面带回来的一句提示（如「已切换到第1号套装」），显示在状态栏消息处 */
@@ -118,91 +147,76 @@ public class GameScreen implements Screen {
         this.currentMessage = message == null ? "" : message;
     }
 
-    /** 回到对局（新开一局或从其他界面返回）：补算当前层伤害，见类注释 */
+    // ==================== 对局命令（由 GameplayInput 的动作调用） ====================
+
+    /** 方向键按下：主角空闲则立即走一步，否则记为动画播完后要走的一步 */
     @Override
-    public void onEnter() {
-        // 松键可能落在了别的界面里，回来时不能让「按住」状态残留
-        presetChord.reset();
-        setChord.reset();
-        steps.clear();
-        engine.recalculateCurrentFloorDamage();
+    public void pressDirection(Direction direction) {
+        steps.press(direction, clock);
+        if (mapView.isAnimating()) {
+            steps.queue(direction);
+        } else {
+            move(direction);
+        }
     }
 
-    /** 窗口失焦：之后的松键事件收不到，按住的方向键 / 修饰键都当作已松开，免得回来时自己一直走 */
     @Override
-    public void onFocusLost() {
-        presetChord.reset();
-        setChord.reset();
-        steps.clear();
+    public void releaseDirection(Direction direction) {
+        steps.release(direction);
     }
 
-    // ==================== 输入 ====================
+    /** 每帧调用（只在对局场景活动时）：方向键按住够久、主角又空闲时接着行动，见类注释 */
+    public void onFrame(double tpf) {
+        if (mapView == null) {
+            return;
+        }
+        clock += tpf;
+        Direction held = steps.repeatDue(clock, HOLD_REPEAT_SECONDS);
+        if (held != null && !mapView.isAnimating()) {
+            move(held);
+        }
+    }
 
     @Override
-    public void handleKey(KeyCode code) {
-        if (code == presetChord.key()) {
-            presetChord.press(code);
-            return;
-        }
-        if (code == setChord.key()) {
-            setChord.press(code);
-            return;
-        }
-        // 按住 D 期间按了任何别的键（数字、方向……），松开 D 时都不再算「单按」，不会再弹出技能设置
-        presetChord.markUsed();
-        setChord.markUsed();
-        if (handleChordDigit(code)) {
-            return;
-        }
+    public void turn() {
+        sessions.turn();
+        // 只有朝向变了，同步时只会重画玩家实体
+        mapView.sync();
+    }
 
-        GamePhase screen = SCREEN_KEYS.get(code);
-        if (screen != null) {
-            flow.to(screen);
-            return;
-        }
+    @Override
+    public void openEquipment() {
+        navigator.push(menus.equipment());
+    }
 
-        switch (code) {
-            case BACK_SPACE -> undoLastAction();
-            case Z -> {
-                this.engine.handleDirectionChange();
-                // 只有朝向变了，同步时只会重画玩家实体
-                mapView.sync();
-            }
-            default -> {
-                Direction direction = toDirection(code);
-                if (direction == null) break;
+    @Override
+    public void openEquipmentSets() {
+        navigator.push(menus.equipmentSets());
+    }
 
-                boolean fresh = steps.press(direction);
-                if (mapView.isAnimating()) {
-                    // 上一步还没走完：新按下的记下来，等动画播完再走；自动重复不记（按着就会接着走）
-                    if (fresh) {
-                        steps.queue(direction);
-                    }
-                } else {
-                    move(direction);
-                }
-            }
-        }
+    @Override
+    public void openSkillSetup() {
+        navigator.push(menus.skillSetup());
     }
 
     /** 走一步（或撞上怪物 / 门 / 楼梯……），之后统一判死 */
     private void move(Direction direction) {
-        MoveResult result = engine.handlePlayerMove(direction);
+        MoveResult result = sessions.move(direction);
         handleMoveResult(result);
         autoSaveAfter(result);
         playFloorTransitionAfter(result);
         render();
 
         // 行动之后统一判死：战斗、以及将来的岩浆 / 毒 / 陷阱都汇到这一处
-        if (engine.getPlayerStateManager().isDead()) {
-            flow.to(GamePhase.GAME_OVER);
+        if (sessions.session().player().isDead()) {
+            navigator.push(menus.gameOver());
         }
     }
 
     /** 地图动画播完：接着走缓下来的一步，或沿仍按着的方向继续走 */
     private void continueWalking() {
-        if (flow.getPhase() != GamePhase.PLAYING) {
-            // 动画播的途中切去了别的界面：回来时不该自己接着走
+        if (!navigator.isInGame()) {
+            // 动画播的途中叠上了别的界面：回来时不该自己接着走
             steps.clear();
             return;
         }
@@ -216,8 +230,9 @@ public class GameScreen implements Screen {
     private void playFloorTransitionAfter(MoveResult result) {
         switch (result.type()) {
             case FLOOR_SWITCHED, REGION_ENTERED -> {
-                RegionInfo region = engine.getMapManager().getCurrentRegion();
-                String floor = "第 " + engine.getMapManager().getCurrentMap().getFloorNumber() + " 层";
+                GameSession session = sessions.session();
+                RegionInfo region = session.maps().getCurrentRegion();
+                String floor = "第 " + session.maps().getCurrentMap().getFloorNumber() + " 层";
                 // 区域名本身常带「·」（如「试炼之塔·下层」），与楼层分两行写，免得连成一串
                 mapView.playFloorTransition(region == null ? floor : region.name() + "\n" + floor);
             }
@@ -226,13 +241,14 @@ public class GameScreen implements Screen {
     }
 
     /**
-     * 撤销最近一次有意义的行动（Backspace）。引擎按快照重建这一局后各界面随之重建（状态栏消息也被清掉），
-     * 因此提示在恢复之后再写、再重绘。游戏结束框里按 Backspace 也走这里：恢复时阶段已迁回 {@code PLAYING}。
+     * 撤销最近一次有意义的行动（Backspace；游戏结束横幅里也走这里，此时横幅已弹回对局）。
+     * 会话按快照重建这一局，地图显示发现换了一张地图会整张重建。
      */
+    @Override
     public void undoLastAction() {
         // 撤销整局重建，行走动画随之打断：缓下来的那一步不该落在撤销后的局面上
         steps.clear();
-        String undone = engine.undoLastAction();
+        String undone = sessions.undoLastAction();
         currentMessage = undone == null ? "没有可撤销的行动" : "已撤销：" + undone;
         render();
     }
@@ -241,7 +257,7 @@ public class GameScreen implements Screen {
     private void autoSaveAfter(MoveResult result) {
         switch (result.type()) {
             case FLOOR_SWITCHED, REGION_ENTERED -> {
-                if (!engine.autoSave()) {
+                if (!sessions.autoSave()) {
                     currentMessage = currentMessage + "（自动存档失败）";
                 }
             }
@@ -249,76 +265,28 @@ public class GameScreen implements Screen {
         }
     }
 
-    /** 显示一句状态栏提示并立即重绘（读档后由存读档界面调用：此时阶段已迁到对局、界面已画过一遍） */
-    public void showMessageNow(String message) {
-        showMessage(message);
-        render();
-    }
-
-    /** 单按 D（按住期间没有组合数字键）松开时才打开技能设置 */
+    /** 对局中 W+数字键换上套装，结果写进状态栏消息；换成功则重算伤害 */
     @Override
-    public void handleKeyRelease(KeyCode code) {
-        Direction direction = toDirection(code);
-        if (direction != null) {
-            steps.release(direction);
-        }
-        if (presetChord.release(code)) {
-            flow.to(GamePhase.SKILL_SETUP);
-        }
-        setChord.release(code);
-    }
-
-    /**
-     * 数字键：按住 D 时切换技能组，按住 W 时换上套装，都没按住时不做任何事。
-     *
-     * @return 是否是数字键（已消费）
-     */
-    private boolean handleChordDigit(KeyCode code) {
-        Integer preset = presetHotkeys.get(code);
-        Integer set = setHotkeys.get(code);
-        if (preset == null && set == null) {
-            return false;
-        }
-        boolean changed = false;
-        if (presetChord.isHeld() && preset != null) {
-            changed = togglePreset(preset);
-        } else if (setChord.isHeld() && set != null) {
-            changed = applyEquipmentSet(set);
-        }
-        if (changed) {
-            engine.recalculateCurrentFloorDamage();
-        }
-        render();
-        return true;
-    }
-
-    /** 对局中 W+数字键换上套装，结果写进状态栏消息 */
-    private boolean applyEquipmentSet(int setIndex) {
-        PlayerStateManager player = engine.getPlayerStateManager();
+    public void applyEquipmentSet(int setIndex) {
+        PlayerStateManager player = sessions.session().player();
         EquipSetResult result = player.applyEquipmentSet(setIndex);
         currentMessage = EquipmentSetState.describe(player, setIndex, result);
-        return result.isOk();
-    }
-
-    private static Direction toDirection(KeyCode code) {
-        return switch (code) {
-            case UP -> Direction.UP;
-            case DOWN -> Direction.DOWN;
-            case LEFT -> Direction.LEFT;
-            case RIGHT -> Direction.RIGHT;
-            default -> null;
-        };
+        if (result.isOk()) {
+            sessions.recalculateDamage();
+        }
+        render();
     }
 
     /**
      * 游戏中按 D+数字键：激活对应预设；对已激活的那套再按一次则停用（全程普攻）。结果写进状态栏消息。
-     *
-     * @return 是否真的切换了（下标超出预设套数时不动）
+     * 下标超出预设套数时不动。
      */
-    private boolean togglePreset(int presetIndex) {
-        PlayerStateManager player = engine.getPlayerStateManager();
+    @Override
+    public void togglePreset(int presetIndex) {
+        PlayerStateManager player = sessions.session().player();
         if (presetIndex >= player.getPresetBook().presetCount()) {
-            return false;
+            render();
+            return;
         }
         int armed = player.togglePreset(presetIndex);
         if (armed == SkillPresetBook.NONE) {
@@ -327,16 +295,16 @@ public class GameScreen implements Screen {
             SkillPreset preset = player.getPresetBook().get(armed);
             currentMessage = preset.getName() + (preset.isEmpty() ? " 已激活（未编排）" : " 已激活");
         }
-        return true;
+        sessions.recalculateDamage();
+        render();
     }
 
     // ==================== 渲染入口 ====================
 
-    @Override
     public void render() {
         mapView.sync();
         renderStatusPanel();
-        sidePanelRenderer.render(sideCanvas, engine.getPlayerStateManager());
+        sidePanelRenderer.render(sideCanvas, sessions.session().player());
     }
 
     private void handleMoveResult(MoveResult result) {
@@ -363,14 +331,15 @@ public class GameScreen implements Screen {
         GraphicsContext gc = statusCanvas.getGraphicsContext2D();
         double w = statusCanvas.getWidth();
         double h = statusCanvas.getHeight();
-        PlayerStateManager player = engine.getPlayerStateManager();
-        GameMap map = engine.getMapManager().getCurrentMap();
+        GameSession session = sessions.session();
+        PlayerStateManager player = session.player();
+        GameMap map = session.maps().getCurrentMap();
 
         drawStatusBackground(gc, w, h);
         drawPlayerAvatar(gc, player, w);
         drawStats(gc, player);
         drawKeys(gc, player);
-        drawFloorInfo(gc, map, h);
+        drawFloorInfo(gc, session.maps().getCurrentRegion(), map, h);
         drawMessage(gc, w);
     }
 
@@ -459,8 +428,7 @@ public class GameScreen implements Screen {
         }
     }
 
-    private void drawFloorInfo(GraphicsContext gc, GameMap map, double h) {
-        RegionInfo region = engine.getMapManager().getCurrentRegion();
+    private void drawFloorInfo(GraphicsContext gc, RegionInfo region, GameMap map, double h) {
         if (region != null) {
             gc.setFont(Fonts.regular(16));
             painter.drawShadowText(gc, region.name(), 14, h - 58);

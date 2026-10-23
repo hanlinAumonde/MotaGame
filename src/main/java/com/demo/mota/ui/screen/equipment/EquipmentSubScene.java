@@ -1,57 +1,52 @@
 package com.demo.mota.ui.screen.equipment;
 
-import com.demo.mota.engine.GameEngine;
-import com.demo.mota.engine.app.GameFlow;
-import com.demo.mota.engine.app.GamePhase;
+import com.demo.mota.app.nav.Navigator;
+import com.demo.mota.app.services.SessionService;
 import com.demo.mota.ui.MenuCommand;
 import com.demo.mota.ui.screen.ChordKey;
-import com.demo.mota.ui.screen.InGameScreen;
+import com.demo.mota.ui.screen.InGameSubScene;
 import com.demo.mota.ui.screen.PresetHotkeys;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 
 import java.util.Map;
 
 /**
- * 装备界面（{@link GamePhase#EQUIPMENT}，对局中按 Q）：{@link EquipmentState} + {@link EquipmentRenderer}。
+ * 装备界面（对局中按 Q）：{@link EquipmentState} + {@link EquipmentRenderer}。
  * 穿脱造成的伤害变化由对局界面在回到游戏时统一重算。按住 W 再按数字键把当前穿戴保存为套装。
  */
-public class EquipmentScreen extends InGameScreen {
+public class EquipmentSubScene extends InGameSubScene {
 
     /** 保存套装：按住 W 再按数字键（与对局中切换套装同一按法）；W 因此不作为「上」的别名 */
     private final ChordKey saveChord = new ChordKey(PresetHotkeys.EQUIPMENT_SET_CHORD);
-    /** 数字键 → 套装下标（每局开始时按塔规则读取） */
-    private Map<KeyCode, Integer> setHotkeys = Map.of();
-    private final GameEngine engine;
+    /** 数字键 → 套装下标（塔规则 {@code equipment.setHotkeys}） */
+    private final Map<KeyCode, Integer> setHotkeys;
+    private final SessionService sessions;
     private final EquipmentRenderer renderer;
     private EquipmentState state;
 
-    public EquipmentScreen(GameEngine engine, GameFlow flow, Canvas canvas, EquipmentRenderer renderer) {
-        super(flow, canvas);
-        this.engine = engine;
+    public EquipmentSubScene(Navigator navigator, Runnable onReturnToGame, SessionService sessions,
+                             EquipmentRenderer renderer) {
+        super(navigator, onReturnToGame);
+        this.sessions = sessions;
         this.renderer = renderer;
+        this.setHotkeys = PresetHotkeys.equipmentSetsFromRules(sessions.content().rules());
     }
 
     @Override
-    public void onNewGame() {
-        this.state = new EquipmentState(engine.getPlayerStateManager());
-        this.setHotkeys = PresetHotkeys.equipmentSetsFromRules(engine.getContent().rules());
-    }
-
-    @Override
-    public void onEnter() {
+    protected void onOpen() {
         saveChord.reset();
+        state = new EquipmentState(sessions.session().player());
         state.open();
     }
 
     @Override
-    protected GamePhase handleScreenKey(KeyCode code) {
+    protected boolean handleScreenKey(KeyCode code) {
         if (code == saveChord.key()) {
             if (saveChord.press(code)) {
                 state.armSave();
             }
-            return null;
+            return false;
         }
         Integer set = setHotkeys.get(code);
         if (set != null) {
@@ -60,10 +55,10 @@ public class EquipmentScreen extends InGameScreen {
                 saveChord.markUsed();
                 state.saveSet(set);
             }
-            return null;
+            return false;
         }
         state.handle(toCommand(code));
-        return state.isOpen() ? null : GamePhase.PLAYING;
+        return !state.isOpen();
     }
 
     @Override

@@ -8,6 +8,7 @@ import com.demo.mota.app.services.SpriteCatalog.CharacterDef;
 import com.demo.mota.app.services.SpriteCatalog.Geometry;
 import com.demo.mota.app.services.SpriteCatalog.SheetDef;
 import com.demo.mota.content.ContentSource;
+import com.demo.mota.content.LoadingTask;
 import com.demo.mota.engine.catalog.TowerContent;
 import com.demo.mota.engine.enums.Direction;
 import javafx.geometry.Rectangle2D;
@@ -30,7 +31,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * <ul>
  *   <li>{@link #onInit()}（FXGL 启动期、后台线程）按精灵目录（{@link SpriteCatalog}）载入图集，
  *       切出各精灵与角色帧并<b>最近邻放大</b>（{@code ImagesKt.resize}），像素图放大后依旧锐利；</li>
- *   <li>数据表里直接写图片路径的精灵第一次用到时才载入，{@link #preloadContentSprites()} 让加载期提前做完；</li>
+ *   <li>随后按塔的内容（{@link ContentService}，排在本服务之前初始化）把道具 / 怪物 / 技能表引用到的图片预载一遍，
+ *       之后绘制时取图都直接命中缓存；进度汇入 {@link StartupProgress}；</li>
  *   <li>定位走内容层的 provider 链（{@link ContentSource#findResourceUrl}，外置目录能覆盖内置图片），
  *       载入走 FXGL 的资源加载器（带缓存）。</li>
  * </ul>
@@ -48,11 +50,20 @@ public final class AssetService extends EngineService {
 
     /** 由 FXGL 按字段类型注入（Engine.injectDependenciesIntoService） */
     private FXGLAssetLoaderService assetLoader;
+    private ContentService contentService;
 
     private final ContentSource resources = ContentSource.getInstance();
     private int scale = 1;
-    /** 塔的内容：按道具 / 怪物 id 查它们引用的精灵；加载期装好之前为 null */
+    /** 塔的内容：按道具 / 怪物 id 查它们引用的精灵；启动期预载之前为 null */
     private volatile TowerContent content;
+
+    private final List<LoadingTask> tasks = List.of(
+            new LoadingTask("载入精灵目录", 5, this::loadCatalog),
+            new LoadingTask("载入图像资源", 20, () -> preloadContentSprites(contentService.content())));
+
+    public AssetService() {
+        StartupProgress.get().reserve(tasks);
+    }
 
     private final Map<String, Image> sprites = new ConcurrentHashMap<>();
     private final Map<String, CharacterSprite> characters = new ConcurrentHashMap<>();
@@ -61,6 +72,10 @@ public final class AssetService extends EngineService {
 
     @Override
     public void onInit() {
+        StartupProgress.get().run(tasks);
+    }
+
+    private void loadCatalog() {
         SpriteCatalog catalog = SpriteCatalog.load(resources);
         scale = catalog.scale();
 
@@ -126,9 +141,9 @@ public final class AssetService extends EngineService {
 
     /**
      * 记下塔的内容，并把道具 / 怪物 / 技能表引用到的图片全部载入一遍、对缺失的告警。
-     * 由加载期的任务调用（后台线程），之后绘制时取图都直接命中缓存。
+     * 启动期执行（后台线程），之后绘制时取图都直接命中缓存。
      */
-    public void preloadContentSprites(TowerContent content) {
+    private void preloadContentSprites(TowerContent content) {
         this.content = content;
         Set<String> refs = new TreeSet<>();
         refs.addAll(content.skills().referencedSprites());

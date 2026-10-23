@@ -7,7 +7,7 @@ import com.demo.mota.engine.map.Position;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.engine.state.monster.Monster;
 import com.demo.mota.ui.MenuCommand;
-import com.demo.mota.engine.app.GamePhase;
+import com.demo.mota.ui.screen.gamemenu.option.GameOption;
 import com.demo.mota.ui.screen.gamemenu.option.GameOptionPopup;
 import com.demo.mota.ui.screen.saveload.SaveLoadMode;
 
@@ -52,9 +52,9 @@ public class GameMenuState {
     /** 最近一次操作留给玩家的提示（如「尚未获得怪物手册」），下一次操作即清除 */
     private String notice;
 
-    /** 选中某个游戏选项后要迁往的阶段，由 {@link GameMenuScreen} 取走 */
-    private GamePhase pendingHandoff;
-    /** 选中「存档」/「读档」后要打开的存读档界面用途，由 {@link GameMenuScreen} 取走 */
+    /** 选中的游戏选项（要换成它对应的界面），由 {@link GameMenuScene} 取走 */
+    private GameOption pendingHandoff;
+    /** 选中「存档」/「读档」后要打开的存读档界面用途，由 {@link GameMenuScene} 取走 */
     private SaveLoadMode pendingSaveLoad;
 
     public GameMenuState(MapManager mapManager, PlayerStateManager player) {
@@ -87,11 +87,11 @@ public class GameMenuState {
     }
 
     /**
-     * 取走并清除待迁往的阶段。菜单因选中了某个游戏选项而关闭时非空；
+     * 取走并清除选中的游戏选项。菜单因选中了某个游戏选项而关闭时非空；
      * 其余情况下关闭（Esc 退到底）为 {@code null}，即回到游戏。
      */
-    public GamePhase takeHandoff() {
-        GamePhase handoff = pendingHandoff;
+    public GameOption takeHandoff() {
+        GameOption handoff = pendingHandoff;
         pendingHandoff = null;
         return handoff;
     }
@@ -147,8 +147,8 @@ public class GameMenuState {
             }
             case MONSTER_SKILL -> { /* 技能详情已是最内层 */ }
             case OPTIONS -> {
-                // 每个游戏选项都是独立界面：关掉本菜单，由 GameMenuScreen 迁往对应阶段
-                pendingHandoff = optionPopup.getSelected().getHandoff();
+                // 每个游戏选项都是独立界面：关掉本菜单，由 GameMenuScene 换成对应界面
+                pendingHandoff = optionPopup.getSelected();
                 close();
             }
         }
