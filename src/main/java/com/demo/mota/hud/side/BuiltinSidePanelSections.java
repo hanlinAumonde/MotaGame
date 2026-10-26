@@ -1,0 +1,181 @@
+package com.demo.mota.hud.side;
+
+import com.demo.mota.engine.item.Equipment;
+import com.demo.mota.engine.skill.Skill;
+import com.demo.mota.engine.skill.book.OwnedSkill;
+import com.demo.mota.engine.skill.preset.PresetSlotView;
+import com.demo.mota.engine.skill.preset.SkillPreset;
+import com.demo.mota.engine.state.PlayerStateManager;
+import com.demo.mota.ui.Fonts;
+import com.demo.mota.ui.kit.Palette;
+import com.demo.mota.ui.kit.Sketch;
+import javafx.scene.paint.Color;
+
+import java.util.List;
+import java.util.function.BiConsumer;
+
+/**
+ * 右侧栏的内置分区：
+ * <table border="1">
+ *   <caption>内置分区</caption>
+ *   <tr><th>id</th><th>内容</th></tr>
+ *   <tr><td>{@code skillCombo}</td><td>激活预设里排的技能（角标为释放回合；暂不生效的画灰），没有激活预设时显示「未激活」</td></tr>
+ *   <tr><td>{@code passiveSkills}</td><td>全部被动技能，关闭的画暗</td></tr>
+ *   <tr><td>{@code equipment}</td><td>装备槽，空槽画虚线框</td></tr>
+ * </table>
+ */
+public final class BuiltinSidePanelSections {
+
+    public static final String SKILL_COMBO = "skillCombo";
+    public static final String PASSIVE_SKILLS = "passiveSkills";
+    public static final String EQUIPMENT = "equipment";
+
+    private static final int COLUMNS = 3;
+    private static final double ICON_SIZE = 64;
+    private static final double ICON_GAP = 10;
+    /** 标题行（含下划线）高度 */
+    private static final double TITLE_HEIGHT = 46;
+    /** 副标题 / 空状态文字行高度 */
+    private static final double LINE_HEIGHT = 30;
+    private static final Color TITLE_COLOR = Color.web("#e8f0ff");
+    private static final Color ARMED_COLOR = Color.web("#7cfc7c");
+
+    private BuiltinSidePanelSections() {}
+
+    public static void registerAll(BiConsumer<String, SidePanelSection> registrar) {
+        registrar.accept(SKILL_COMBO, new SkillComboSection());
+        registrar.accept(PASSIVE_SKILLS, new PassiveSkillsSection());
+        registrar.accept(EQUIPMENT, new EquipmentSection());
+    }
+
+    // ==================== 技能组合 ====================
+
+    private static final class SkillComboSection implements SidePanelSection {
+
+        @Override
+        public double height(SidePanelContext ctx, double width) {
+            if (ctx.player().getPresetBook().getArmed() == null) {
+                return TITLE_HEIGHT + LINE_HEIGHT;
+            }
+            List<PresetSlotView> slots = ctx.player().getArmedPresetSlots();
+            return TITLE_HEIGHT + LINE_HEIGHT + (slots.isEmpty() ? LINE_HEIGHT : gridHeight(slots.size()));
+        }
+
+        @Override
+        public void render(SidePanelContext ctx, double x, double y, double width) {
+            Sketch s = ctx.sketch();
+            drawTitle(s, "技能组合", x, y, width);
+            SkillPreset armed = ctx.player().getPresetBook().getArmed();
+            double lineY = y + TITLE_HEIGHT + 22;
+            if (armed == null) {
+                s.centered("未激活", Fonts.bold(20), Palette.DISABLED, x + width / 2, lineY);
+                return;
+            }
+            s.centered("● " + armed.getName(), Fonts.bold(20), ARMED_COLOR, x + width / 2, lineY);
+
+            // 预设里排的每一格都画出来；暂时不生效的（装备卸下了 / 超出次数）盖一层灰，而不是直接隐藏
+            List<PresetSlotView> slots = ctx.player().getArmedPresetSlots();
+            double gridTop = y + TITLE_HEIGHT + LINE_HEIGHT;
+            if (slots.isEmpty()) {
+                s.centered("全程普攻", Fonts.bold(20), Palette.DISABLED, x + width / 2, gridTop + 22);
+                return;
+            }
+            for (int i = 0; i < slots.size(); i++) {
+                PresetSlotView slot = slots.get(i);
+                double[] cell = cell(x, gridTop, width, i);
+                ctx.icons().skill(s, slot.skill(), cell[0], cell[1], ICON_SIZE, ICON_SIZE, !slot.effective());
+                drawBadge(s, slot.round() == 0 ? "前" : String.valueOf(slot.round()), cell[0], cell[1]);
+            }
+        }
+    }
+
+    // ==================== 被动技能 ====================
+
+    private static final class PassiveSkillsSection implements SidePanelSection {
+
+        private static List<OwnedSkill> passives(PlayerStateManager player) {
+            return player.getSkillBook().entries().stream().filter(owned -> owned.skill().isPassive()).toList();
+        }
+
+        @Override
+        public double height(SidePanelContext ctx, double width) {
+            List<OwnedSkill> passives = passives(ctx.player());
+            return TITLE_HEIGHT + (passives.isEmpty() ? LINE_HEIGHT : gridHeight(passives.size()));
+        }
+
+        @Override
+        public void render(SidePanelContext ctx, double x, double y, double width) {
+            Sketch s = ctx.sketch();
+            drawTitle(s, "被动技能", x, y, width);
+            List<OwnedSkill> passives = passives(ctx.player());
+            double gridTop = y + TITLE_HEIGHT;
+            if (passives.isEmpty()) {
+                s.centered("无", Fonts.bold(20), Palette.DISABLED, x + width / 2, gridTop + 22);
+                return;
+            }
+            for (int i = 0; i < passives.size(); i++) {
+                double[] cell = cell(x, gridTop, width, i);
+                OwnedSkill owned = passives.get(i);
+                Skill skill = owned.skill();
+                ctx.icons().skill(s, skill, cell[0], cell[1], ICON_SIZE, ICON_SIZE, !owned.isEnabled());
+            }
+        }
+    }
+
+    // ==================== 当前装备 ====================
+
+    private static final class EquipmentSection implements SidePanelSection {
+
+        @Override
+        public double height(SidePanelContext ctx, double width) {
+            return TITLE_HEIGHT + gridHeight(ctx.player().getEquipSlotCount());
+        }
+
+        @Override
+        public void render(SidePanelContext ctx, double x, double y, double width) {
+            Sketch s = ctx.sketch();
+            drawTitle(s, "当前装备", x, y, width);
+            PlayerStateManager player = ctx.player();
+            double gridTop = y + TITLE_HEIGHT;
+            for (int i = 0; i < player.getEquipSlotCount(); i++) {
+                double[] cell = cell(x, gridTop, width, i);
+                Equipment equipment = player.getEquipped(i);
+                if (equipment != null) {
+                    ctx.icons().equipment(s, equipment, cell[0], cell[1], ICON_SIZE, ICON_SIZE);
+                } else {
+                    s.dashed(cell[0] + 0.5, cell[1] + 0.5, ICON_SIZE - 1, ICON_SIZE - 1,
+                            Color.rgb(170, 182, 255, 0.55), 1.5, 5);
+                }
+            }
+        }
+    }
+
+    // ==================== 工具 ====================
+
+    /** 加粗标题 + 一条细下划线 */
+    private static void drawTitle(Sketch s, String title, double x, double y, double width) {
+        s.centered(title, Fonts.bold(26), TITLE_COLOR, x + width / 2, y + 28);
+        s.line(x + 24, y + 38.5, x + width - 24, y + 38.5, Color.rgb(170, 182, 255, 0.35), 1);
+    }
+
+    /** 第 index 个图标的左上角坐标（每行 {@link #COLUMNS} 个，整体水平居中） */
+    private static double[] cell(double x, double top, double width, int index) {
+        double rowWidth = COLUMNS * ICON_SIZE + (COLUMNS - 1) * ICON_GAP;
+        double left = x + (width - rowWidth) / 2;
+        return new double[]{
+                left + (index % COLUMNS) * (ICON_SIZE + ICON_GAP),
+                top + (index / COLUMNS) * (ICON_SIZE + ICON_GAP)
+        };
+    }
+
+    private static double gridHeight(int count) {
+        int rows = Math.max(1, (count + COLUMNS - 1) / COLUMNS);
+        return rows * ICON_SIZE + (rows - 1) * ICON_GAP;
+    }
+
+    /** 图标左下角的回合角标 */
+    private static void drawBadge(Sketch s, String text, double x, double y) {
+        s.fill(x, y + ICON_SIZE - 22, 26, 22, Color.rgb(0, 0, 0, 0.75));
+        s.centered(text, Fonts.mono(17), Color.web("#ffd95a"), x + 13, y + ICON_SIZE - 5);
+    }
+}

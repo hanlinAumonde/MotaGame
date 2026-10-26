@@ -1,6 +1,5 @@
 package com.demo.mota.engine.save;
 
-import com.demo.mota.engine.rules.GameRules;
 import com.demo.mota.engine.snapshot.GameSnapshot;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -27,7 +26,7 @@ import java.util.List;
  * 结构调整经 {@link SaveMigrations} 逐步升级；快照里引用的内容在配置表里已不存在时由恢复逻辑跳过。
  * 只有 JSON 本身损坏、版本过新、缺少迁移三种情况读不了，档位分别标出状态，不会把异常抛到界面外。
  *
- * <p>档位列表在启动时扫描一次（{@code GameBootstrap} 的「扫描存档」），之后每次写入同步更新，
+ * <p>档位列表在启动时扫描一次（加载期任务「扫描存档」），之后每次写入同步更新，
  * 因此标题界面判断「有没有存档」不必再碰磁盘。
  */
 public final class SaveRepository {
@@ -48,23 +47,14 @@ public final class SaveRepository {
     /** 档位索引缓存，顺序与 {@link #slotIds()} 一致；尚未扫描时为 null */
     private volatile List<SaveSlotInfo> slots;
 
-    private static class Holder {
-        private static final SaveRepository INSTANCE = new SaveRepository(
-                defaultDirectory(), GameRules.get().save().slotCount(), SaveMigrations.standard());
-    }
-
-    /** 本进程使用的存档库（首次访问时创建；扫描由 {@code GameBootstrap} 触发） */
-    public static SaveRepository get() {
-        return Holder.INSTANCE;
-    }
-
     public SaveRepository(Path directory, int slotCount, SaveMigrations migrations) {
         this.directory = directory;
         this.slotCount = Math.max(1, slotCount);
         this.migrations = migrations;
     }
 
-    private static Path defaultDirectory() {
+    /** 默认存档目录：系统属性 {@value #SAVE_DIR_PROPERTY}，没有时为运行目录下的 {@code saves/} */
+    public static Path defaultDirectory() {
         String configured = System.getProperty(SAVE_DIR_PROPERTY);
         if (configured != null && !configured.isBlank()) {
             return Path.of(configured);

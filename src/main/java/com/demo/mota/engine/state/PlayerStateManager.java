@@ -1,10 +1,12 @@
 package com.demo.mota.engine.state;
 
 import com.demo.mota.engine.GameNumber;
-import com.demo.mota.engine.Item.*;
-import com.demo.mota.engine.Item.GenericItem.GenericItem;
-import com.demo.mota.engine.factory.item.ItemFactory;
-import com.demo.mota.engine.factory.skill.SkillFactory;
+import com.demo.mota.engine.catalog.ItemCatalog;
+import com.demo.mota.engine.catalog.PlayerDefinition;
+import com.demo.mota.engine.catalog.SkillCatalog;
+import com.demo.mota.engine.catalog.TowerContent;
+import com.demo.mota.engine.item.*;
+import com.demo.mota.engine.item.generic.GenericItem;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.enums.KeyColor;
 import com.demo.mota.engine.enums.StateType;
@@ -33,9 +35,16 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.demo.mota.engine.configs.ItemConfigConstants.INITIAL_KEY_SET;
-
 public class PlayerStateManager extends AbstractCharacterState {
+    /** 开局钥匙组的 id 前缀：钥匙道具的 id 为前缀 + 颜色（{@code key-001-yellow} ……） */
+    public static final String INITIAL_KEY_SET = "key-001-";
+
+    private static final System.Logger log = System.getLogger(PlayerStateManager.class.getName());
+
+    /** 造钥匙、读档时重建道具用 */
+    private final ItemCatalog items;
+    /** 升级习得技能、读档时重建技能、预设里引用了暂不在手上的技能时查本体用 */
+    private final SkillCatalog skills;
     private final LevelManager levelManager;
 
     private long currentGoldAmount;
@@ -64,14 +73,19 @@ public class PlayerStateManager extends AbstractCharacterState {
     /** 辅助类道具（怪物手册……），按拾取顺序 */
     private final List<AuxiliaryItem> auxiliaryItemsOwned;
 
-    public PlayerStateManager(String characterId, String characterName, Map<StateType, GameNumber> stateMap, Direction currentDirection){
-        this(characterId, characterName, stateMap, currentDirection, GameRules.get());
+    /** 按塔的内容造一个开局状态的玩家（读档 / 撤销也从这里出发，再施加快照） */
+    public PlayerStateManager(PlayerDefinition definition, TowerContent content) {
+        this(definition.id(), definition.name(), definition.initialStats(), definition.direction(),
+                content.rules(), content.items(), content.skills(), new LevelManager(content.levels()));
     }
 
     public PlayerStateManager(String characterId, String characterName, Map<StateType, GameNumber> stateMap,
-                              Direction currentDirection, GameRules rules){
+                              Direction currentDirection, GameRules rules, ItemCatalog items, SkillCatalog skills,
+                              LevelManager levelManager) {
         super(characterId, characterName, stateMap, currentDirection);
-        this.levelManager = new LevelManager();
+        this.items = items;
+        this.skills = skills;
+        this.levelManager = levelManager;
         this.currentGoldAmount = 0;
         this.equipmentsOwned = new ArrayList<>();
         this.equipmentsEquipped = new Equipment[rules.equipment().slotCount()];
@@ -92,9 +106,9 @@ public class PlayerStateManager extends AbstractCharacterState {
 
     public void setCurrentKeySet(String currentKeySet) {
         addAncientKey();
-        this.yellow_Key = (Key) ItemFactory.getInstance().createById(currentKeySet + KeyColor.YELLOW.getValue());
-        this.red_Key = (Key) ItemFactory.getInstance().createById(currentKeySet + KeyColor.RED.getValue());
-        this.blue_Key = (Key) ItemFactory.getInstance().createById(currentKeySet + KeyColor.BLUE.getValue());
+        this.yellow_Key = (Key) items.create(currentKeySet + KeyColor.YELLOW.getValue());
+        this.red_Key = (Key) items.create(currentKeySet + KeyColor.RED.getValue());
+        this.blue_Key = (Key) items.create(currentKeySet + KeyColor.BLUE.getValue());
     }
 
     private void addAncientKey() {
@@ -162,7 +176,8 @@ public class PlayerStateManager extends AbstractCharacterState {
 
     public int getLevelNumber() { return this.levelManager.getLevelNumber(); }
     public GameNumber getCurrentExp() { return this.levelManager.getCurrentExperience(); }
-    public void updateLevel(GameNumber expGained) {
+    /** 累计经验并结算升级（加成、回满、习得技能）；返回本次结算的结果，没升级时 {@code didLevelUp()} 为 false */
+    public LevelUpResult updateLevel(GameNumber expGained) {
         LevelUpResult result = this.levelManager.cumulateExperience(expGained);
         if (result.didLevelUp()) {
             for (LevelBonus bonus : result.bonuses()) {
@@ -180,8 +195,9 @@ public class PlayerStateManager extends AbstractCharacterState {
             if (result.fullHeal()) {
                 restoreFullHP();
             }
-            SkillFactory.getInstance().createByIds(result.learnedSkillIds()).forEach(this::learnSkill);
+            skills.createAll(result.learnedSkillIds()).forEach(this::learnSkill);
         }
+        return result;
     }
 
     // ==================== 技能 ====================
@@ -268,12 +284,8 @@ public class PlayerStateManager extends AbstractCharacterState {
         return views;
     }
 
-    private static Skill lookupSkill(String skillId) {
-        try {
-            return SkillFactory.getInstance().createById(skillId);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+    private Skill lookupSkill(String skillId) {
+        return skills.findSkill(skillId);
     }
 
     public SkillBook getSkillBook() {
@@ -722,18 +734,15 @@ public class PlayerStateManager extends AbstractCharacterState {
         return value == null ? GameNumber.ZERO : GameNumber.fromBigInteger(new BigInteger(value));
     }
 
-    private static <T extends Item> T createOrNull(String itemId, Class<T> type) {
-        try {
-            Item item = ItemFactory.getInstance().createById(itemId);
-            if (type.isInstance(item)) return type.cast(item);
-        } catch (IllegalArgumentException ignored) {
-            // 落到下面的警告
+    private <T extends Item> T createOrNull(String itemId, Class<T> type) {
+        T item = items.createOrNull(itemId, type);
+        if (item == null) {
+            warnMissing("道具", itemId);
         }
-        warnMissing("道具", itemId);
-        return null;
+        return item;
     }
 
     private static void warnMissing(String kind, String id) {
-        System.err.println("[Snapshot] 配置表中找不到" + kind + " \"" + id + "\"，已跳过");
+        log.log(System.Logger.Level.WARNING, "快照引用的{0} \"{1}\" 在配置表中找不到，已跳过", kind, id);
     }
 }

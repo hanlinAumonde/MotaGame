@@ -25,16 +25,16 @@ public class Monster extends AbstractCharacterState {
     /** 战斗预计算出的击杀所需回合数；无法击败时为 0 */
     private int currentRounds;
 
+    /**
+     * 刚造出来的怪物没有伤害预计算（{@link #getCurrentDamage()} 为 null）：要等它落到地图上，
+     * 由 {@code BattleHandler.recalculateAllDamage} 带着玩家与地图一起推演。
+     */
     public Monster(String characterId, String characterName, Map<StateType, GameNumber> stateMap, Direction currentDirection,
-                   PlayerStateManager playerStateManager, long goldReward, GameNumber experienceReward,
-                   List<Skill> skills, List<String> tags) {
+                   long goldReward, GameNumber experienceReward, List<Skill> skills, List<String> tags) {
         // 技能与标签由基类统一持有：怪物在构造时从配置带入，玩家可在技能系统落地后逐步习得
         super(characterId, characterName, stateMap, currentDirection, skills, tags);
         this.goldReward = goldReward;
         this.experienceReward = experienceReward;
-        // 此刻怪物还没被放进地图，依赖地图的技能效果暂不生效；
-        // 地图装载完成后 BattleHandler.recalculateAllDamage 会带着地图重算一次
-        this.updateCurrentDamage(playerStateManager, null);
     }
 
     public long getGoldReward() {
@@ -94,7 +94,7 @@ public class Monster extends AbstractCharacterState {
      * 因此地图上显示的伤害数字、手册里的回合数与实际战斗结算<b>永远出自同一次推演</b>。
      *
      * @param map 怪物所在地图，供「按地图同类数量加成」这类技能取数；
-     *            怪物尚未落图时传 null，相应效果本次不生效
+     *            为 null 时相应效果本次不生效
      */
     public void updateCurrentDamage(PlayerStateManager playerStateManager, GameMap map) {
         BattleSnapshot playerSnapshot = new BattleSnapshot(

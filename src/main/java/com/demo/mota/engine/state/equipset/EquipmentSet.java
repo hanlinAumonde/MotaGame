@@ -1,6 +1,6 @@
 package com.demo.mota.engine.state.equipset;
 
-import com.demo.mota.engine.Item.Equipment;
+import com.demo.mota.engine.item.Equipment;
 
 import java.util.Arrays;
 import java.util.Collections;

@@ -1,20 +1,16 @@
 package com.demo.mota.engine.rules;
 
-import com.demo.mota.engine.resource.ResourceManager;
-import com.fasterxml.jackson.core.type.TypeReference;
-
 import java.util.List;
 
-import static com.demo.mota.engine.configs.GameContextConfigConstants.GAME_RULES_PATH;
-
 /**
- * 塔级规则配置（{@code data/rules/gameRules.json}）。
+ * 塔级规则配置（{@code assets/json/rules.json}）。
  *
  * <p>凡是「不同的塔可能想要不同答案」的设定都收在这里，而不是写死在代码里——
  * 技能预设能不能由玩家编辑、装备有几个槽、右侧栏显示哪些内容……
  * 将来的造塔器只需要产出这份文件。
  *
  * <p>任何字段缺省都回退到 {@link #DEFAULT} 中的对应值，因此配置文件可以只写想改的部分。
+ * 由内容层读取，作为 {@code TowerContent} 的一部分。
  */
 public record GameRules(SkillRules skill, EquipmentRules equipment, SidePanelRules sidePanel, UndoRules undo,
                         SaveRules save) {
@@ -27,20 +23,6 @@ public record GameRules(SkillRules skill, EquipmentRules equipment, SidePanelRul
         sidePanel = sidePanel == null ? SidePanelRules.DEFAULT : sidePanel;
         undo = undo == null ? UndoRules.DEFAULT : undo;
         save = save == null ? SaveRules.DEFAULT : save;
-    }
-
-    private static class Holder {
-        private static final GameRules INSTANCE = load();
-    }
-
-    /** 当前塔的规则（首次访问时读盘，之后常驻）；由 {@code GameBootstrap} 在加载阶段提前触发 */
-    public static GameRules get() {
-        return Holder.INSTANCE;
-    }
-
-    private static GameRules load() {
-        GameRules rules = ResourceManager.getInstance().loadJsonResource(GAME_RULES_PATH, new TypeReference<>() {});
-        return rules == null ? DEFAULT : rules;
     }
 
     /**

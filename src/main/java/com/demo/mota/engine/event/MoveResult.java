@@ -1,6 +1,17 @@
 package com.demo.mota.engine.event;
 
-public class MoveResult {
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 玩家行动一步的结果。
+ *
+ * @param type   结果类型（状态栏文字、撤销点的依据）
+ * @param detail 给状态栏的补充说明（怪物名、道具名、「第N层」……），没有时为 null
+ * @param events 这一步按顺序发生的领域事件，见 {@link GameEvent}
+ */
+public record MoveResult(Type type, String detail, List<GameEvent> events) {
+
     public enum Type {
         MOVED,
         ITEM_PICKED,
@@ -23,27 +34,14 @@ public class MoveResult {
         NO_MOVE
     }
 
-    private final Type type;
-    private final String detail;
-
-    private MoveResult(Type type, String detail) {
-        this.type = type;
-        this.detail = detail;
+    public MoveResult {
+        events = List.copyOf(events);
     }
 
-    public static MoveResult of(Type type) {
-        return new MoveResult(type, null);
-    }
-
-    public static MoveResult of(Type type, String detail) {
-        return new MoveResult(type, detail);
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public String getDetail() {
-        return detail;
+    /** 追加事件（结果本身不可变，返回新对象） */
+    public MoveResult withEvent(GameEvent event) {
+        List<GameEvent> all = new ArrayList<>(events);
+        all.add(event);
+        return new MoveResult(type, detail, all);
     }
 }

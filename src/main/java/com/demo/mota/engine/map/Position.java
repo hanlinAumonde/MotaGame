@@ -2,59 +2,35 @@ package com.demo.mota.engine.map;
 
 import com.demo.mota.engine.enums.Direction;
 
-import java.util.Objects;
+/**
+ * 地图上的一格（不可变）：{@code x} 为列、{@code y} 为行，左上角为 (0, 0)。
+ * 可以直接当作 {@code Map} 的键，拿到手的位置不会被别处悄悄改掉。
+ */
+public record Position(int x, int y) {
 
-import static com.demo.mota.engine.configs.MapConfigConstants.MAP_SIDE_LENGTH;
-
-public class Position {
-    private short x_index;
-    private short y_index;
-
-    public Position(short x_index, short y_index) {
-        this.x_index = x_index;
-        this.y_index = y_index;
+    /** 是否落在地图范围内 */
+    public boolean isInside() {
+        return x >= 0 && y >= 0 && x < GameMap.SIDE && y < GameMap.SIDE;
     }
 
-    public short getX_index() {
-        return x_index;
-    }
-
-    public void setX_index(short x_index) {
-        this.x_index = x_index;
-    }
-
-    public short getY_index() {
-        return y_index;
-    }
-
-    public void setY_index(short y_index) {
-        this.y_index = y_index;
-    }
-
-    public Position getAdjacentPosition(Direction direction) {
-        return switch (direction) {
-            case UP -> new Position(x_index, y_index == 0 ? 0 : (short) (y_index - 1));
-            case DOWN -> new Position(x_index, y_index == MAP_SIDE_LENGTH - 1 ? y_index : (short) (y_index + 1));
-            case LEFT -> new Position(x_index == 0 ? 0 : (short) (x_index - 1), y_index);
-            case RIGHT -> new Position(x_index == MAP_SIDE_LENGTH - 1 ? x_index : (short) (x_index + 1), y_index);
+    /** 朝某方向相邻的一格；走出地图时为 {@code null} */
+    public Position adjacent(Direction direction) {
+        Position next = switch (direction) {
+            case UP -> new Position(x, y - 1);
+            case DOWN -> new Position(x, y + 1);
+            case LEFT -> new Position(x - 1, y);
+            case RIGHT -> new Position(x + 1, y);
         };
+        return next.isInside() ? next : null;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Position position = (Position) o;
-        return x_index == position.x_index && y_index == position.y_index;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(x_index, y_index);
+    /** 是否与另一格上下左右相邻 */
+    public boolean isAdjacentTo(Position other) {
+        return Math.abs(x - other.x) + Math.abs(y - other.y) == 1;
     }
 
     @Override
     public String toString() {
-        return "(" + x_index + ", " + y_index + ")";
+        return "(" + x + ", " + y + ")";
     }
 }

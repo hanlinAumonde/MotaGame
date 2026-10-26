@@ -1,6 +1,6 @@
 package com.demo.mota.engine.rules;
 
-import com.demo.mota.engine.Item.Equipment;
+import com.demo.mota.engine.item.Equipment;
 
 /**
  * 装备能否放进某个槽位的规则。

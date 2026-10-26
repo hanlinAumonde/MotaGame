@@ -1,24 +1,19 @@
 package com.demo.mota.engine.map.region;
 
-import com.demo.mota.engine.resource.ResourceManager;
-import com.fasterxml.jackson.core.type.TypeReference;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.demo.mota.engine.configs.MapConfigConstants.REGION_MANIFEST_PATH;
-
 /**
- * 区域清单（{@code data/map/regions.json}）：列出全部区域，**顺序即推进顺序**。
+ * 区域清单（{@code assets/json/regions.json}）：列出全部区域，**顺序即推进顺序**。
  *
  * <p>楼层文件各自写着 {@code regionId}，但「这个区域有哪些层」必须有一处集中回答——
  * 否则载入一个区域就得扫描全部楼层文件，而资源 provider 只能按路径取流、不能列目录
  * （与精灵图用清单而不扫目录是同一个理由）。两边不一致时由 {@code MapManager} 载入时报错。
+ *
+ * <p>由内容层读取并构造，作为 {@code TowerContent} 的一部分。
  */
 public final class RegionCatalog {
-
-    private record Manifest(List<RegionInfo> regions) {}
 
     private final List<RegionInfo> regions;
     private final Map<Integer, RegionInfo> byFloor = new HashMap<>();
@@ -44,21 +39,6 @@ public final class RegionCatalog {
         }
     }
 
-    private static class Holder {
-        private static final RegionCatalog INSTANCE = load();
-    }
-
-    /** 当前塔的区域清单（首次访问时读盘，之后常驻）；由 {@code GameBootstrap} 在加载阶段提前触发 */
-    public static RegionCatalog get() {
-        return Holder.INSTANCE;
-    }
-
-    private static RegionCatalog load() {
-        Manifest manifest = ResourceManager.getInstance()
-                .loadJsonResource(REGION_MANIFEST_PATH, new TypeReference<>() {});
-        return new RegionCatalog(manifest == null ? null : manifest.regions());
-    }
-
     public List<RegionInfo> all() {
         return regions;
     }
@@ -67,7 +47,7 @@ public final class RegionCatalog {
     public RegionInfo regionOf(int floor) {
         RegionInfo region = byFloor.get(floor);
         if (region == null) {
-            throw new IllegalStateException("第 " + floor + " 层不属于任何区域，请检查 " + REGION_MANIFEST_PATH);
+            throw new IllegalStateException("第 " + floor + " 层不属于任何区域，请检查区域清单");
         }
         return region;
     }

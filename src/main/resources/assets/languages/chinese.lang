@@ -1,0 +1,103 @@
+#
+# 简体中文。FXGL 以默认语言 CHINESE 启动时读这个文件（GameSettings.setDefaultLanguage）。
+# 前半是 FXGL 自身用到的键（照 FXGL 25.0.1 的 english.lang 逐条翻译，缺一个界面上就会直接显示键名），
+# 本游戏自己的文字目前仍写在代码里，迁移阶段 9 再分批提取到这里。
+#
+
+#
+# 对话框
+#
+
+dialog.exitGame = 退出游戏？
+dialog.yes = 是
+dialog.no = 否
+dialog.ok = 确定
+dialog.cancel = 取消
+
+#
+# 菜单（FXGL 默认菜单的文字；本游戏的菜单是自绘的，这些键只在 FXGL 自带界面里出现）
+#
+
+menu.language = 语言
+menu.continue = 继续
+menu.resume = 回到游戏
+menu.newGame = 新游戏
+menu.save = 存档
+menu.load = 读档
+menu.extra = 更多
+menu.online = 联机
+menu.video = 画面
+menu.audio = 声音
+menu.credits = 制作人员
+menu.options = 选项
+menu.logout = 登出
+menu.exit = 退出
+menu.mainMenu = 主菜单
+menu.restore = 恢复默认
+menu.gameplay = 游戏
+menu.controls = 按键
+menu.trophies = 成就
+menu.feedback = 反馈
+menu.back = 返回
+menu.delete = 删除
+menu.difficulty = 难度
+menu.playtime = 游戏时间
+menu.music.volume = 音乐音量
+menu.sound.volume = 音效音量
+menu.fullscreen = 全屏
+menu.fixRatio = 固定比例
+menu.settingsRestore = 设置将恢复为默认值
+menu.exitMainMenu = 返回主菜单？
+menu.logOut = 登出？
+menu.unsavedProgress = 未保存的进度将会丢失！
+menu.chooseFeedback = 选择反馈方式
+menu.pressAnyKey = 按任意键
+menu.loadSave = 读取存档
+menu.loading = 读取中
+menu.loadingSaveFiles = 正在读取存档列表
+menu.loadingLast = 正在读取最近的存档
+menu.deleteSave = 删除存档
+menu.deleting = 删除中
+menu.overwrite = 覆盖存档
+menu.enterSaveName = 输入存档名
+menu.savingData = 正在保存
+
+#
+# 联机
+#
+
+multiplayer.new = 新建
+multiplayer.select = 选择
+multiplayer.options = 联机选项
+multiplayer.connect = 连接……
+multiplayer.connecting = 正在连接
+multiplayer.host = 建立
+multiplayer.hosting = 正在建立游戏
+multiplayer.enterIp = 输入服务器 IP
+
+#
+# 用户档案
+#
+
+profile.profile = 档案
+profile.selectOrCreate = 选择或新建档案
+profile.loadingProfile = 正在读取档案
+profile.loadingProfiles = 正在读取档案列表
+profile.deletingProfile = 正在删除档案
+profile.corrupted = 档案已损坏
+profile.new = 新档案
+
+#
+# 开发
+#
+
+dev.screenshotSaved = 截图已保存
+dev.screenshotFailed = 截图失败
+
+#
+# 成就
+#
+
+achievement.achievement = 成就
+achievement.progress = 进度
+achievement.receive = 获得了一项成就！

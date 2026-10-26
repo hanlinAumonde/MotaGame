@@ -9,9 +9,20 @@ import com.demo.mota.engine.skill.cost.SkillCostRegistry;
 import com.demo.mota.engine.skill.effect.SkillEffectResolver;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.engine.state.monster.DamageRange;
+import com.demo.mota.engine.state.level.LevelUpResult;
 import com.demo.mota.engine.state.monster.Monster;
 
 public class BattleHandler {
+
+    /**
+     * 一场战斗的结算。
+     *
+     * @param won     是否击败了怪物
+     * @param damage  玩家实际掉的血
+     * @param levelUp 获胜后的经验结算（没升级时 {@code didLevelUp()} 为 false）；输了为 null
+     */
+    public record BattleReport(boolean won, GameNumber damage, LevelUpResult levelUp) {
+    }
 
     /**
      * 结算一场战斗。
@@ -21,12 +32,12 @@ public class BattleHandler {
      * 要不要冒险交给玩家。判死不在这里做——扣完血由调用链上层统一检查
      * {@code PlayerStateManager.isDead()}，好让岩浆、毒这些将来的掉血途径共用一个判定点。
      *
-     * @return 是否击败了怪物；false 表示玩家在这一战里倒下了
+     * @return 结算结果；{@code won} 为 false 表示玩家在这一战里倒下了
      */
-    public boolean executeBattle(PlayerStateManager player, GameMap map, Position monsterPos) {
+    public BattleReport executeBattle(PlayerStateManager player, GameMap map, Position monsterPos) {
         Monster monster = map.getMonsterAt(monsterPos);
         if (monster == null) {
-            return true;
+            return new BattleReport(true, GameNumber.ZERO, null);
         }
 
         GameNumber currentHealth = player.getCurrentHP();
@@ -34,23 +45,23 @@ public class BattleHandler {
         // OVER_KILL：打不动（伤害为 0 或回合超限），耗到最后倒下的只会是玩家
         if (monster.getCurrentDamageRange() == DamageRange.OVER_KILL) {
             player.updateState(StateType.HP, GameNumber.ZERO);
-            return false;
+            return new BattleReport(false, currentHealth, null);
         }
 
         // 预计算伤害即打完这一战要挨的总伤害；够不够扛得住只看当前生命值
         GameNumber damage = monster.getCurrentDamage();
         if (damage.compareTo(currentHealth) >= 0) {
             player.updateState(StateType.HP, GameNumber.ZERO);
-            return false;
+            return new BattleReport(false, currentHealth, null);
         }
 
         player.updateState(StateType.HP, currentHealth.minus(damage));
         payActiveSkillCosts(player, monster.getCurrentRounds());
 
         player.updateGoldAmount(monster.getGoldReward());
-        player.updateLevel(monster.getExperienceReward());
+        LevelUpResult levelUp = player.updateLevel(monster.getExperienceReward());
 
-        return true;
+        return new BattleReport(true, damage, levelUp);
     }
 
     /**

@@ -16,7 +16,39 @@
     <javafx.version>25.0.4</javafx.version>
     <jackson.version>2.22.3</jackson.version>
     <junit.version>5.14.4</junit.version>
+    <fxgl.version>25.0.1</fxgl.version>
   </properties>
+
+  <!-- FXGL 自带的 JavaFX 版本（25.0.1）比项目旧，这里统一钉到 javafx.version，避免各模块版本参差 -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-base</artifactId>
+        <version>${javafx.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-graphics</artifactId>
+        <version>${javafx.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-controls</artifactId>
+        <version>${javafx.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-fxml</artifactId>
+        <version>${javafx.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-media</artifactId>
+        <version>${javafx.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -24,16 +56,26 @@
       <artifactId>javafx-controls</artifactId>
       <version>${javafx.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-fxml</artifactId>
-      <version>${javafx.version}</version>
-    </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
+    </dependency>
+
+    <!-- 游戏框架：窗口 / 场景 / 输入由它托管（阶段 0 只用作宿主，界面仍画在自己的 Canvas 上）。
+         传递依赖带来 javafx-fxml / javafx-media 与 kotlin-stdlib -->
+    <dependency>
+      <groupId>com.github.almasb</groupId>
+      <artifactId>fxgl</artifactId>
+      <version>${fxgl.version}</version>
+      <exclusions>
+        <!-- kotlin-stdlib 带进来的编译期注解，没有 module-info，留着会让 jlink 因自动模块而失败 -->
+        <exclusion>
+          <groupId>org.jetbrains</groupId>
+          <artifactId>annotations</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

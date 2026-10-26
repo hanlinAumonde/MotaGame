@@ -35,3 +35,6 @@ build/
 .DS_Store
 ### Saves ###
 saves/
+### FXGL（开发模式 -Dmota.dev=true 下写入运行目录）###
+/logs/
+/system/

@@ -1,0 +1,47 @@
+/*
+ * 魔塔的界面样式，经 GameSettings.setCSSList 应用到 FXGL 的全部场景（排在 fxgl_dark.css 之后）。
+ * 界面由 ui.kit.Sketch 按坐标摆放节点，这里定义它用到的几种形状；文字颜色见 ui.kit.Palette。
+ *
+ * 伪类 :active = 有焦点的面板 / 当前选中项。描边以边线为中心（-fx-border-insets 取负的半宽），
+ * 与原来画布 strokeRect 的效果一致。
+ */
+.root {
+    -fx-font-family: "Noto Sans SC";
+}
+
+/* 整屏底色：深蓝渐变 */
+.mota-screen {
+    -fx-background-color: linear-gradient(to bottom, #2e3566, #171a33);
+}
+
+/* 面板：半透明深蓝底 + 描边 */
+.mota-panel {
+    -fx-background-color: rgba(24, 28, 62, 0.86);
+    -fx-border-color: rgba(170, 182, 255, 0.45);
+    -fx-border-width: 1.5;
+    -fx-border-insets: -0.75;
+}
+
+.mota-panel:active {
+    -fx-border-color: #aab6ff;
+    -fx-border-width: 3;
+    -fx-border-insets: -1.5;
+}
+
+/* 选中框：白色半透明填充 + 描边 */
+.mota-selection {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-border-color: rgba(170, 182, 255, 0.45);
+    -fx-border-width: 2;
+    -fx-border-insets: -1;
+}
+
+.mota-selection:active {
+    -fx-background-color: rgba(255, 255, 255, 0.20);
+    -fx-border-color: #aab6ff;
+}
+
+/* 对话框 */
+.mota-dialog-backdrop {
+    -fx-background-color: rgba(0, 0, 0, 0.55);
+}

@@ -6,7 +6,7 @@ import java.util.List;
  * 「一列选项 + 上下选择 + 确认」的通用状态机，标题界面与游戏结束提示框共用。
  *
  * <p>与 {@code GameMenuState} 一样只管状态、不碰绘制；输入同样走 {@link MenuCommand} 语义，
- * 按键到语义的翻译留在各 Screen 里。
+ * 按键到语义的翻译留在各界面（场景）里。
  *
  * <p><b>禁用项会被跳过</b>而不是选中后无响应：存档功能落地前，「继续游戏」「读档」
  * 这类占位按钮照常画出来（灰色），但光标不会停在上面，玩家一眼就知道现在用不了。
@@ -16,7 +16,7 @@ public class OptionMenu {
     /**
      * 一个选项。
      *
-     * @param id      供 Screen 判断玩家选了什么，与展示文本解耦
+     * @param id      供界面判断玩家选了什么，与展示文本解耦
      * @param label   展示文本
      * @param enabled 是否可用；false 时画灰且不可选中
      */
@@ -72,7 +72,7 @@ public class OptionMenu {
                 Option selected = getSelected();
                 return selected.enabled() ? selected.id() : null;
             }
-            case BACK, CLOSE -> { /* 由各 Screen 自行决定是否有「返回」语义 */ }
+            case BACK, CLOSE -> { /* 由各界面自行决定是否有「返回」语义 */ }
         }
         return null;
     }
