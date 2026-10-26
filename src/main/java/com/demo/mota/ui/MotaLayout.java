@@ -4,7 +4,7 @@ package com.demo.mota.ui;
  * 窗口与对局画面的布局尺寸（原来写在 {@code MotaController} 里）。
  *
  * <p>窗口 1296×840：左状态栏 208 + 中间地图 832 + 右技能装备栏 256；高 840（地图 832 + 底部留白）。
- * 菜单类界面都画在一块铺满窗口的画布上；地图是世界层里的实体，左上角落在 {@link #MAP_X} / {@link #MAP_Y}。
+ * 菜单类界面铺满窗口；地图是世界层里的实体，左上角落在 {@link #MAP_X} / {@link #MAP_Y}。
  */
 public final class MotaLayout {
 

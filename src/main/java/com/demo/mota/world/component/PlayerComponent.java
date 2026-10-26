@@ -52,6 +52,7 @@ public final class PlayerComponent extends Component {
         move = entity.getComponent(CellMoveComponent.class);
         if (sprite != null && sprite.idleChannel(facing) != null) {
             texture = new AnimatedTexture(sprite.idleChannel(facing));
+            texture.setSmooth(false);
             // 帧比格子高（64×66）：上移让脚踩在格子底边
             texture.setTranslateY(CELL - sprite.frameHeight());
             entity.getViewComponent().addChild(texture);

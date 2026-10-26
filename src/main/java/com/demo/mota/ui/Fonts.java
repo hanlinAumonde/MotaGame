@@ -2,7 +2,12 @@ package com.demo.mota.ui;
 
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.ui.FontType;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 界面字体的唯一入口：取 FXGL 注册的打包字体（{@code GameSettings.setFontUI / Game / Mono}，
@@ -14,10 +19,14 @@ import javafx.scene.text.Font;
  *   <li>{@link #mono} —— {@code FontType.MONO}，Inconsolata 特粗（数值、伤害数字）</li>
  * </ul>
  *
- * <p>FXGL 在全部引擎服务初始化之后才异步注册这几种字体，注册完成之前取到的是 JavaFX 默认字体；
- * 界面每次绘制都现取，注册完成后的下一次绘制即恢复正常。
+ * <p>FXGL 在全部引擎服务初始化之后才异步注册这几种字体（源码：{@code FXGLApplication.postServicesInit}），
+ * 注册完成之前取到的是 JavaFX 默认字体；界面每次摆放都现取，注册完成后的下一次摆放即恢复正常。
+ * 最早显示的标题界面经 {@link #whenRegistered} 在注册完成时补摆一次。
  */
 public final class Fonts {
+
+    /** 字体探针：绑定了 FXGL 字体的隐形文字，必须强引用，否则绑定与监听会随它一起被回收 */
+    private static final List<Text> PROBES = new ArrayList<>();
 
     private Fonts() {
     }
@@ -32,5 +41,14 @@ public final class Fonts {
 
     public static Font mono(double size) {
         return FXGL.getUIFactoryService().newFont(FontType.MONO, size);
+    }
+
+    /**
+     * FXGL 注册打包字体时回调（FX 线程）。{@code FontType.TEXT} 是最后注册的一种：它变了，其余几种也都已就绪。
+     */
+    public static void whenRegistered(Runnable action) {
+        Text probe = FXGL.getUIFactoryService().newText("", Color.TRANSPARENT, FontType.TEXT, 12);
+        probe.fontProperty().addListener((obs, old, font) -> action.run());
+        PROBES.add(probe);
     }
 }

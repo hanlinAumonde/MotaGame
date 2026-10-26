@@ -4,10 +4,10 @@ import com.almasb.fxgl.app.scene.FXGLMenu;
 import com.almasb.fxgl.app.scene.LoadingScene;
 import com.almasb.fxgl.app.scene.SceneFactory;
 import com.almasb.fxgl.app.scene.StartupScene;
-import com.demo.mota.ui.screen.gamemenu.GameMenuScene;
-import com.demo.mota.ui.screen.loading.MotaLoadingScene;
-import com.demo.mota.ui.screen.loading.MotaStartupScene;
-import com.demo.mota.ui.screen.title.TitleMenu;
+import com.demo.mota.scene.gamemenu.GameMenuScene;
+import com.demo.mota.scene.startup.MotaLoadingScene;
+import com.demo.mota.scene.startup.MotaStartupScene;
+import com.demo.mota.scene.title.TitleMenu;
 
 /**
  * 交给 FXGL 的场景工厂：启动场景（内容加载进度）、加载场景（每局装配）、标题（主菜单）、游戏菜单（X）。

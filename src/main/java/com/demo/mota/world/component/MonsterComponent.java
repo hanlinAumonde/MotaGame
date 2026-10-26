@@ -6,8 +6,8 @@ import com.demo.mota.engine.state.monster.DamageRange;
 import com.demo.mota.engine.state.monster.Monster;
 import com.demo.mota.ui.DamagePalette;
 import com.demo.mota.ui.Fonts;
-import com.demo.mota.ui.TextPainter;
 import com.demo.mota.ui.ValueFormatter;
+import com.demo.mota.ui.kit.TextMetrics;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
@@ -33,7 +33,7 @@ public final class MonsterComponent extends Component {
     private static final double FONT_MIN_RATIO = 0.17;
     private static final double PADDING = CELL * 0.05;
 
-    private static final TextPainter PAINTER = new TextPainter();
+    private static final TextMetrics METRICS = new TextMetrics();
 
     private final Monster monster;
     private final Text damage = new Text();
@@ -60,13 +60,13 @@ public final class MonsterComponent extends Component {
             return;
         }
         shown = label;
-        Font font = PAINTER.fitFont(label.text(), Fonts::mono,
+        Font font = METRICS.fit(label.text(), Fonts::mono,
                 CELL * FONT_RATIO, CELL * FONT_MIN_RATIO, CELL - 2 * PADDING);
         damage.setText(label.text());
         damage.setFont(font);
         damage.setFill(label.color());
         // 右下角对齐：基线贴底边留白，右边缘贴右边留白
-        damage.setX(CELL - PADDING - PAINTER.measureWidth(label.text(), font));
+        damage.setX(CELL - PADDING - METRICS.width(label.text(), font));
         damage.setY(CELL - PADDING);
     }
 

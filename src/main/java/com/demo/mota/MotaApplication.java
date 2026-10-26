@@ -4,6 +4,8 @@ import com.almasb.fxgl.app.ApplicationMode;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.localization.Language;
+import com.almasb.fxgl.ui.DialogService;
 import com.demo.mota.app.MotaSceneFactory;
 import com.demo.mota.app.MotaScenes;
 import com.demo.mota.app.input.GameplayInput;
@@ -11,11 +13,14 @@ import com.demo.mota.app.services.AssetService;
 import com.demo.mota.app.services.ContentService;
 import com.demo.mota.app.services.DevToolsService;
 import com.demo.mota.app.services.SessionService;
+import com.demo.mota.hud.HudModel;
 import com.demo.mota.ui.MotaLayout;
+import com.demo.mota.ui.dialog.MotaDialogService;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 应用入口：生命周期、场景、输入都交给 FXGL。
@@ -54,7 +59,12 @@ public class MotaApplication extends GameApplication {
         settings.setGameMenuEnabled(true);
         settings.setMenuKey(KeyCode.X);
         settings.setSceneFactory(new MotaSceneFactory(scenes));
-        settings.setCloseConfirmation(false);
+        // 关窗确认：FXGL 弹 dialog.exitGame（chinese.lang），对话框是 MotaDialogService 的游戏风格
+        settings.setCloseConfirmation(true);
+        settings.setEngineServiceProvider(DialogService.class, MotaDialogService.class);
+        // FXGL 自身的文字（关窗确认等）用中文：assets/languages/chinese.lang
+        settings.setDefaultLanguage(Language.CHINESE);
+        settings.setSupportedLanguages(List.of(Language.CHINESE));
         settings.setUserProfileEnabled(false);
 
         // 打包字体（assets/ui/fonts/）：界面经 ui.Fonts 取用，不再依赖系统里的黑体 / Consolas
@@ -96,6 +106,12 @@ public class MotaApplication extends GameApplication {
                 FXGL.getSceneService().getCurrentScene().getInput().clearAll();
             }
         });
+    }
+
+    /** 每局开始时声明世界变量（FXGL 在 startNewGame() 时清空它们）：状态栏的视图模型 */
+    @Override
+    protected void initGameVars(Map<String, Object> vars) {
+        HudModel.declare(vars);
     }
 
     /** 加载场景的后台线程：装上准备好的这一局（只做不会失败的事） */

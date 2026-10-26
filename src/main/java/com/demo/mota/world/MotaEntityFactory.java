@@ -133,7 +133,16 @@ public final class MotaEntityFactory implements EntityFactory {
                 .build();
     }
 
+    /**
+     * 有图用图，缺图用占位形状。图片已按原尺寸放大到一格，关掉平滑：窗口放大时像素图仍是锐利的方块，
+     * 而不是被插值抹糊。
+     */
     private static Node imageOr(Image image, Node placeholder) {
-        return image != null ? new Texture(image) : placeholder;
+        if (image == null) {
+            return placeholder;
+        }
+        Texture texture = new Texture(image);
+        texture.setSmooth(false);
+        return texture;
     }
 }

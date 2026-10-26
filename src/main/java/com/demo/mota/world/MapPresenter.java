@@ -18,7 +18,7 @@ import com.demo.mota.engine.map.tile.Tile;
 import com.demo.mota.engine.session.GameSession;
 import com.demo.mota.engine.state.PlayerStateManager;
 import com.demo.mota.engine.state.monster.Monster;
-import com.demo.mota.ui.screen.transition.FloorTransitionSubScene;
+import com.demo.mota.scene.transition.FloorTransitionSubScene;
 import com.demo.mota.world.RemovalHints.Exit;
 import com.demo.mota.world.RemovalHints.Layer;
 import com.demo.mota.world.component.MonsterComponent;

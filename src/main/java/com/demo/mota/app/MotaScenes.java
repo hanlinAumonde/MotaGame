@@ -7,23 +7,23 @@ import com.demo.mota.app.nav.Navigator;
 import com.demo.mota.app.services.AssetService;
 import com.demo.mota.app.services.SessionService;
 import com.demo.mota.engine.session.GameSession;
-import com.demo.mota.ui.screen.equipment.EquipmentRenderer;
-import com.demo.mota.ui.screen.equipment.EquipmentSubScene;
-import com.demo.mota.ui.screen.equipset.EquipmentSetRenderer;
-import com.demo.mota.ui.screen.equipset.EquipmentSetSubScene;
-import com.demo.mota.ui.screen.game.GameScreen;
-import com.demo.mota.ui.screen.gamemenu.GameMenuRenderer;
-import com.demo.mota.ui.screen.gamemenu.GameMenuScene;
-import com.demo.mota.ui.screen.gamemenu.option.GameOption;
-import com.demo.mota.ui.screen.gameover.GameOverSubScene;
-import com.demo.mota.ui.screen.inventory.InventoryRenderer;
-import com.demo.mota.ui.screen.inventory.InventorySubScene;
-import com.demo.mota.ui.screen.saveload.SaveLoadMode;
-import com.demo.mota.ui.screen.saveload.SaveLoadRenderer;
-import com.demo.mota.ui.screen.saveload.SaveLoadSubScene;
-import com.demo.mota.ui.screen.skill.SkillSetupRenderer;
-import com.demo.mota.ui.screen.skill.SkillSetupSubScene;
-import com.demo.mota.ui.screen.title.TitleMenu;
+import com.demo.mota.scene.equipment.EquipmentSubScene;
+import com.demo.mota.scene.equipment.EquipmentView;
+import com.demo.mota.scene.equipset.EquipmentSetSubScene;
+import com.demo.mota.scene.equipset.EquipmentSetView;
+import com.demo.mota.scene.game.GameScreen;
+import com.demo.mota.scene.gamemenu.GameMenuScene;
+import com.demo.mota.scene.gamemenu.GameMenuView;
+import com.demo.mota.scene.gamemenu.option.GameOption;
+import com.demo.mota.scene.gameover.GameOverSubScene;
+import com.demo.mota.scene.inventory.InventorySubScene;
+import com.demo.mota.scene.inventory.InventoryView;
+import com.demo.mota.scene.saveload.SaveLoadMode;
+import com.demo.mota.scene.saveload.SaveLoadSubScene;
+import com.demo.mota.scene.saveload.SaveLoadView;
+import com.demo.mota.scene.skill.SkillSetupSubScene;
+import com.demo.mota.scene.skill.SkillSetupView;
+import com.demo.mota.scene.title.TitleMenu;
 
 import java.util.Objects;
 
@@ -45,7 +45,7 @@ public final class MotaScenes implements TitleMenu.Actions, GameMenuScene.Host, 
     private Navigator navigator;
     private GameScreen game;
     private GameplayInput gameplayInput;
-    private GameMenuRenderer gameMenuRenderer;
+    private GameMenuView gameMenuView;
 
     private SaveLoadSubScene saveLoad;
     private GameOverSubScene gameOver;
@@ -64,14 +64,14 @@ public final class MotaScenes implements TitleMenu.Actions, GameMenuScene.Host, 
         gameplayInput = new GameplayInput(game, sessions.content().rules());
         Runnable returnToGame = this::returnToGame;
 
-        gameMenuRenderer = new GameMenuRenderer(assets);
-        saveLoad = new SaveLoadSubScene(navigator, sessions, new SaveLoadRenderer());
+        gameMenuView = new GameMenuView(assets);
+        saveLoad = new SaveLoadSubScene(navigator, sessions, new SaveLoadView());
         gameOver = new GameOverSubScene(navigator, sessions, saveLoad, game::undoLastAction);
-        inventory = new InventorySubScene(navigator, returnToGame, sessions, new InventoryRenderer(assets));
-        equipment = new EquipmentSubScene(navigator, returnToGame, sessions, new EquipmentRenderer(assets));
+        inventory = new InventorySubScene(navigator, returnToGame, sessions, new InventoryView(assets));
+        equipment = new EquipmentSubScene(navigator, returnToGame, sessions, new EquipmentView(assets));
         equipmentSets = new EquipmentSetSubScene(navigator, returnToGame, sessions,
-                new EquipmentSetRenderer(assets), game::showMessage);
-        skillSetup = new SkillSetupSubScene(navigator, returnToGame, sessions, new SkillSetupRenderer(assets));
+                new EquipmentSetView(assets), game::showMessage);
+        skillSetup = new SkillSetupSubScene(navigator, returnToGame, sessions, new SkillSetupView(assets));
     }
 
     public GameScreen game() {
@@ -111,7 +111,11 @@ public final class MotaScenes implements TitleMenu.Actions, GameMenuScene.Host, 
 
     @Override
     public void exit() {
-        FXGL.getGameController().exit();
+        FXGL.getDialogService().showConfirmationBox("退出游戏？", yes -> {
+            if (yes) {
+                FXGL.getGameController().exit();
+            }
+        });
     }
 
     // ==================== 游戏菜单 ====================
@@ -122,8 +126,8 @@ public final class MotaScenes implements TitleMenu.Actions, GameMenuScene.Host, 
     }
 
     @Override
-    public GameMenuRenderer renderer() {
-        return gameMenuRenderer;
+    public GameMenuView view() {
+        return gameMenuView;
     }
 
     @Override

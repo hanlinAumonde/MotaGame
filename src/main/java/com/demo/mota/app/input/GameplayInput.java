@@ -7,8 +7,6 @@ import com.almasb.fxgl.input.UserAction;
 import com.almasb.fxgl.logging.Logger;
 import com.demo.mota.engine.enums.Direction;
 import com.demo.mota.engine.rules.GameRules;
-import com.demo.mota.ui.screen.ChordKey;
-import com.demo.mota.ui.screen.PresetHotkeys;
 import javafx.scene.input.KeyCode;
 
 import java.util.Map;

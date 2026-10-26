@@ -55,10 +55,10 @@ public final class ContentLoader {
         this.source = source;
     }
 
-    /** 一次性读完整座塔（测试、工具用；游戏里由宿主执行 {@link #tasks()} 以便显示进度） */
+    /** 一次性读完整座塔（测试、工具用，不报进度；游戏里由内容服务经启动进度执行 {@link #tasks()}） */
     public static TowerContent load(ContentSource source) {
         ContentLoader loader = new ContentLoader(source);
-        LoadingRunner.run(loader.tasks(), null);
+        loader.tasks().forEach(task -> task.action().run());
         return loader.result();
     }
 
